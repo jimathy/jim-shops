@@ -22,7 +22,7 @@ CreateThread(function()
 			AddTextComponentSubstringPlayerName(Config.Locations[k]["label"])
 			EndTextCommandSetBlipName(StoreBlip)
 
-			print("Shop - ['"..k.."("..l..")']")
+			if Config.Debug then print("Shop - ['"..k.."("..l..")']") end
 			exports['qb-target']:AddCircleZone("Shop - ['"..k.."("..l..")']", b, 2.0, { name="Shop - ['"..k.."("..l..")']", debugPoly=Config.Debug, useZ=true, }, 
 			{ options = { { event = "jim-shops:ShopMenu", icon = "fas fa-certificate", label = "Browse Shop", 
 				shoptable = Config.Locations[tostring(k)], name = Config.Locations[tostring(k)]["label"], }, },
