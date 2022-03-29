@@ -34,13 +34,14 @@ end)
 RegisterNetEvent('jim-shops:ShopMenu', function(data)
 	local products = data.shoptable.products
 	local ShopMenu = {}
+	local hasLicense, hasLicenseItem = nil
 	if data.shoptable["logo"] ~= nil then
 		ShopMenu[#ShopMenu + 1] = { header = "<img src="..data.shoptable["logo"].." width=200px>", txt = "", isMenuHeader = true }
 	else
 		ShopMenu[#ShopMenu + 1] = { header = data.shoptable.label, txt = "", isMenuHeader = true }
 	end
 	ShopMenu[#ShopMenu + 1] = { header = "", txt = "❌ Close", params = { event = "jim-shops:CloseMenu" } }
-	if products == Config.Products["weapons"] then
+	if products.name == Config.Products["weapons"].name then
 		while hasLicense == nil do QBCore.Functions.TriggerCallback("jim-shops:server:getLicenseStatus", function(hasLic, hasLicItem) hasLicense = hasLic hasLicenseItem = hasLicItem end) Wait(0) end
 	end
 	for i = 1, #products do
