@@ -6,6 +6,7 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate') AddEventHandler('QBCore:Client:OnJ
 RegisterNetEvent('QBCore:Client:SetDuty') AddEventHandler('QBCore:Client:SetDuty', function(duty) onDuty = duty end)
 AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName() == resource then QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) end end)
 
+ped = {}
 CreateThread(function()
 	for k, v in pairs(Config.Locations) do
 		for l, b in pairs(v["coords"]) do
@@ -13,20 +14,28 @@ CreateThread(function()
 			SetBlipSprite(StoreBlip, Config.Locations[k]["blipsprite"])
 			SetBlipScale(StoreBlip, 0.7)
 			SetBlipDisplay(StoreBlip, 6)
-			if Config.Locations[k]["products"] == Config.Products["normal"] then SetBlipColour(StoreBlip, 2)
-			elseif Config.Locations[k]["products"] == Config.Products["weapons"] then SetBlipColour(StoreBlip, 1)
-			elseif Config.Locations[k]["products"] == Config.Products["hardware"] then SetBlipColour(StoreBlip, 5)
-			else SetBlipColour(StoreBlip, 0) end
+			SetBlipColour(StoreBlip, Config.Locations[k]["blipcolour"])
 			SetBlipAsShortRange(StoreBlip, true)
 			BeginTextCommandSetBlipName("STRING")
 			AddTextComponentSubstringPlayerName(Config.Locations[k]["label"])
 			EndTextCommandSetBlipName(StoreBlip)
-
+			
+			if Config.Peds then
+				local model = Config.Locations[k]["model"] RequestModel(model) while not HasModelLoaded(model) do Wait(0) end
+				ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, model, b.x, b.y, b.z-1.0, b.a, true, false)
+				--SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true)
+				SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
+				FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
+				if Config.Debug then print("Ped Created for Shop - ['"..k.."("..l..")']") end
+			end
+			
 			if Config.Debug then print("Shop - ['"..k.."("..l..")']") end
-			exports['qb-target']:AddCircleZone("Shop - ['"..k.."("..l..")']", b, 2.0, { name="Shop - ['"..k.."("..l..")']", debugPoly=Config.Debug, useZ=true, }, 
+
+			exports['qb-target']:AddCircleZone("Shop - ['"..k.."("..l..")']", vector3(b.x, b.y, b.z), 2.0, { name="Shop - ['"..k.."("..l..")']", debugPoly=Config.Debug, useZ=true, }, 
 			{ options = { { event = "jim-shops:ShopMenu", icon = "fas fa-certificate", label = "Browse Shop", 
 				shoptable = Config.Locations[tostring(k)], name = Config.Locations[tostring(k)]["label"], }, },
 			distance = 2.0 })
+			
 		end
 	end
 end)
@@ -35,13 +44,12 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data)
 	local products = data.shoptable.products
 	local ShopMenu = {}
 	local hasLicense, hasLicenseItem = nil
-	if data.shoptable["logo"] ~= nil then
-		ShopMenu[#ShopMenu + 1] = { header = "<img src="..data.shoptable["logo"].." width=200px>", txt = "", isMenuHeader = true }
-	else
-		ShopMenu[#ShopMenu + 1] = { header = data.shoptable.label, txt = "", isMenuHeader = true }
+
+	if data.shoptable["logo"] ~= nil then ShopMenu[#ShopMenu + 1] = { header = "<img src="..data.shoptable["logo"].." width=200px>", txt = "", isMenuHeader = true }
+	else ShopMenu[#ShopMenu + 1] = { header = data.shoptable.label, txt = "", isMenuHeader = true }
 	end
 	ShopMenu[#ShopMenu + 1] = { header = "", txt = "❌ Close", params = { event = "jim-shops:CloseMenu" } }
-	if products.name == Config.Products["weapons"].name then
+	if data.shoptable["type"] == "weapons" then
 		while hasLicense == nil do QBCore.Functions.TriggerCallback("jim-shops:server:getLicenseStatus", function(hasLic, hasLicItem) hasLicense = hasLic hasLicenseItem = hasLicItem end) Wait(0) end
 	end
 	for i = 1, #products do
@@ -64,9 +72,8 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data)
 			ShopMenu[#ShopMenu + 1] = { header = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..setheader, txt = text, 
 						params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, shoptable = data.shoptable, name = data.name } } }
 		end
-			text, setheader = nil
+	text, setheader = nil
 	end
-	
 	exports['qb-menu']:openMenu(ShopMenu)
 end)
 
@@ -94,5 +101,12 @@ RegisterNetEvent('jim-shops:Charge', function(data)
 end)
 
 AddEventHandler('onResourceStop', function(resource) 
-	if resource == GetCurrentResourceName() then for k, v in pairs(Config.Locations) do for l, b in pairs(v["coords"]) do exports['qb-target']:RemoveZone("Shop - ['"..k.."("..l..")']") end end end
+	if resource == GetCurrentResourceName() then
+		for k, v in pairs(Config.Locations) do
+			for l, b in pairs(v["coords"]) do
+				exports['qb-target']:RemoveZone("Shop - ['"..k.."("..l..")']")
+				if Config.Peds then	DeletePed(ped["Shop - ['"..k.."("..l..")']"]) end
+			end 
+		end 
+	end
 end)
