@@ -23,14 +23,12 @@ CreateThread(function()
 			if Config.Peds then
 				local model = Config.Locations[k]["model"] RequestModel(model) while not HasModelLoaded(model) do Wait(0) end
 				ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, model, b.x, b.y, b.z-1.0, b.a, true, false)
-				--SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true)
+				if not Config.Locations[k]["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
 				SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
 				FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
 				if Config.Debug then print("Ped Created for Shop - ['"..k.."("..l..")']") end
 			end
-			
 			if Config.Debug then print("Shop - ['"..k.."("..l..")']") end
-
 			exports['qb-target']:AddCircleZone("Shop - ['"..k.."("..l..")']", vector3(b.x, b.y, b.z), 2.0, { name="Shop - ['"..k.."("..l..")']", debugPoly=Config.Debug, useZ=true, }, 
 			{ options = { { event = "jim-shops:ShopMenu", icon = "fas fa-certificate", label = "Browse Shop", 
 				shoptable = Config.Locations[tostring(k)], name = Config.Locations[tostring(k)]["label"], }, },

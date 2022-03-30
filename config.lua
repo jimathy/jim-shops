@@ -88,6 +88,7 @@ Config.Locations = {
         ["label"] = "24/7 Supermarket",
 		["type"] = "items",
 		["model"] = `mp_m_shopkeep_01`,
+		["killable"] = true,
 		["logo"] = "https://i.imgur.com/bPcM0TM.png",
         ["coords"] = {
 			vector4(24.91, -1346.86, 29.5, 268.37),
