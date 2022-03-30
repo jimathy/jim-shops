@@ -10,7 +10,9 @@ Everything needed is in Config.lua and its essentially the same as qb-shop's con
 - Support for shop logos at the top of the menu
 - Supports items that require jobs
 - Supports Gun License being required
-- Support for openning shops externally
+- Support for opening shops externally
+- Ability to choose and spawn shop peds
+- Digital Den shop locations
 
 ![FiveM_b2545_GTAProcess_mYqo1bzn22](https://user-images.githubusercontent.com/1885302/160259437-e691b884-a707-422d-bbda-e86ecc5d3d50.jpg)
 ![FiveM_b2545_GTAProcess_3SZCVpXrEX](https://user-images.githubusercontent.com/1885302/160259455-0bbe9705-8469-41fb-bd5b-a6388cdc5392.jpg)
