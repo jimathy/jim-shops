@@ -1,4 +1,4 @@
-print("Jim-Shops - Shop Script by Jimathy")
+print("Jim-Shops v1.2 - Shop Script by Jimathy")
 
 -- If you need support I now have a discord available, it helps me keep track of issues and give better support.
 
@@ -6,68 +6,70 @@ print("Jim-Shops - Shop Script by Jimathy")
 
 Config = {}
 
-Config.Debug = false
+Config.Debug = false -- Enable to add debug boxes and message.
 
-Config.img = "qb-inventory/html/images/"
+Config.img = "qb-inventory/html/images/" -- Set this to your inventory
 
 Config.Peds = true -- Set to true if you want Shops to have Peds
 
+Config.Limit = false -- Enable this to add Stash features, This adds limits to items and gets refilled at each restart
+
 Config.Products = {
     ["normal"] = {
-		[1] = { name = "tosti", price = 2, amount = 50 },
-        [2] = { name = "water_bottle", price = 2, amount = 50 },
-        [3] = { name = "kurkakola", price = 2, amount = 50 },
-        [4] = { name = "twerks_candy", price = 2, amount = 50 },
-        [5] = { name = "snikkel_candy", price = 2, amount = 50 },
-        [6] = { name = "sandwich", price = 2, amount = 50 },
-        [7] = { name = "beer", price = 7, amount = 50 },
-        [8] = { name = "whiskey", price = 10, amount = 50 },
-        [9] = { name = "vodka", price = 12, amount = 50 },
-        [10] = { name = "bandage", price = 100, amount = 50 },
-        [11] = { name = "lighter", price = 2, amount = 50 },
-        [12] = { name = "rolling_paper", price = 2, amount = 5000 },
+		[1] = { name = "tosti", price = 2, amount = 50, info = {} },
+        [2] = { name = "water_bottle", price = 2, amount = 50, info = {} },
+        [3] = { name = "kurkakola", price = 2, amount = 50, info = {} },
+        [4] = { name = "twerks_candy", price = 2, amount = 50, info = {} },
+        [5] = { name = "snikkel_candy", price = 2, amount = 50, info = {} },
+        [6] = { name = "sandwich", price = 2, amount = 50, info = {} },
+        [7] = { name = "beer", price = 7, amount = 50, info = {} },
+        [8] = { name = "whiskey", price = 10, amount = 50, info = {} },
+        [9] = { name = "vodka", price = 12, amount = 50, info = {} },
+        [10] = { name = "bandage", price = 100, amount = 50, info = {} },
+        [11] = { name = "lighter", price = 2, amount = 50, info = {} },
+        [12] = { name = "rolling_paper", price = 2, amount = 5000, info = {uses = 10} },
     },
     ["hardware"] = {
-        [1] = { name = "lockpick", price = 200, amount = 50, },
-        [2] = { name = "weapon_wrench", price = 250, amount = 250, },
-        [3] = { name = "weapon_hammer", price = 250, amount = 250, },
-        [4] = { name = "repairkit", price = 250, amount = 50, requiredJob = { "mechanic", "police" } },
-        [5] = { name = "screwdriverset", price = 350, amount = 50, },
-        [6] = { name = "phone", price = 850, amount = 50, },
-        [7] = { name = "radio", price = 250, amount = 50, },
-        [8] = { name = "binoculars", price = 50, amount = 50, },
-        [9] = { name = "firework1", price = 50, amount = 50, },
-        [10] = { name = "firework2", price = 50, amount = 50, },
-        [11] = { name = "firework3", price = 50, amount = 50, },
-        [12] = { name = "firework4", price = 50, amount = 50, },
-        [13] = { name = "fitbit", price = 400, amount = 150, },
-        [14] = { name = "cleaningkit", price = 150, amount = 150, },
-        [15] = { name = "advancedrepairkit", price = 500, amount = 50, requiredJob = { "mechanic" } },
+        [1] = { name = "lockpick", price = 200, amount = 50, info = {} },
+        [2] = { name = "weapon_wrench", price = 250, amount = 250, info = {} },
+        [3] = { name = "weapon_hammer", price = 250, amount = 250, info = {} },
+        [4] = { name = "repairkit", price = 250, amount = 50, info = {}, requiredJob = { "mechanic", "police" } },
+        [5] = { name = "screwdriverset", price = 350, amount = 50, info = {} },
+        [6] = { name = "phone", price = 850, amount = 50, info = {} },
+        [7] = { name = "radio", price = 250, amount = 50, info = {} },
+        [8] = { name = "binoculars", price = 50, amount = 50, info = {} },
+        [9] = { name = "firework1", price = 50, amount = 50, info = {} },
+        [10] = { name = "firework2", price = 50, amount = 50, info = {} },
+        [11] = { name = "firework3", price = 50, amount = 50, info = {} },
+        [12] = { name = "firework4", price = 50, amount = 50, info = {} },
+        [13] = { name = "fitbit", price = 400, amount = 150, info = {} },
+        [14] = { name = "cleaningkit", price = 150, amount = 150, info = {} },
+        [15] = { name = "advancedrepairkit", price = 500, amount = 50, info = {}, requiredJob = { "mechanic" } },
     },
     ["weedshop"] = {
-        [1] = { name = "joint", price = 10, amount = 1000, },
-        [2] = { name = "weapon_poolcue", price = 100, amount = 1000, },
-        [3] = { name = "weed_nutrition", price = 20, amount = 1000, },
-        [4] = { name = "empty_weed_bag", price = 2, amount = 1000, },
-        [5] = { name = "rolling_paper", price = 2, amount = 1000, },
+        [1] = { name = "joint", price = 10, amount = 1000, info = {} },
+        [2] = { name = "weapon_poolcue", price = 100, amount = 1000, info = {} },
+        [3] = { name = "weed_nutrition", price = 20, amount = 1000, info = {} },
+        [4] = { name = "empty_weed_bag", price = 2, amount = 1000, info = {} },
+        [5] = { name = "rolling_paper", price = 2, amount = 1000, info = {} },
     },
     ["gearshop"] = {
-        [1] = { name = "diving_gear", price = 2500, amount = 10, },
-        [2] = { name = "jerry_can", price = 200, amount = 50, },
+        [1] = { name = "diving_gear", price = 2500, amount = 10, info = {} },
+        [2] = { name = "jerry_can", price = 200, amount = 50, info = {} },
     },
     ["leisureshop"] = {
-        [1] = { name = "parachute", price = 2500, amount = 10, },
-        [2] = { name = "binoculars", price = 50, amount = 50, },    
-        [3] = { name = "diving_gear", price = 2500, amount = 10, },
+        [1] = { name = "parachute", price = 2500, amount = 10, info = {} },
+        [2] = { name = "binoculars", price = 50, amount = 50, info = {} },    
+        [3] = { name = "diving_gear", price = 2500, amount = 10, info = {} },
     },
     ["weapons"] = {
-        [1] = { name = "weapon_knife", price = 250, amount = 250, },
-        [2] = { name = "weapon_bat", price = 250, amount = 250, },
-        [3] = { name = "weapon_hatchet",price = 250, amount = 250, requiredJob = { "mechanic", "police" } },
-        [4] = { name = "weapon_pistol", price = 2500, amount = 5, requiresLicense = true },
-        [5] = { name = "weapon_snspistol", price = 1500, amount = 5, requiresLicense = true },
-        [6] = { name = "weapon_vintagepistol", price = 4000, amount = 5, requiresLicense = true },
-        [7] = { name = "pistol_ammo", price = 250, amount = 250, requiresLicense = true },
+        [1] = { name = "weapon_knife", price = 250, amount = 250, info = nil },
+        [2] = { name = "weapon_bat", price = 250, amount = 250, info = {} },
+        [3] = { name = "weapon_hatchet",price = 250, amount = 250, info = {}, requiredJob = { "mechanic", "police" } },
+        [4] = { name = "weapon_pistol", price = 2500, amount = 5, info = nil, requiresLicense = true },
+        [5] = { name = "weapon_snspistol", price = 1500, amount = 5, info = nil, requiresLicense = true },
+        [6] = { name = "weapon_vintagepistol", price = 4000, amount = 5, info = nil, requiresLicense = true },
+        [7] = { name = "pistol_ammo", price = 250, amount = 250, info = {}, requiresLicense = true },
     },    
 
     ["coffeeplace"] = {
@@ -79,7 +81,14 @@ Config.Products = {
     },
 	["electronics"] = {
         [1] = { name = "phone", price = 850, amount = 50 },
-    },
+        [2] = { name = "radio", price = 250, amount = 50, },
+        [3] = { name = "screwdriverset", price = 350, amount = 50, },
+        [4] = { name = "binoculars", price = 50, amount = 50, },
+        [5] = { name = "fitbit", price = 400, amount = 150, },
+	},	
+	["blackmarket"] = {
+        [1] = { name = "radioscanner", price = 850, amount = 5 },
+	},
 }
 
 Config.Locations = {
@@ -158,7 +167,7 @@ Config.Locations = {
     ["ammunation"] = {
         ["label"] = "Ammunation",
 		["type"] = "weapons",
-		["model"] = "s_m_m_ammucountry",
+		["model"] = `s_m_m_ammucountry`,
 		["logo"] = "https://static.wikia.nocookie.net/gtawiki/images/a/aa/Ammunation-GTAV.png",
         ["coords"] = {
             vector4(808.94, -2158.99, 29.62, 330.26),
@@ -176,9 +185,9 @@ Config.Locations = {
         ["blipsprite"] = 567,
 		["blipcolour"] = 1,
     },
---[[
+
     -- Ammunation GABZ Locations
-	["ammunation"] = {
+--[[	["ammunation"] = {
         ["label"] = "Ammunation",
 		["type"] = "weapons",
 		["model"] = `s_m_m_ammucountry`,
@@ -193,74 +202,74 @@ Config.Locations = {
 			vector4(2564.85, 298.83, 108.74, 283.17),
 			vector4(-1112.4, 2697.08, 18.55, 152.96),
 			vector4(841.16, -1028.63, 28.19, 294.2),
-			vector4(-1310.71, -394.33, 36.7, 340.51),
+			vector4(-1310.71, -394.33, 36.7, 340.51)
 		},
         ["products"] = Config.Products["weapons"],
         ["blipsprite"] = 110,
 		["blipcolour"] = 1,
-    },
-]]
+    },]]
+
     -- Casino Locations
-    ["casino"] = {
-        ["label"] = "Diamond Casino",
+	["casino"] = {
+		["label"] = "Diamond Casino",
 		["type"] = "items",
 		["model"] = `s_f_m_shop_high`,
-        ["coords"] = { vector4(949.3, 32.01, 71.84, 81.33), },
-        ["products"] = Config.Products["casino"],
-        ["blipsprite"] = 617,
+		["coords"] = { vector4(949.3, 32.01, 71.84, 81.33), },
+		["products"] = Config.Products["casino"],
+		["blipsprite"] = 617,
 		["blipcolour"] = 0,
-    },
+	},
     ["casino2"] = {
-        ["label"] = "Casino Bar",
-        ["coords"] = { vector4(950.68, 34.56, 71.85, 29.86), },
+		["label"] = "Casino Bar",
+		["coords"] = { vector4(950.68, 34.56, 71.85, 29.86), },
 		["type"] = "items",
 		["model"] = `S_M_M_HighSec_01`,
-        ["products"] = Config.Products["normal"],
-        ["blipsprite"] = 52,
- 		["blipcolour"] = 0,
-   },
+		["products"] = Config.Products["normal"],
+		["blipsprite"] = 52,
+		["blipcolour"] = 0,
+	},
 
     -- Weedshop Locations
     ["weedshop"] = {
-        ["label"] = "Smoke on the Water",
+		["label"] = "Smoke on the Water",
 		["type"] = "items",
 		["model"] = `mp_f_weed_01`,
-        ["coords"] = { vector4(-1173.12, -1572.71, 4.66, 123.56), },
-        ["products"] = Config.Products["weedshop"],
-        ["blipsprite"] = 496,
- 		["blipcolour"] = 2,
+		["coords"] = { vector4(-1173.12, -1572.71, 4.66, 123.56), },
+		["products"] = Config.Products["weedshop"],
+		["blipsprite"] = 496,
+		["blipcolour"] = 2,
    },
 
     -- Bean Coffee Locations
     ["beancoffee"] = {
-        ["label"] = "Bean Machine Coffee",
+		["label"] = "Bean Machine Coffee",
 		["type"] = "items",
 		["model"] = `A_F_Y_Hipster_02`,
-        ["coords"] = { vector4(-628.97, 238.27, 81.9, 1.28), },
-        ["products"] = Config.Products["coffeeplace"],
-        ["blipsprite"] = 52,
+		["coords"] = { vector4(-628.97, 238.27, 81.9, 1.28), },
+		["products"] = Config.Products["coffeeplace"],
+		["blipsprite"] = 52,
 		["blipcolour"] = 31,
     },
 
     -- Sea Word Locations
     ["seaworld"] = {
-        ["label"] = "Sea World",
+		["label"] = "Sea World",
 		["type"] = "items",
 		["model"] = `mp_m_boatstaff_01`,
-        ["coords"] = { vector4(-1686.48, -1072.53, 13.15, 49.85), },
-        ["products"] = Config.Products["gearshop"],
-        ["blipsprite"] = 52,
- 		["blipcolour"] = 3,
+		["coords"] = { vector4(-1686.48, -1072.53, 13.15, 49.85), },
+		["products"] = Config.Products["gearshop"],
+		["blipsprite"] = 52,
+		["blipcolour"] = 3,
    },
 
     -- Leisure Shop Locations
     ["leisureshop"] = {
-        ["label"] = "Leisure Shop",
+		["label"] = "Leisure Shop",
 		["type"] = "items",
 		["model"] = `mp_m_boatstaff_01`,
-        ["coords"] = { vector4(-1505.67, 1512.29, 115.29, 244.94) },
-        ["products"] = Config.Products["leisureshop"],
-        ["blipsprite"] = 52,
+		["coords"] = { vector4(-1505.67, 1512.29, 115.29, 244.94) },
+		["products"] = Config.Products["leisureshop"],
+		["blipsprite"] = 52,
 		["blipcolour"] = 2,
     },
 
@@ -289,4 +298,15 @@ Config.Locations = {
 		["blipsprite"] = 619,
 		["blipcolour"] = 7,
 	},
+	--[[["blackmarket"] = {
+		["label"] = "Black Market",
+		["type"] = "items",
+		["model"] = `MP_M_Weed_01`,
+		["coords"] = { 
+			vector4(2166.11, 3380.08, 46.43, 240.51),
+			vector4(776.24, 4184.08, 41.8, 92.12),
+			},
+		["products"] = Config.Products["blackmarket"],
+		["hideblip"] = true,
+	},]]
 }
