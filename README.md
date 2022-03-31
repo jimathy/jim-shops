@@ -13,9 +13,13 @@ Everything needed is in Config.lua and its essentially the same as qb-shop's con
 - Support for opening shops externally
 - Ability to choose and spawn shop peds
 - Digital Den shop locations
+- Stash Support, adds ability to limit purchases between restarts
 
-![FiveM_b2545_GTAProcess_mYqo1bzn22](https://user-images.githubusercontent.com/1885302/160259437-e691b884-a707-422d-bbda-e86ecc5d3d50.jpg)
-![FiveM_b2545_GTAProcess_3SZCVpXrEX](https://user-images.githubusercontent.com/1885302/160259455-0bbe9705-8469-41fb-bd5b-a6388cdc5392.jpg)
+
+![FiveM_b2545_GTAProcess_6p8QLBWFay](https://user-images.githubusercontent.com/1885302/161044199-f2755428-b911-4205-b709-21d835c4b18e.jpg)
+![FiveM_b2545_GTAProcess_MobSX714os](https://user-images.githubusercontent.com/1885302/161044075-b7ae850d-a242-4984-a984-52e780d87f48.jpg)
+![FiveM_b2545_GTAProcess_nvrm4jU278](https://user-images.githubusercontent.com/1885302/161044087-c9eb8f8d-a4a5-4174-a048-73a610231abe.jpg)
+
 
 
 You can easily add the event for default inventory shops to open through my script instead.
