@@ -196,7 +196,7 @@ Config.Locations = {
 			vector4(-1310.71, -394.33, 36.7, 340.51),
 		},
         ["products"] = Config.Products["weapons"],
-        ["blipsprite"] = 110
+        ["blipsprite"] = 110,
 		["blipcolour"] = 1,
     },
 ]]
