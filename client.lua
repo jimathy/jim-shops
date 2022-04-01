@@ -29,7 +29,7 @@ CreateThread(function()
 			end
 			if Config.Peds then
 				local model = Config.Locations[k]["model"] RequestModel(model) while not HasModelLoaded(model) do Wait(0) end
-				ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, model, b.x, b.y, b.z-1.0, b.a, true, false)
+				if ped["Shop - ['"..k.."("..l..")']"] == nil then ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, model, b.x, b.y, b.z-1.0, b.a, false, false) end
 				if not Config.Locations[k]["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
 				SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
 				FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
