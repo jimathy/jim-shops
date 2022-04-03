@@ -41,7 +41,7 @@ RegisterServerEvent('jim-shops:ShopOpen', function(shop, name, shoptable)
 	TriggerClientEvent('jim-shops:ShopMenu', source, data, true)
 end)
 
-RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shoptable, name, price, info, shop, num, nostash)
+RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shoptable, price, info, shop, num, nostash)
 	local src = source
     local Player = QBCore.Functions.GetPlayer(src)
 	--Inventory space checks
@@ -78,7 +78,6 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 	--Make data to send back to main shop menu
 	local data = {}
 	data.shoptable = shoptable
-	data.name = name
 	custom = true
 	if Config.Limit and not nostash then
 		custom = nil

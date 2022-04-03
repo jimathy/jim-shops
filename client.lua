@@ -18,19 +18,19 @@ CreateThread(function()
 		for l, b in pairs(v["coords"]) do
 			if not v["hideblip"] then
 				StoreBlip = AddBlipForCoord(b)
-				SetBlipSprite(StoreBlip, Config.Locations[k]["blipsprite"])
+				SetBlipSprite(StoreBlip, v["blipsprite"])
 				SetBlipScale(StoreBlip, 0.7)
 				SetBlipDisplay(StoreBlip, 6)
-				SetBlipColour(StoreBlip, Config.Locations[k]["blipcolour"])
+				SetBlipColour(StoreBlip, v["blipcolour"])
 				SetBlipAsShortRange(StoreBlip, true)
 				BeginTextCommandSetBlipName("STRING")
-				AddTextComponentSubstringPlayerName(Config.Locations[k]["label"])
+				AddTextComponentSubstringPlayerName(v["label"])
 				EndTextCommandSetBlipName(StoreBlip)
 			end
 			if Config.Peds then
-				local model = Config.Locations[k]["model"] RequestModel(model) while not HasModelLoaded(model) do Wait(0) end
-				if ped["Shop - ['"..k.."("..l..")']"] == nil then ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, model, b.x, b.y, b.z-1.0, b.a, false, false) end
-				if not Config.Locations[k]["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
+				local model = v["model"] RequestModel(model) while not HasModelLoaded(model) do Wait(0) end
+				if ped["Shop - ['"..k.."("..l..")']"] == nil then ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, model, b.x, b.y, b.z-1.0, b.a, true, false) end
+				if not v["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
 				SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
 				FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
 				if Config.Debug then print("Ped Created for Shop - ['"..k.."("..l..")']") end
@@ -38,7 +38,7 @@ CreateThread(function()
 			if Config.Debug then print("Shop - ['"..k.."("..l..")']") end
 			exports['qb-target']:AddCircleZone("Shop - ['"..k.."("..l..")']", vector3(b.x, b.y, b.z), 2.0, { name="Shop - ['"..k.."("..l..")']", debugPoly=Config.Debug, useZ=true, }, 
 			{ options = { { event = "jim-shops:ShopMenu", icon = "fas fa-certificate", label = "Browse Shop", 
-				shoptable = Config.Locations[tostring(k)], name = Config.Locations[tostring(k)]["label"], k = k, l = l, }, },
+				shoptable = v, name = v["label"], k = k, l = l, }, },
 			distance = 2.0 })
 			
 		end
@@ -60,7 +60,7 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 		end
 	end
 	if data.shoptable["logo"] ~= nil then ShopMenu[#ShopMenu + 1] = { header = "<img src="..data.shoptable["logo"].." width=200px>", txt = "", isMenuHeader = true }
-	else ShopMenu[#ShopMenu + 1] = { header = data.shoptable.label, txt = "", isMenuHeader = true }
+	else ShopMenu[#ShopMenu + 1] = { header = data.shoptable["label"], txt = "", isMenuHeader = true }
 	end
 	ShopMenu[#ShopMenu + 1] = { header = "", txt = "❌ Close", params = { event = "jim-shops:CloseMenu" } }
 	if data.shoptable["type"] == "weapons" then
@@ -68,7 +68,8 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 	end
 	for i = 1, #products do
 		local amount = nil
-		if Config.Limit and not custom then amount = tonumber(stashItems[i].amount) end
+		local lock = false
+		if Config.Limit and not custom then if stashItems[i] == nil then amount = 0 lock = true else amount = tonumber(stashItems[i].amount) end end
 		if products[i].price == 0 then price = "Free" else price = "Cost: $"..products[i].price end
 		local setheader = QBCore.Shared.Items[products[i].name].label
 		local text = price.."<br>Weight: "..QBCore.Shared.Items[products[i].name].weight
@@ -76,23 +77,22 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 		if products[i].requiredJob then
 			for i2 = 1, #products[i].requiredJob do
 				if QBCore.Functions.GetPlayerData().job.name == products[i].requiredJob[i2] then
-					ShopMenu[#ShopMenu + 1] = { header = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..setheader, txt = text, 
-						params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info, shoptable = data.shoptable, name = data.name, k = data.k, l = data.l, amount = amount } } }
+					ShopMenu[#ShopMenu + 1] = { header = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..setheader, txt = text, isMenuHeader = lock,
+						params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount } } }
 				end
 			end
 		elseif products[i].requiresLicense then
 			if hasLicense and hasLicenseItem then
-			ShopMenu[#ShopMenu + 1] = { header = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..setheader, txt = text, 
-					params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info, shoptable = data.shoptable, name = data.name, k = data.k, l = data.l, amount = amount } } }
+			ShopMenu[#ShopMenu + 1] = { header = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..setheader, txt = text, isMenuHeader = lock,
+					params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount } } }
 			end
 		else
-			ShopMenu[#ShopMenu + 1] = { header = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..setheader, txt = text, 
+			ShopMenu[#ShopMenu + 1] = { header = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..setheader, txt = text, isMenuHeader = lock,
 					params = { event = "jim-shops:Charge", args = { 
 									item = products[i].name, 
 									cost = products[i].price,
 									info = products[i].info,
 									shoptable = data.shoptable,
-									name = data.name,
 									k = data.k,
 									l = data.l, 
 									amount = amount 
@@ -120,9 +120,10 @@ RegisterNetEvent('jim-shops:Charge', function(data)
 	})
 	if dialog then
 		if not dialog.amount then return end
+		if tonumber(dialog.amount) > tonumber(data.amount) then TriggerEvent("QBCore:Notify", "Incorrect amount", "error") TriggerEvent("jim-shops:Charge", data) return end
 		if data.cost == "Free" then data.cost = 0 end
 		if data.amount == nil then nostash = true end
-		TriggerServerEvent('jim-shops:GetItem', dialog.amount, dialog.billtype, data.item, data.shoptable, data.name, data.cost, data.info, data.k, data.l, nostash)
+		TriggerServerEvent('jim-shops:GetItem', dialog.amount, dialog.billtype, data.item, data.shoptable, data.cost, data.info, data.k, data.l, nostash)
 		RequestAnimDict('amb@prop_human_atm@male@enter')
         while not HasAnimDictLoaded('amb@prop_human_atm@male@enter') do Wait(1) end
         if HasAnimDictLoaded('amb@prop_human_atm@male@enter') then TaskPlayAnim(PlayerPedId(), 'amb@prop_human_atm@male@enter', "enter", 1.0,-1.0, 1500, 1, 1, true, true, true) end
