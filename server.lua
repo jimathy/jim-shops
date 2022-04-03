@@ -67,7 +67,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 			stashItems = GetStashItems("["..shop.."("..num..")]")
 			for i = 1, #stashItems do
 				if stashItems[i].name == item then
-					if (stashItems[i].amount - amount) <= 0 then stashItems[i] = nil else stashItems[i].amount = stashItems[i].amount - amount end 
+					if (stashItems[i].amount - amount) <= 0 then stashItems[i].amount = 0 else stashItems[i].amount = stashItems[i].amount - amount end 
 					TriggerEvent('qb-inventory:server:SaveStashItems', "["..shop.."("..num..")]", stashItems)
 					if Config.Debug then print("Removing "..QBCore.Shared.Items[item].label.." x"..amount.." from Shop's Stash: '["..shop.."("..num..")]") end
 				end
