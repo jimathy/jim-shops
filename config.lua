@@ -100,6 +100,30 @@ Config.Locations = {
 		["killable"] = true,
 		["logo"] = "https://i.imgur.com/bPcM0TM.png",
         ["coords"] = {
+			vector4(24.5, -1346.19, 29.5, 266.78),
+			vector4(-3039.91, 584.26, 7.91, 16.79),
+			vector4(-3243.27, 1000.1, 12.83, 358.73),
+			vector4(1728.28, 6416.03, 35.04, 242.45),
+			vector4(1697.96, 4923.04, 42.06, 326.61),
+			vector4(1959.6, 3740.93, 32.34, 296.84),
+			vector4(549.16, 2670.35, 42.16, 92.53),
+			vector4(2677.41, 3279.8, 55.24, 334.16),
+			vector4(2556.19, 380.89, 108.62, 355.58),
+			vector4(372.82, 327.3, 103.57, 255.46),
+			vector4(161.21, 6642.32, 31.61, 223.57),
+		},
+        ["products"] = Config.Products["normal"],
+        ["blipsprite"] = 628,
+		["blipcolour"] = 2,
+    },	    
+	-- 24/7 GABZ Locations
+ --[[   ["247supermarket"] = {
+        ["label"] = "24/7 Supermarket",
+		["type"] = "items",
+		["model"] = `mp_m_shopkeep_01`,
+		["killable"] = true,
+		["logo"] = "https://i.imgur.com/bPcM0TM.png",
+        ["coords"] = {
 			vector4(24.91, -1346.86, 29.5, 268.37),
 			vector4(-3039.64, 584.78, 7.91, 21.88),
 			vector4(-3242.73, 1000.46, 12.83, 2.08),
@@ -115,7 +139,7 @@ Config.Locations = {
         ["products"] = Config.Products["normal"],
         ["blipsprite"] = 628,
 		["blipcolour"] = 2,
-    },	
+    },	]]
     -- LTD Gasoline Locations
     ["ltdgasoline"] = {
         ["label"] = "LTD Gasoline",
