@@ -117,29 +117,20 @@ end)
 RegisterNetEvent("qb-shops:server:RestockShopItems", function(storeinfo)
 	local k, l = nil
 	local storename = storeinfo
-	if string.find(storename, "247supermarket") then 
-		k = "247supermarket" v = Config.Locations[k]
-		l = storename:gsub(k,"")
-		if l == "" then l = 1 end
-	elseif string.find(storename, "hardware") then 
-		k = "hardware" v = Config.Locations[k]
-		l = storename:gsub(k,"")
-		if l == "" then l = 1 end
-	elseif string.find(storename, "robsliquor") then 
-		k = "robsliquor" v = Config.Locations[k] l = storename:gsub(k,"")
-		if l == "" then l = 1 end
-	elseif string.find(storename, "ltdgasoline") then 
-		k = "ltdgasoline" v = Config.Locations[k]
-		l = storename:gsub(k,"")
-		if l == "" then l = 1 end
+	if string.find(storename, "247supermarket") then k = "247supermarket"
+	elseif string.find(storename, "hardware") then k = "hardware"
+	elseif string.find(storename, "robsliquor") then k = "robsliquor"
+	elseif string.find(storename, "ltdgasoline") then k = "ltdgasoline"
 	end
+	l = storename:gsub(k,"") 
+	if l == "" then l = 1 end
 	local stashTable = {}
-	for i = 1, #v["products"] do
-		local itemInfo = QBCore.Shared.Items[v["products"][i].name:lower()]
+	for i = 1, #Config.Locations[k]["products"] do
+		local itemInfo = QBCore.Shared.Items[Config.Locations[k]["products"][i].name:lower()]
 		print(itemInfo["name"])
 		stashTable[i] = {
 			name = itemInfo["name"],
-			amount = tonumber(v["products"][i].amount),
+			amount = tonumber(Config.Locations[k]["products"][i].amount),
 			info = {},
 			label = itemInfo["label"],
 			description = itemInfo["description"] ~= nil and itemInfo["description"] or "",
