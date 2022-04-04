@@ -111,7 +111,47 @@ RegisterNetEvent("jim-shops:MakeStash", function ()
 		elseif Config.Limit == false then stashname = "["..k.."("..l..")]" MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', {stashname}) end 
 		end
 	end
+end)
 
+--Compatability Wrapper Event for qb-truckerjob to refill shop stashes
+RegisterNetEvent("qb-shops:server:RestockShopItems", function(storeinfo)
+	local k, l = nil
+	local storename = storeinfo
+	if string.find(storename, "247supermarket") then 
+		k = "247supermarket" v = Config.Locations[k]
+		l = storename:gsub(k,"")
+		if l == "" then l = 1 end
+	elseif string.find(storename, "hardware") then 
+		k = "hardware" v = Config.Locations[k]
+		l = storename:gsub(k,"")
+		if l == "" then l = 1 end
+	elseif string.find(storename, "robsliquor") then 
+		k = "robsliquor" v = Config.Locations[k] l = storename:gsub(k,"")
+		if l == "" then l = 1 end
+	elseif string.find(storename, "ltdgasoline") then 
+		k = "ltdgasoline" v = Config.Locations[k]
+		l = storename:gsub(k,"")
+		if l == "" then l = 1 end
+	end
+	local stashTable = {}
+	for i = 1, #v["products"] do
+		local itemInfo = QBCore.Shared.Items[v["products"][i].name:lower()]
+		print(itemInfo["name"])
+		stashTable[i] = {
+			name = itemInfo["name"],
+			amount = tonumber(v["products"][i].amount),
+			info = {},
+			label = itemInfo["label"],
+			description = itemInfo["description"] ~= nil and itemInfo["description"] or "",
+			weight = itemInfo["weight"],
+			type = itemInfo["type"],
+			unique = itemInfo["unique"],
+			useable = itemInfo["useable"],
+			image = itemInfo["image"],
+			slot = i,
+		}
+	end
+	if Config.Limit then TriggerEvent('qb-inventory:server:SaveStashItems', "["..k.."("..l..")]", stashTable) end
 end)
 
 QBCore.Functions.CreateCallback('jim-shops:server:getLicenseStatus', function(source, cb)

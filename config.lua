@@ -1,4 +1,4 @@
-print("Jim-Shops v1.2 - Shop Script by Jimathy")
+print("Jim-Shops v1.3 - Shop Script by Jimathy")
 
 -- If you need support I now have a discord available, it helps me keep track of issues and give better support.
 
@@ -27,7 +27,7 @@ Config.Products = {
         [9] = { name = "vodka", price = 12, amount = 50, info = {} },
         [10] = { name = "bandage", price = 100, amount = 50, info = {} },
         [11] = { name = "lighter", price = 2, amount = 50, info = {} },
-        [12] = { name = "rolling_paper", price = 2, amount = 5000, info = {uses = 10} },
+        [12] = { name = "rolling_paper", price = 2, amount = 5000, info = {} },
     },
     ["hardware"] = {
         [1] = { name = "lockpick", price = 200, amount = 50, info = {} },
@@ -115,9 +115,10 @@ Config.Locations = {
         ["products"] = Config.Products["normal"],
         ["blipsprite"] = 628,
 		["blipcolour"] = 2,
-    },	    
+    },	
+--[[    
 	-- 24/7 GABZ Locations
- --[[   ["247supermarket"] = {
+    ["247supermarket"] = {
         ["label"] = "24/7 Supermarket",
 		["type"] = "items",
 		["model"] = `mp_m_shopkeep_01`,
@@ -139,7 +140,8 @@ Config.Locations = {
         ["products"] = Config.Products["normal"],
         ["blipsprite"] = 628,
 		["blipcolour"] = 2,
-    },	]]
+    },
+]]
     -- LTD Gasoline Locations
     ["ltdgasoline"] = {
         ["label"] = "LTD Gasoline",
@@ -209,9 +211,9 @@ Config.Locations = {
         ["blipsprite"] = 567,
 		["blipcolour"] = 1,
     },
-
+--[[
     -- Ammunation GABZ Locations
---[[	["ammunation"] = {
+	["ammunation"] = {
         ["label"] = "Ammunation",
 		["type"] = "weapons",
 		["model"] = `s_m_m_ammucountry`,
@@ -226,13 +228,13 @@ Config.Locations = {
 			vector4(2564.85, 298.83, 108.74, 283.17),
 			vector4(-1112.4, 2697.08, 18.55, 152.96),
 			vector4(841.16, -1028.63, 28.19, 294.2),
-			vector4(-1310.71, -394.33, 36.7, 340.51)
+			vector4(-1310.71, -394.33, 36.7, 340.51),
 		},
         ["products"] = Config.Products["weapons"],
         ["blipsprite"] = 110,
 		["blipcolour"] = 1,
-    },]]
-
+    },
+]]
     -- Casino Locations
 	["casino"] = {
 		["label"] = "Diamond Casino",
