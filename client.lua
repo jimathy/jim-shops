@@ -120,7 +120,7 @@ RegisterNetEvent('jim-shops:Charge', function(data)
 	})
 	if dialog then
 		if not dialog.amount then return end
-		if tonumber(dialog.amount) > tonumber(data.amount) then TriggerEvent("QBCore:Notify", "Incorrect amount", "error") TriggerEvent("jim-shops:Charge", data) return end
+		if Config.Limit then if tonumber(dialog.amount) > tonumber(data.amount) then TriggerEvent("QBCore:Notify", "Incorrect amount", "error") TriggerEvent("jim-shops:Charge", data) return end end
 		if data.cost == "Free" then data.cost = 0 end
 		if data.amount == nil then nostash = true end
 		TriggerServerEvent('jim-shops:GetItem', dialog.amount, dialog.billtype, data.item, data.shoptable, data.cost, data.info, data.k, data.l, nostash)
