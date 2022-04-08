@@ -71,7 +71,7 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 		local lock = false
 		if Config.Limit and not custom then if stashItems[i].amount == 0 then amount = 0 lock = true else amount = tonumber(stashItems[i].amount) end end
 		if products[i].price == 0 then price = "Free" else price = "Cost: $"..products[i].price end
-		if Config.Debug then print(product[i].name) end
+		if Config.Debug then print(products[i].name) end
 		local setheader = QBCore.Shared.Items[products[i].name].label
 		local text = price.."<br>Weight: "..QBCore.Shared.Items[products[i].name].weight
 		if Config.Limit and not custom then text = price.."<br>Amount: x"..amount.."<br>Weight: "..QBCore.Shared.Items[products[i].name].weight.."kg" end
