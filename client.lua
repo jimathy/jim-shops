@@ -15,7 +15,7 @@ end)
 ped = {}
 CreateThread(function()
 	for k, v in pairs(Config.Locations) do
-		if k == "blackmarket" and not Config.BlackMarket then print(k) else
+		if k == "blackmarket" and not Config.BlackMarket then else
 			for l, b in pairs(v["coords"]) do
 				if not v["hideblip"] then
 					StoreBlip = AddBlipForCoord(b)
