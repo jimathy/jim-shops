@@ -15,32 +15,33 @@ end)
 ped = {}
 CreateThread(function()
 	for k, v in pairs(Config.Locations) do
-		for l, b in pairs(v["coords"]) do
-			if not v["hideblip"] then
-				StoreBlip = AddBlipForCoord(b)
-				SetBlipSprite(StoreBlip, v["blipsprite"])
-				SetBlipScale(StoreBlip, 0.7)
-				SetBlipDisplay(StoreBlip, 6)
-				SetBlipColour(StoreBlip, v["blipcolour"])
-				SetBlipAsShortRange(StoreBlip, true)
-				BeginTextCommandSetBlipName("STRING")
-				AddTextComponentSubstringPlayerName(v["label"])
-				EndTextCommandSetBlipName(StoreBlip)
+		if k == "blackmarket" and not Config.BlackMarket then print(k) else
+			for l, b in pairs(v["coords"]) do
+				if not v["hideblip"] then
+					StoreBlip = AddBlipForCoord(b)
+					SetBlipSprite(StoreBlip, v["blipsprite"])
+					SetBlipScale(StoreBlip, 0.7)
+					SetBlipDisplay(StoreBlip, 6)
+					SetBlipColour(StoreBlip, v["blipcolour"])
+					SetBlipAsShortRange(StoreBlip, true)
+					BeginTextCommandSetBlipName("STRING")
+					AddTextComponentSubstringPlayerName(v["label"])
+					EndTextCommandSetBlipName(StoreBlip)
+				end
+				if Config.Peds then
+					local model = v["model"] RequestModel(model) while not HasModelLoaded(model) do Wait(0) end
+					if ped["Shop - ['"..k.."("..l..")']"] == nil then ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, model, b.x, b.y, b.z-1.0, b.a, false, false) end
+					if not v["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
+					SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
+					FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
+					if Config.Debug then print("Ped Created for Shop - ['"..k.."("..l..")']") end
+				end
+				if Config.Debug then print("Shop - ['"..k.."("..l..")']") end
+				exports['qb-target']:AddCircleZone("Shop - ['"..k.."("..l..")']", vector3(b.x, b.y, b.z), 2.0, { name="Shop - ['"..k.."("..l..")']", debugPoly=Config.Debug, useZ=true, }, 
+				{ options = { { event = "jim-shops:ShopMenu", icon = "fas fa-certificate", label = "Browse Shop", 
+					shoptable = v, name = v["label"], k = k, l = l, }, },
+				distance = 2.0 })
 			end
-			if Config.Peds then
-				local model = v["model"] RequestModel(model) while not HasModelLoaded(model) do Wait(0) end
-				if ped["Shop - ['"..k.."("..l..")']"] == nil then ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, model, b.x, b.y, b.z-1.0, b.a, false, false) end
-				if not v["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
-				SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
-				FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
-				if Config.Debug then print("Ped Created for Shop - ['"..k.."("..l..")']") end
-			end
-			if Config.Debug then print("Shop - ['"..k.."("..l..")']") end
-			exports['qb-target']:AddCircleZone("Shop - ['"..k.."("..l..")']", vector3(b.x, b.y, b.z), 2.0, { name="Shop - ['"..k.."("..l..")']", debugPoly=Config.Debug, useZ=true, }, 
-			{ options = { { event = "jim-shops:ShopMenu", icon = "fas fa-certificate", label = "Browse Shop", 
-				shoptable = v, name = v["label"], k = k, l = l, }, },
-			distance = 2.0 })
-			
 		end
 	end
 end)
@@ -71,7 +72,11 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 		local lock = false
 		if Config.Limit and not custom then if stashItems[i].amount == 0 then amount = 0 lock = true else amount = tonumber(stashItems[i].amount) end end
 		if products[i].price == 0 then price = "Free" else price = "Cost: $"..products[i].price end
-		if Config.Debug then print(products[i].name) end
+		if Config.Debug then print("ShopMenu - Searching for item '"..products[i].name.."'")
+			if not QBCore.Shared.Items[products[i].name:lower()] then 
+				print ("RestockShopItems - Can't find item '"..products[i].name.."'")
+			end
+		end
 		local setheader = QBCore.Shared.Items[products[i].name].label
 		local text = price.."<br>Weight: "..QBCore.Shared.Items[products[i].name].weight
 		if Config.Limit and not custom then text = price.."<br>Amount: x"..amount.."<br>Weight: "..QBCore.Shared.Items[products[i].name].weight.."kg" end
@@ -114,11 +119,16 @@ RegisterNetEvent('jim-shops:Charge', function(data)
 	settext = settext..weight.."<br> Cost per item: "..price.."<br><br>- Payment Type -"
 	local header = "<center><p><img src=nui://"..Config.img..QBCore.Shared.Items[data.item].image.." width=100px></p>"..QBCore.Shared.Items[data.item].label
 	if data.shoptable["logo"] ~= bil then header = "<center><p><img src="..data.shoptable["logo"].." width=150px></img></p>"..header end
-	local dialog = exports['qb-input']:ShowInput({ header = header, submitText = "Pay",
-	inputs = {
-			{ type = 'radio', name = 'billtype', text = settext, options = { { value = "cash", text = "Cash" }, { value = "bank", text = "Card" } } }, 
-			{ type = 'number', isRequired = true, name = 'amount', text = 'Amount to buy' },}
-	})
+	
+	local newinputs = {}
+	if data.shoptable["label"] == Config.Locations["blackmarket"]["label"] and Config.BlackCrypto then 
+		newinputs[#newinputs+1] = { type = 'radio', name = 'billtype', text = settext, options = { { value = "crypto", text = "Crypto" } } }
+	else
+		newinputs[#newinputs+1] = { type = 'radio', name = 'billtype', text = settext, options = { { value = "cash", text = "Cash" }, { value = "bank", text = "Card" } } }
+	end
+	newinputs[#newinputs+1] = { type = 'number', isRequired = true, name = 'amount', text = 'Amount to buy' }
+	
+	local dialog = exports['qb-input']:ShowInput({ header = header, submitText = "Pay", inputs = newinputs })
 	if dialog then
 		if not dialog.amount then return end
 		if Config.Limit then if tonumber(dialog.amount) > tonumber(data.amount) then TriggerEvent("QBCore:Notify", "Incorrect amount", "error") TriggerEvent("jim-shops:Charge", data) return end end

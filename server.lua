@@ -87,11 +87,16 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 	TriggerClientEvent('jim-shops:ShopMenu', src, data, custom)
 end)
 
-RegisterNetEvent("jim-shops:MakeStash", function ()
+RegisterNetEvent("jim-shops:MakeStash", function()
 	for k, v in pairs(Config.Locations) do
 		local stashTable = {}
 		for l, b in pairs(v["coords"]) do
 			for i = 1, #v["products"] do
+				if Config.Debug then print("MakeStash - Searching for item '"..v["products"][i].name.."'")
+					if not QBCore.Shared.Items[v["products"][i].name:lower()] then 
+						print ("MakeStash - Can't find item '"..v["products"][i].name.."'")
+					end
+				end
 				local itemInfo = QBCore.Shared.Items[v["products"][i].name:lower()]
 				stashTable[i] = {
 					name = itemInfo["name"],
@@ -126,8 +131,12 @@ RegisterNetEvent("qb-shops:server:RestockShopItems", function(storeinfo)
 	if l == "" then l = 1 end
 	local stashTable = {}
 	for i = 1, #Config.Locations[k]["products"] do
+		if Config.Debug then print("RestockShopItems - Searching for item '"..v["products"][i].name.."'")
+			if not QBCore.Shared.Items[v["products"][i].name:lower()] then 
+				print ("RestockShopItems - Can't find item '"..v["products"][i].name.."'")
+			end
+		end
 		local itemInfo = QBCore.Shared.Items[Config.Locations[k]["products"][i].name:lower()]
-		print(itemInfo["name"])
 		stashTable[i] = {
 			name = itemInfo["name"],
 			amount = tonumber(Config.Locations[k]["products"][i].amount),

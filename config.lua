@@ -1,4 +1,4 @@
-print("Jim-Shops v1.3 - Shop Script by Jimathy")
+print("Jim-Shops v1.4 - Shop Script by Jimathy")
 
 -- If you need support I now have a discord available, it helps me keep track of issues and give better support.
 
@@ -13,6 +13,12 @@ Config.img = "qb-inventory/html/images/" -- Set this to your inventory
 Config.Peds = true -- Set to true if you want Shops to have Peds
 
 Config.Limit = false -- Enable this to add Stash features, This adds limits to items and gets refilled at each restart
+
+Config.BlackMarket = false -- enable to add blackmarket locations (defined at the bottom of this file)
+
+-- NOT WORKING YET, DON'T USE --
+--Config.BlackCrypto = true -- Enable this to use cypto for blackmarket payments
+--------------------------------							
 
 Config.Products = {
     ["normal"] = {
@@ -324,7 +330,7 @@ Config.Locations = {
 		["blipsprite"] = 619,
 		["blipcolour"] = 7,
 	},
-	--[[["blackmarket"] = {
+	["blackmarket"] = {
 		["label"] = "Black Market",
 		["type"] = "items",
 		["model"] = `MP_M_Weed_01`,
@@ -334,5 +340,5 @@ Config.Locations = {
 			},
 		["products"] = Config.Products["blackmarket"],
 		["hideblip"] = true,
-	},]]
+	},
 }
