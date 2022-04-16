@@ -1,14 +1,15 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
+function installCheck()	for k, v in pairs(Config.Products) do for i = 1, #v do	if not QBCore.Shared.Items[v[i].name] then print("Error: Cannot find '"..v[i].name.."' in your shared items") end end end end
+
 PlayerJob = {}
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded') AddEventHandler('QBCore:Client:OnPlayerLoaded', function() QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) end)
 RegisterNetEvent('QBCore:Client:OnJobUpdate') AddEventHandler('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end)
 RegisterNetEvent('QBCore:Client:SetDuty') AddEventHandler('QBCore:Client:SetDuty', function(duty) onDuty = duty end)
 AddEventHandler('onResourceStart', function(resource)
-	if GetCurrentResourceName() == resource then 
-		QBCore.Functions.GetPlayerData(function(PlayerData) 
-			PlayerJob = PlayerData.job 
-		end) 
+	if GetCurrentResourceName() == resource then
+		installCheck()
+		QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
 	end 
 end)
 
