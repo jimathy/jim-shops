@@ -1,10 +1,6 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-AddEventHandler('onResourceStart', function(resource)
-	if GetCurrentResourceName() == resource then 
-		TriggerEvent("jim-shops:MakeStash")
-	end 
-end)
+AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName() == resource then TriggerEvent("jim-shops:MakeStash") end end)
 
 local function GetStashItems(stashId)
 	local items = {}
@@ -47,9 +43,14 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 	--Inventory space checks
 	local totalWeight = QBCore.Player.GetTotalWeight(Player.PlayerData.items)
     local maxWeight = QBCore.Config.Player.MaxWeight
+	local slots = 0
+	for k, v in pairs(Player.PlayerData.items) do slots = slots +1 end
+	slots = Config.MaxSlots - slots
 	local balance = Player.Functions.GetMoney(tostring(billtype))
 	if (totalWeight + (QBCore.Shared.Items[item].weight * amount)) > maxWeight then 
 		TriggerClientEvent("QBCore:Notify", src, "Not enough space in inventory", "error") 
+	elseif QBCore.Shared.Items[item].unique and (tonumber(slots) < tonumber(amount)) then
+		TriggerClientEvent("QBCore:Notify", src, "Not enough slots in inventory", "error")
 	else
 		--Money checks
 		if balance >= (tonumber(price) * tonumber(amount)) then 
@@ -58,9 +59,11 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 			TriggerClientEvent("QBCore:Notify", src, "Not enough money", "error") return
 		end
 		if QBCore.Shared.Items[item].type == "weapon" then
-			Player.Functions.AddItem(item, amount)
+			if QBCore.Shared.Items[item].unique then for i = 1, amount do Player.Functions.AddItem(item, 1) Wait(10) end
+			else Player.Functions.AddItem(item, tonumber(amount)) end
 		else
-			Player.Functions.AddItem(item, amount, nil, info)
+			if QBCore.Shared.Items[item].unique then for i = 1, amount do Player.Functions.AddItem(item, 1, nil, info) Wait(10) end
+			else Player.Functions.AddItem(item, tonumber(amount), nil, info) end
 		end
 		TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount)
 		if Config.Limit and not nostash then
@@ -161,4 +164,3 @@ QBCore.Functions.CreateCallback('jim-shops:server:getLicenseStatus', function(so
     local licenseItem = Player.Functions.GetItemByName("weaponlicense")
     cb(licenseTable.weapon, licenseItem)
 end)
-
