@@ -52,21 +52,21 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 	local ShopMenu = {}
 	local hasLicense, hasLicenseItem = nil
 	local stashItems = nil
-	
-	if Config.Limit and not custom then 
-		while stashItems == nil do 
-			QBCore.Functions.TriggerCallback('qb-inventory:server:GetStashItems', function(StashItems)
-				stashItems = StashItems
-			end, "["..data.k.."("..data.l..")]") 
-			Wait(100)
-		end
+	if Config.Limit and not custom then
+		local p = promise.new() 
+		QBCore.Functions.TriggerCallback('qb-inventory:server:GetStashItems', function(stash) p:resolve(stash) end, "["..data.k.."("..data.l..")]")
+		stashItems = Citizen.Await(p)
 	end
 	if data.shoptable["logo"] ~= nil then ShopMenu[#ShopMenu + 1] = { header = "<img src="..data.shoptable["logo"].." width=200px>", txt = "", isMenuHeader = true }
 	else ShopMenu[#ShopMenu + 1] = { header = data.shoptable["label"], txt = "", isMenuHeader = true }
 	end
 	ShopMenu[#ShopMenu + 1] = { header = "", txt = "❌ Close", params = { event = "jim-shops:CloseMenu" } }
 	if data.shoptable["type"] == "weapons" then
-		while hasLicense == nil do QBCore.Functions.TriggerCallback("jim-shops:server:getLicenseStatus", function(hasLic, hasLicItem) hasLicense = hasLic hasLicenseItem = hasLicItem end) Wait(0) end
+		local p = promise.new()
+		local p2 = promise.new()
+		QBCore.Functions.TriggerCallback("jim-shops:server:getLicenseStatus", function(hasLic, hasLicItem) p:resolve(hasLic) p2:resolve(hasLicItem) end)
+		hasLicense = Citizen.Await(p)
+		hasLicenseItem = Citizen.Await(p2)
 	end
 	for i = 1, #products do
 		local amount = nil
