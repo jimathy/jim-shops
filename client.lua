@@ -30,8 +30,9 @@ CreateThread(function()
 					EndTextCommandSetBlipName(StoreBlip)
 				end
 				if Config.Peds then
-					local model = v["model"] RequestModel(model) while not HasModelLoaded(model) do Wait(0) end
-					if ped["Shop - ['"..k.."("..l..")']"] == nil then ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, model, b.x, b.y, b.z-1.0, b.a, false, false) end
+					local i = math.random(1, #v["model"])
+					RequestModel(v["model"][i]) while not HasModelLoaded(v["model"][i]) do Wait(0) end
+					if ped["Shop - ['"..k.."("..l..")']"] == nil then ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, v["model"][i], b.x, b.y, b.z-1.0, b.a, false, false) end
 					if not v["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
 					SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
 					FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)

@@ -1,4 +1,4 @@
-print("Jim-Shops v1.4 - Shop Script by Jimathy")
+print("Jim-Shops v1.5 - Shop Script by Jimathy")
 
 -- If you need support I now have a discord available, it helps me keep track of issues and give better support.
 
@@ -12,11 +12,11 @@ Config.img = "qb-inventory/html/images/" -- Set this to your inventory
 
 Config.Peds = true -- Set to true if you want Shops to have Peds
 
-Config.Limit = false -- Enable this to add Stash features, This adds limits to items and gets refilled at each restart
+Config.Limit = true -- Enable this to add Stash features, This adds limits to items and gets refilled at each restart
 
 Config.MaxSlots = 41 -- Set this to your player inventory slot count, this is default "41"
 
-Config.BlackMarket = false -- enable to add blackmarket locations (defined at the bottom of this file)
+Config.BlackMarket = true -- enable to add blackmarket locations (defined at the bottom of this file)
 
 -- NOT WORKING YET, DON'T USE --
 --Config.BlackCrypto = true -- Enable this to use cypto for blackmarket payments
@@ -104,7 +104,11 @@ Config.Locations = {
     ["247supermarket"] = {
         ["label"] = "24/7 Supermarket",
 		["type"] = "items",
-		["model"] = `mp_m_shopkeep_01`,
+		["model"] = { 
+			[1] = `mp_m_shopkeep_01`,
+			[2] = `S_F_Y_Shop_LOW`,
+			[3] = `S_F_Y_SweatShop_01`,
+		},
 		["killable"] = true,
 		["logo"] = "https://i.imgur.com/bPcM0TM.png",
         ["coords"] = {
@@ -123,13 +127,17 @@ Config.Locations = {
         ["products"] = Config.Products["normal"],
         ["blipsprite"] = 628,
 		["blipcolour"] = 2,
-    },	
---[[    
+    },
+   
 	-- 24/7 GABZ Locations
-    ["247supermarket"] = {
+--[[    ["247supermarket"] = {
         ["label"] = "24/7 Supermarket",
 		["type"] = "items",
-		["model"] = `mp_m_shopkeep_01`,
+		["model"] = { 
+			[1] = `mp_m_shopkeep_01`,
+			[2] = `S_F_Y_Shop_LOW`,
+			[3] = `S_F_Y_SweatShop_01`,
+		},
 		["killable"] = true,
 		["logo"] = "https://i.imgur.com/bPcM0TM.png",
         ["coords"] = {
@@ -148,13 +156,21 @@ Config.Locations = {
         ["products"] = Config.Products["normal"],
         ["blipsprite"] = 628,
 		["blipcolour"] = 2,
-    },
-]]
+    },]]
+
     -- LTD Gasoline Locations
     ["ltdgasoline"] = {
         ["label"] = "LTD Gasoline",
 		["type"] = "items",
-		["model"] = `s_m_m_autoshop_02`,
+		["model"] = { 
+			[1] = `s_m_m_autoshop_02`,
+			[2] = `S_F_M_Autoshop_01`,
+			[3] = `S_M_M_AutoShop_01`,
+			[4] = `S_M_M_Autoshop_03`,
+			[5] = `IG_Benny`,
+			[6] = `IG_Benny_02`,
+			[7] = `MP_F_BennyMech_01`,
+		},
 		["logo"] = "https://static.wikia.nocookie.net/gtawiki/images/7/72/LTD-GTAO-LSTunersBanner.png",
         ["coords"] = {
 			vector4(-47.42, -1758.67, 29.42, 47.26),
@@ -170,7 +186,13 @@ Config.Locations = {
     ["robsliquor"] = {
         ["label"] = "Rob's Liqour",
 		["type"] = "items",
-		["model"] = `cs_nervousron`,
+		["model"] = { 
+			[1] = `cs_nervousron`,
+			[2] = `IG_RussianDrunk`,
+			[3] = `U_M_Y_MilitaryBum`,
+			[4] = `A_F_M_TrampBeac_01`,
+			[5] = `A_M_M_Tramp_01`,
+		},
 		["logo"] = "https://static.wikia.nocookie.net/gtawiki/images/d/de/RebsLiquor-GTAV.png",
         ["coords"] = {
 			vector4(-1221.38, -907.89, 12.33, 27.51),
@@ -187,7 +209,15 @@ Config.Locations = {
     ["hardware"] = {
         ["label"] = "Hardware Store",
  		["type"] = "items",
-		["model"] = `s_m_m_autoshop_02`,
+		["model"] = { 
+			[1] = `s_m_m_autoshop_02`,
+			[2] = `S_F_M_Autoshop_01`,
+			[3] = `S_M_M_AutoShop_01`,
+			[4] = `S_M_M_Autoshop_03`,
+			[5] = `IG_Benny`,
+			[6] = `IG_Benny_02`,
+			[7] = `MP_F_BennyMech_01`,
+		},
 		["coords"] = {
 			vector4(46.52, -1749.55, 29.64, 50.82),
 			vector4(2747.76, 3472.9, 55.67, 243.88),
@@ -201,7 +231,15 @@ Config.Locations = {
     ["ammunation"] = {
         ["label"] = "Ammunation",
 		["type"] = "weapons",
-		["model"] = `s_m_m_ammucountry`,
+		["model"] = { 
+			[1] = `s_m_m_ammucountry`,
+			[2] = `S_M_Y_AmmuCity_01`,
+			[3] = `MP_M_WareMech_01`,
+			[4] = `A_M_M_Farmer_01`,
+			[5] = `MP_M_ExArmy_01`,
+			[6] = `S_M_Y_ArmyMech_01`,
+			[7] = `S_M_M_Armoured_02`,
+		},
 		["logo"] = "https://static.wikia.nocookie.net/gtawiki/images/a/aa/Ammunation-GTAV.png",
         ["coords"] = {
             vector4(808.94, -2158.99, 29.62, 330.26),
@@ -219,12 +257,20 @@ Config.Locations = {
         ["blipsprite"] = 567,
 		["blipcolour"] = 1,
     },
---[[
+	
     -- Ammunation GABZ Locations
-	["ammunation"] = {
+--[[	["ammunation"] = {
         ["label"] = "Ammunation",
 		["type"] = "weapons",
-		["model"] = `s_m_m_ammucountry`,
+		["model"] = { 
+			[1] = `s_m_m_ammucountry`,
+			[2] = `S_M_Y_AmmuCity_01`,
+			[3] = `MP_M_WareMech_01`,
+			[4] = `A_M_M_Farmer_01`,
+			[5] = `MP_M_ExArmy_01`,
+			[6] = `S_M_Y_ArmyMech_01`,
+			[7] = `S_M_M_Armoured_02`,
+		},
 		["logo"] = "https://static.wikia.nocookie.net/gtawiki/images/a/aa/Ammunation-GTAV.png",
         ["coords"] = {
             vector4(-659.16, -939.79, 21.83, 91.25),
@@ -247,7 +293,9 @@ Config.Locations = {
 	["casino"] = {
 		["label"] = "Diamond Casino",
 		["type"] = "items",
-		["model"] = `s_f_m_shop_high`,
+		["model"] = { 
+			[1] = `U_F_M_CasinoShop_01`,
+		},
 		["coords"] = { vector4(949.3, 32.01, 71.84, 81.33), },
 		["products"] = Config.Products["casino"],
 		["blipsprite"] = 617,
@@ -257,7 +305,9 @@ Config.Locations = {
 		["label"] = "Casino Bar",
 		["coords"] = { vector4(950.68, 34.56, 71.85, 29.86), },
 		["type"] = "items",
-		["model"] = `S_M_M_HighSec_01`,
+		["model"] = { 
+			[1] = `S_M_M_HighSec_01`,
+		},
 		["products"] = Config.Products["normal"],
 		["blipsprite"] = 52,
 		["blipcolour"] = 0,
@@ -267,7 +317,12 @@ Config.Locations = {
     ["weedshop"] = {
 		["label"] = "Smoke on the Water",
 		["type"] = "items",
-		["model"] = `mp_f_weed_01`,
+		["model"] = { 
+			[1] = `mp_f_weed_01`,
+			[2] = `MP_M_Weed_01`,
+			[3] = `A_M_Y_MethHead_01`,
+			[4] = `A_F_Y_RurMeth_01`,
+		},
 		["coords"] = { vector4(-1173.12, -1572.71, 4.66, 123.56), },
 		["products"] = Config.Products["weedshop"],
 		["blipsprite"] = 496,
@@ -278,7 +333,9 @@ Config.Locations = {
     ["beancoffee"] = {
 		["label"] = "Bean Machine Coffee",
 		["type"] = "items",
-		["model"] = `A_F_Y_Hipster_02`,
+		["model"] = { 
+			[1] = `A_F_Y_Hipster_02`,
+		},
 		["coords"] = { vector4(-628.97, 238.27, 81.9, 1.28), },
 		["products"] = Config.Products["coffeeplace"],
 		["blipsprite"] = 52,
@@ -289,7 +346,9 @@ Config.Locations = {
     ["seaworld"] = {
 		["label"] = "Sea World",
 		["type"] = "items",
-		["model"] = `mp_m_boatstaff_01`,
+		["model"] = { 
+			[1] = `mp_m_boatstaff_01`,
+		},
 		["coords"] = { vector4(-1686.48, -1072.53, 13.15, 49.85), },
 		["products"] = Config.Products["gearshop"],
 		["blipsprite"] = 52,
@@ -300,7 +359,9 @@ Config.Locations = {
     ["leisureshop"] = {
 		["label"] = "Leisure Shop",
 		["type"] = "items",
-		["model"] = `mp_m_boatstaff_01`,
+		["model"] = { 
+			[1] = `mp_m_boatstaff_01`,
+		},
 		["coords"] = { vector4(-1505.67, 1512.29, 115.29, 244.94) },
 		["products"] = Config.Products["leisureshop"],
 		["blipsprite"] = 52,
@@ -311,7 +372,13 @@ Config.Locations = {
     ["delvecchioliquor"] = {
         ["label"] = "Del Vecchio Liquor",
 		["type"] = "items",
-		["model"] = `A_F_Y_Hipster_04`,
+		["model"] = { 
+			[1] = `cs_nervousron`,
+			[2] = `IG_RussianDrunk`,
+			[3] = `U_M_Y_MilitaryBum`,
+			[4] = `A_F_M_TrampBeac_01`,
+			[5] = `A_M_M_Tramp_01`,
+		},
         ["coords"] = { vector4(-160.54, 6320.85, 31.59, 317.79), },
         ["products"] = Config.Products["normal"],
         ["blipsprite"] = 52,
@@ -320,13 +387,22 @@ Config.Locations = {
 	["digitalden"] = {
 		["label"] = "Digital Den",
 		["type"] = "items",
-		["model"] = `S_M_M_LifeInvad_01`,
+		["model"] = { 
+			[1] = `S_M_M_LifeInvad_01`,
+			[2] = `IG_Ramp_Hipster`,
+			[3] = `A_M_Y_Hipster_02`,
+			[4] = `A_F_Y_Hipster_01`,
+			[5] = `IG_LifeInvad_01`,
+			[6] = `IG_LifeInvad_02`,
+			[7] = `CS_LifeInvad_01`,
+		},
 		["logo"] = "https://static.wikia.nocookie.net/gtawiki/images/b/b5/DigitalDen-GTAV-Logo.png",
 		["coords"] = { 
 			vector4(391.76, -832.79, 29.29, 223.77),
 			vector4(1136.99, -473.13, 66.53, 254.85),
 			vector4(-509.55, 278.63, 83.31, 176.65),
 			vector4(-656.27, -854.73, 24.5, 359.39),
+			vector4(-1088.29, -254.3, 37.76, 252.7),
 			},
 		["products"] = Config.Products["electronics"],
 		["blipsprite"] = 619,
@@ -335,10 +411,21 @@ Config.Locations = {
 	["blackmarket"] = {
 		["label"] = "Black Market",
 		["type"] = "items",
-		["model"] = `MP_M_Weed_01`,
+		["model"] = { 
+			[1] = `mp_f_weed_01`,
+			[2] = `MP_M_Weed_01`,
+			[3] = `A_M_Y_MethHead_01`,
+			[4] = `A_F_Y_RurMeth_01`,
+			[5] = `A_M_M_RurMeth_01`,
+			[6] = `MP_F_Meth_01`,
+			[7] = `MP_M_Meth_01`,
+		},
 		["coords"] = { 
-			vector4(2166.11, 3380.08, 46.43, 240.51),
 			vector4(776.24, 4184.08, 41.8, 92.12),
+			vector4(2482.51, 3722.28, 43.92, 39.98),
+			vector4(462.67, -1789.16, 28.59, 317.53),
+			vector4(-115.15, 6369.07, 31.52, 232.08),
+			vector4(752.52, -3198.33, 6.07, 301.72)
 			},
 		["products"] = Config.Products["blackmarket"],
 		["hideblip"] = true,
