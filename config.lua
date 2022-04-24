@@ -5,13 +5,13 @@ print("Jim-Shops v1.5 - Shop Script by Jimathy")
 -- https://discord.gg/xKgQZ6wZvS
 
 Config = {
-	Debug = true -- Enable to add debug boxes and message.
-	img = "qb-inventory/html/images/" -- Set this to your inventory
-	Peds = true -- Set to true if you want Shops to have Peds
-	Limit = false -- Enable this to add Stash features, This adds limits to items and gets refilled at each restart
-	MaxSlots = 41 -- Set this to your player inventory slot count, this is default "41"
-	BlackMarket = false -- enable to add blackmarket locations (defined at the bottom of this file)
-	Measurement = "kg" -- Custom Weight measurement
+	Debug = false, -- Enable to add debug boxes and message.
+	img = "qb-inventory/html/images/", -- Set this to your inventory
+	Peds = true, -- Set to true if you want Shops to have Peds
+	Limit = false, -- Enable this to add Stash features, This adds limits to items and gets refilled at each restart
+	MaxSlots = 41, -- Set this to your player inventory slot count, this is default "41"
+	BlackMarket = false, -- enable to add blackmarket locations (defined at the bottom of this file)
+	Measurement = "kg", -- Custom Weight measurement
 }							
 
 Config.Products = {
