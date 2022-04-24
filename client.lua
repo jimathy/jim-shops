@@ -117,7 +117,7 @@ RegisterNetEvent('jim-shops:CloseMenu', function() exports['qb-menu']:closeMenu(
 
 RegisterNetEvent('jim-shops:Charge', function(data)
 	if data.cost == "Free" then price = data.cost else price = "$"..data.cost end
-	if QBCore.Shared.Items[data.item].weight == 0 then weight = "" else weight = "Weight: "..QBCore.Shared.Items[data.item].weight end
+	if QBCore.Shared.Items[data.item].weight == 0 then weight = "" else weight = "Weight: "..(QBCore.Shared.Items[data.item].weight / 100)..Config.Measurement end
 	local settext = "- Confirm Purchase -<br><br>"
 	if Config.Limit and data.amount ~= nil then settext = settext.."Amount: "..data.amount.."<br>" end
 	settext = settext..weight.."<br> Cost per item: "..price.."<br><br>- Payment Type -"
