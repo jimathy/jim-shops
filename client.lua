@@ -79,23 +79,25 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 				print ("RestockShopItems - Can't find item '"..products[i].name.."'")
 			end
 		end
-		local setheader = QBCore.Shared.Items[products[i].name].label
+		
+		if not Config.JimMenu then setheader = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..QBCore.Shared.Items[products[i].name].label
+		else setheader = QBCore.Shared.Items[products[i].name].label end
 		local text = price.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 100)..Config.Measurement
 		if Config.Limit and not custom then text = price.."<br>Amount: x"..amount.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 100)..Config.Measurement end
 		if products[i].requiredJob then
 			for i2 = 1, #products[i].requiredJob do
 				if QBCore.Functions.GetPlayerData().job.name == products[i].requiredJob[i2] then
-					ShopMenu[#ShopMenu + 1] = { header = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..setheader, txt = text, isMenuHeader = lock,
+					ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
 						params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount } } }
 				end
 			end
 		elseif products[i].requiresLicense then
 			if hasLicense and hasLicenseItem then
-			ShopMenu[#ShopMenu + 1] = { header = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..setheader, txt = text, isMenuHeader = lock,
+			ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
 					params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount } } }
 			end
 		else
-			ShopMenu[#ShopMenu + 1] = { header = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..setheader, txt = text, isMenuHeader = lock,
+			ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
 					params = { event = "jim-shops:Charge", args = { 
 									item = products[i].name, 
 									cost = products[i].price,
@@ -120,7 +122,7 @@ RegisterNetEvent('jim-shops:Charge', function(data)
 	if Config.Limit and data.amount ~= nil then settext = settext.."Amount: "..data.amount.."<br>" end
 	settext = settext..weight.."<br> Cost per item: "..price.."<br><br>- Payment Type -"
 	local header = "<center><p><img src=nui://"..Config.img..QBCore.Shared.Items[data.item].image.." width=100px></p>"..QBCore.Shared.Items[data.item].label
-	if data.shoptable["logo"] ~= bil then header = "<center><p><img src="..data.shoptable["logo"].." width=150px></img></p>"..header end
+	if data.shoptable["logo"] ~= nil then header = "<center><p><img src="..data.shoptable["logo"].." width=150px></img></p>"..header end
 	
 	local newinputs = {}
 	if data.shoptable["label"] == Config.Locations["blackmarket"]["label"] and Config.BlackCrypto then 

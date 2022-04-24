@@ -12,7 +12,8 @@ Config = {
 	MaxSlots = 41, -- Set this to your player inventory slot count, this is default "41"
 	BlackMarket = false, -- enable to add blackmarket locations (defined at the bottom of this file)
 	Measurement = "kg", -- Custom Weight measurement
-}							
+	JimMenu = false, -- Enable this if you are using my customised qb-menu resource
+}
 
 Config.Products = {
     ["normal"] = {
