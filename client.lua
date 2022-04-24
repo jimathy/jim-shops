@@ -120,7 +120,7 @@ RegisterNetEvent('jim-shops:Charge', function(data)
 	if Config.Limit and data.amount ~= nil then settext = settext.."Amount: "..data.amount.."<br>" end
 	settext = settext..weight.."<br> Cost per item: "..price.."<br><br>- Payment Type -"
 	local header = "<center><p><img src=nui://"..Config.img..QBCore.Shared.Items[data.item].image.." width=100px></p>"..QBCore.Shared.Items[data.item].label
-	if data.shoptable["logo"] ~= bil then header = "<center><p><img src="..data.shoptable["logo"].." width=150px></img></p>"..header end
+	if data.shoptable["logo"] ~= nil then header = "<center><p><img src="..data.shoptable["logo"].." width=150px></img></p>"..header end
 	
 	local newinputs = {}
 	if data.shoptable["label"] == Config.Locations["blackmarket"]["label"] and Config.BlackCrypto then 
