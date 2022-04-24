@@ -79,23 +79,25 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 				print ("RestockShopItems - Can't find item '"..products[i].name.."'")
 			end
 		end
-		local setheader = QBCore.Shared.Items[products[i].name].label
+		
+		if not Config.JimMenu then setheader = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..QBCore.Shared.Items[products[i].name].label
+		else setheader = QBCore.Shared.Items[products[i].name].label end
 		local text = price.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 100)..Config.Measurement
 		if Config.Limit and not custom then text = price.."<br>Amount: x"..amount.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 100)..Config.Measurement end
 		if products[i].requiredJob then
 			for i2 = 1, #products[i].requiredJob do
 				if QBCore.Functions.GetPlayerData().job.name == products[i].requiredJob[i2] then
-					ShopMenu[#ShopMenu + 1] = { header = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..setheader, txt = text, isMenuHeader = lock,
+					ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
 						params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount } } }
 				end
 			end
 		elseif products[i].requiresLicense then
 			if hasLicense and hasLicenseItem then
-			ShopMenu[#ShopMenu + 1] = { header = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..setheader, txt = text, isMenuHeader = lock,
+			ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
 					params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount } } }
 			end
 		else
-			ShopMenu[#ShopMenu + 1] = { header = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..setheader, txt = text, isMenuHeader = lock,
+			ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
 					params = { event = "jim-shops:Charge", args = { 
 									item = products[i].name, 
 									cost = products[i].price,
