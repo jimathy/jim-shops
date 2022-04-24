@@ -80,8 +80,8 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 			end
 		end
 		local setheader = QBCore.Shared.Items[products[i].name].label
-		local text = price.."<br>Weight: "..QBCore.Shared.Items[products[i].name].weight
-		if Config.Limit and not custom then text = price.."<br>Amount: x"..amount.."<br>Weight: "..QBCore.Shared.Items[products[i].name].weight.."kg" end
+		local text = price.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 100)..Config.Measurement
+		if Config.Limit and not custom then text = price.."<br>Amount: x"..amount.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 100)..Config.Measurement end
 		if products[i].requiredJob then
 			for i2 = 1, #products[i].requiredJob do
 				if QBCore.Functions.GetPlayerData().job.name == products[i].requiredJob[i2] then
