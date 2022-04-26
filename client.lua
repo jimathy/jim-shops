@@ -82,8 +82,8 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 		
 		if not Config.JimMenu then setheader = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px>"..QBCore.Shared.Items[products[i].name].label
 		else setheader = QBCore.Shared.Items[products[i].name].label end
-		local text = price.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 100)..Config.Measurement
-		if Config.Limit and not custom then text = price.."<br>Amount: x"..amount.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 100)..Config.Measurement end
+		local text = price.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 1000)..Config.Measurement
+		if Config.Limit and not custom then text = price.."<br>Amount: x"..amount.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 1000)..Config.Measurement end
 		if products[i].requiredJob then
 			for i2 = 1, #products[i].requiredJob do
 				if QBCore.Functions.GetPlayerData().job.name == products[i].requiredJob[i2] then
@@ -117,7 +117,7 @@ RegisterNetEvent('jim-shops:CloseMenu', function() exports['qb-menu']:closeMenu(
 
 RegisterNetEvent('jim-shops:Charge', function(data)
 	if data.cost == "Free" then price = data.cost else price = "$"..data.cost end
-	if QBCore.Shared.Items[data.item].weight == 0 then weight = "" else weight = "Weight: "..(QBCore.Shared.Items[data.item].weight / 100)..Config.Measurement end
+	if QBCore.Shared.Items[data.item].weight == 0 then weight = "" else weight = "Weight: "..(QBCore.Shared.Items[data.item].weight / 1000)..Config.Measurement end
 	local settext = "- Confirm Purchase -<br><br>"
 	if Config.Limit and data.amount ~= nil then settext = settext.."Amount: "..data.amount.."<br>" end
 	settext = settext..weight.."<br> Cost per item: "..price.."<br><br>- Payment Type -"
