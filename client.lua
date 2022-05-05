@@ -60,7 +60,7 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 		QBCore.Functions.TriggerCallback('qb-inventory:server:GetStashItems', function(stash) p:resolve(stash) end, "["..data.k.."("..data.l..")]")
 		stashItems = Citizen.Await(p)
 	end
-	if data.shoptable["logo"] ~= nil then ShopMenu[#ShopMenu + 1] = { isDisabled = true, header = "<center><img src="..data.shoptable["logo"].." width=100%>", txt = "", isMenuHeader = true }
+	if data.shoptable["logo"] ~= nil then ShopMenu[#ShopMenu + 1] = { header = "<center><img src="..data.shoptable["logo"].." width=100%>", txt = "", isMenuHeader = true }
 	else ShopMenu[#ShopMenu + 1] = { header = data.shoptable["label"], txt = "", isMenuHeader = true }
 	end
 	
