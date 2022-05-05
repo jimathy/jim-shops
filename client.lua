@@ -36,6 +36,7 @@ CreateThread(function()
 					if not v["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
 					SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
 					FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
+					SetEntityNoCollisionEntity(ped["Shop - ['"..k.."("..l..")']"], PlayerPedId(), false) 
 					if Config.Debug then print("Ped Created for Shop - ['"..k.."("..l..")']") end
 				end
 				if Config.Debug then print("Shop - ['"..k.."("..l..")']") end
@@ -53,15 +54,19 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 	local ShopMenu = {}
 	local hasLicense, hasLicenseItem = nil
 	local stashItems = nil
+	local setheader = ""
 	if Config.Limit and not custom then
 		local p = promise.new() 
 		QBCore.Functions.TriggerCallback('qb-inventory:server:GetStashItems', function(stash) p:resolve(stash) end, "["..data.k.."("..data.l..")]")
 		stashItems = Citizen.Await(p)
 	end
-	if data.shoptable["logo"] ~= nil then ShopMenu[#ShopMenu + 1] = { header = "<img src="..data.shoptable["logo"].." width=200px>", txt = "", isMenuHeader = true }
+	if data.shoptable["logo"] ~= nil then ShopMenu[#ShopMenu + 1] = { isDisabled = true, header = "<center><img src="..data.shoptable["logo"].." width=100%>", txt = "", isMenuHeader = true }
 	else ShopMenu[#ShopMenu + 1] = { header = data.shoptable["label"], txt = "", isMenuHeader = true }
 	end
-	ShopMenu[#ShopMenu + 1] = { header = "", txt = "❌ Close", params = { event = "jim-shops:CloseMenu" } }
+	
+	if Config.JimMenu then ShopMenu[#ShopMenu + 1] = { icon = "fas fa-circle-xmark", header = "", txt = "Close", params = { event = "jim-shops:CloseMenu" } }
+	else ShopMenu[#ShopMenu + 1] = { header = "", txt = "❌ Close", params = { event = "jim-shops:CloseMenu" } } end
+	
 	if data.shoptable["type"] == "weapons" then
 		local p = promise.new()
 		local p2 = promise.new()
