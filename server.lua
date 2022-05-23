@@ -1,6 +1,19 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName() == resource then TriggerEvent("jim-shops:MakeStash") end end)
+AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName() == resource then TriggerEvent("jim-shops:MakeStash") end
+	for k, v in pairs(Config.Products) do
+		for i = 1, #v do
+			if not QBCore.Shared.Items[Config.Products[k][i].name] then
+				print("Config.Products['"..k.."'] can't find item: "..Config.Products[k][i].name)
+			end
+		end
+	end
+	for k, v in pairs(Config.Locations) do
+		if v["products"] == nil then
+			print("Config.Locations['"..k.."'] can't find its product table")
+		end
+	end
+end)
 
 local function GetStashItems(stashId)
 	local items = {}
