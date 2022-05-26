@@ -3,14 +3,12 @@ local QBCore = exports['qb-core']:GetCoreObject()
 function installCheck()	for k, v in pairs(Config.Products) do for i = 1, #v do	if not QBCore.Shared.Items[v[i].name] then print("Error: Cannot find '"..v[i].name.."' in your shared items") end end end end
 
 PlayerJob = {}
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded') AddEventHandler('QBCore:Client:OnPlayerLoaded', function() QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) end)
-RegisterNetEvent('QBCore:Client:OnJobUpdate') AddEventHandler('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end)
-RegisterNetEvent('QBCore:Client:SetDuty') AddEventHandler('QBCore:Client:SetDuty', function(duty) onDuty = duty end)
-AddEventHandler('onResourceStart', function(resource)
-	if GetCurrentResourceName() == resource then
-		installCheck()
-		QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
-	end 
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function() QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) end)
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end)
+RegisterNetEvent('QBCore:Client:SetDuty', function(duty) onDuty = duty end)
+AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName() ~= resource then return end
+	installCheck()
+	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
 end)
 
 ped = {}
@@ -34,6 +32,9 @@ CreateThread(function()
 					RequestModel(v["model"][i]) while not HasModelLoaded(v["model"][i]) do Wait(0) end
 					if ped["Shop - ['"..k.."("..l..")']"] == nil then ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, v["model"][i], b.x, b.y, b.z-1.0, b.a, false, false) end
 					if not v["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
+					local scenarios = { "WORLD_HUMAN_MUSCLE_FREE_WEIGHTS", "WORLD_HUMAN_GUARD_PATROL", "WORLD_HUMAN_JANITOR", "WORLD_HUMAN_MUSCLE_FLEX", "WORLD_HUMAN_MUSCLE_FREE_WEIGHTS", "PROP_HUMAN_STAND_IMPATIENT", }
+					scenario = math.random(1, #scenarios)
+					TaskStartScenarioInPlace(ped["Shop - ['"..k.."("..l..")']"], scenarios[scenario], -1, true)
 					SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
 					FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
 					SetEntityNoCollisionEntity(ped["Shop - ['"..k.."("..l..")']"], PlayerPedId(), false) 
@@ -57,10 +58,10 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 	local setheader = ""
 	if Config.Limit and not custom then
 		local p = promise.new() 
-		QBCore.Functions.TriggerCallback('qb-inventory:server:GetStashItems', function(stash) p:resolve(stash) end, "["..data.k.."("..data.l..")]")
+		QBCore.Functions.TriggerCallback('jim-shops:server:GetStashItems', function(stash) p:resolve(stash) end, "["..data.k.."("..data.l..")]")
 		stashItems = Citizen.Await(p)
 	end
-	if data.shoptable["logo"] ~= nil then ShopMenu[#ShopMenu + 1] = { header = "<center><img src="..data.shoptable["logo"].." width=100%>", txt = "", isMenuHeader = true }
+	if data.shoptable["logo"] ~= nil then ShopMenu[#ShopMenu + 1] = { isDisabled = true, header = "<center><img src="..data.shoptable["logo"].." width=100%>", txt = "", isMenuHeader = true }
 	else ShopMenu[#ShopMenu + 1] = { header = data.shoptable["label"], txt = "", isMenuHeader = true }
 	end
 	
@@ -151,13 +152,11 @@ RegisterNetEvent('jim-shops:Charge', function(data)
 	end
 end)
 
-AddEventHandler('onResourceStop', function(resource) 
-	if resource == GetCurrentResourceName() then
-		for k, v in pairs(Config.Locations) do
-			for l, b in pairs(v["coords"]) do
-				exports['qb-target']:RemoveZone("Shop - ['"..k.."("..l..")']")
-				if Config.Peds then	DeletePed(ped["Shop - ['"..k.."("..l..")']"]) end
-			end 
+AddEventHandler('onResourceStop', function(resource) if resource ~= GetCurrentResourceName() then return end
+	for k, v in pairs(Config.Locations) do
+		for l, b in pairs(v["coords"]) do
+			exports['qb-target']:RemoveZone("Shop - ['"..k.."("..l..")']")
+			if Config.Peds then	DeletePed(ped["Shop - ['"..k.."("..l..")']"]) end
 		end 
-	end
+	end 
 end)

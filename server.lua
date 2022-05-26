@@ -84,7 +84,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 			for i = 1, #stashItems do
 				if stashItems[i].name == item then
 					if (stashItems[i].amount - amount) <= 0 then stashItems[i].amount = 0 else stashItems[i].amount = stashItems[i].amount - amount end 
-					TriggerEvent('qb-inventory:server:SaveStashItems', "["..shop.."("..num..")]", stashItems)
+					TriggerEvent('jim-shops:server:SaveStashItems', "["..shop.."("..num..")]", stashItems)
 					if Config.Debug then print("Removing "..QBCore.Shared.Items[item].label.." x"..amount.." from Shop's Stash: '["..shop.."("..num..")]") end
 				end
 			end
@@ -128,7 +128,7 @@ RegisterNetEvent("jim-shops:MakeStash", function()
 					slot = i,
 				}
 			end
-		if Config.Limit then TriggerEvent('qb-inventory:server:SaveStashItems', "["..k.."("..l..")]", stashTable)
+		if Config.Limit then TriggerEvent('jim-shops:server:SaveStashItems', "["..k.."("..l..")]", stashTable)
 		elseif Config.Limit == false then stashname = "["..k.."("..l..")]" MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', {stashname}) end 
 		end
 	end
@@ -167,7 +167,7 @@ RegisterNetEvent("qb-shops:server:RestockShopItems", function(storeinfo)
 			slot = i,
 		}
 	end
-	if Config.Limit then TriggerEvent('qb-inventory:server:SaveStashItems', "["..k.."("..l..")]", stashTable) end
+	if Config.Limit then TriggerEvent('jim-shops:server:SaveStashItems', "["..k.."("..l..")]", stashTable) end
 end)
 
 QBCore.Functions.CreateCallback('jim-shops:server:getLicenseStatus', function(source, cb)
@@ -177,3 +177,6 @@ QBCore.Functions.CreateCallback('jim-shops:server:getLicenseStatus', function(so
     local licenseItem = Player.Functions.GetItemByName("weaponlicense")
     cb(licenseTable.weapon, licenseItem)
 end)
+
+QBCore.Functions.CreateCallback('jim-shops:server:GetStashItems', function(source, cb, stashId) cb(GetStashItems(stashId)) end)
+RegisterNetEvent('jim-shops:server:SaveStashItems', function(stashId, items) MySQL.Async.insert('INSERT INTO stashitems (stash, items) VALUES (:stash, :items) ON DUPLICATE KEY UPDATE items = :items', { ['stash'] = stashId, ['items'] = json.encode(items) }) end)
