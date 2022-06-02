@@ -145,6 +145,7 @@ Config.Locations = {
 			vector4(2556.8, 381.27, 108.62, 359.15),
 			vector4(373.08, 326.75, 103.57, 253.14),
 			vector4(161.2, 6641.74, 31.7, 221.02),
+			vector4(812.86, -782.01, 26.17, 270.01),
 		},
         ["products"] = Config.Products["normal"],
         ["blipsprite"] = 628,
