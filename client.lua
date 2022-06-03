@@ -94,13 +94,13 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 			for i2 = 1, #products[i].requiredJob do
 				if QBCore.Functions.GetPlayerData().job.name == products[i].requiredJob[i2] then
 					ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
-						params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount } } }
+						params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount, custom = custom } } }
 				end
 			end
 		elseif products[i].requiresLicense then
 			if hasLicense and hasLicenseItem then
 			ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
-					params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount } } }
+					params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount, custom = custom } } }
 			end
 		else
 			ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
@@ -111,7 +111,8 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 									shoptable = data.shoptable,
 									k = data.k,
 									l = data.l, 
-									amount = amount 
+									amount = amount,
+									custom = custom,
 								} } }
 		end
 	text, setheader = nil
@@ -141,7 +142,7 @@ RegisterNetEvent('jim-shops:Charge', function(data)
 	local dialog = exports['qb-input']:ShowInput({ header = header, submitText = "Pay", inputs = newinputs })
 	if dialog then
 		if not dialog.amount then return end
-		if Config.Limit then if tonumber(dialog.amount) > tonumber(data.amount) then TriggerEvent("QBCore:Notify", "Incorrect amount", "error") TriggerEvent("jim-shops:Charge", data) return end end
+		if Config.Limit and data.custom == nil then	if tonumber(dialog.amount) > tonumber(data.amount) then TriggerEvent("QBCore:Notify", "Incorrect amount", "error") TriggerEvent("jim-shops:Charge", data) return end end
 		if tonumber(dialog.amount) <= 0 then TriggerEvent("QBCore:Notify", "Incorrect amount", "error") TriggerEvent("jim-shops:Charge", data) return end
 		if data.cost == "Free" then data.cost = 0 end
 		if data.amount == nil then nostash = true end
