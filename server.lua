@@ -54,31 +54,46 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 	local src = source
     local Player = QBCore.Functions.GetPlayer(src)
 	--Inventory space checks
+	local give = true
 	local totalWeight = QBCore.Player.GetTotalWeight(Player.PlayerData.items)
     local maxWeight = QBCore.Config.Player.MaxWeight
 	local slots = 0
 	for k, v in pairs(Player.PlayerData.items) do slots = slots +1 end
 	slots = Config.MaxSlots - slots
 	local balance = Player.Functions.GetMoney(tostring(billtype))
+	-- If too heavy:
 	if (totalWeight + (QBCore.Shared.Items[item].weight * amount)) > maxWeight then 
-		TriggerClientEvent("QBCore:Notify", src, "Not enough space in inventory", "error") 
+		TriggerClientEvent("QBCore:Notify", src, "Not enough space in inventory", "error") give = false
+	-- If unique and it would poof away:
 	elseif QBCore.Shared.Items[item].unique and (tonumber(slots) < tonumber(amount)) then
-		TriggerClientEvent("QBCore:Notify", src, "Not enough slots in inventory", "error")
+		TriggerClientEvent("QBCore:Notify", src, "Not enough slots in inventory", "error") give = false
 	else
-		--Money checks
-		if balance >= (tonumber(price) * tonumber(amount)) then 
-			Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
-		else 
-			TriggerClientEvent("QBCore:Notify", src, "Not enough money", "error") return
-		end
-		if QBCore.Shared.Items[item].type == "weapon" then
-			if QBCore.Shared.Items[item].unique then for i = 1, amount do Player.Functions.AddItem(item, 1) Wait(10) end
-			else Player.Functions.AddItem(item, tonumber(amount)) end
+		-- If its a weapon, do this:
+		if QBCore.Shared.Items[item].type == "weapon" then 
+			if QBCore.Shared.Items[item].unique then 
+				for i = 1, amount do
+					if Player.Functions.AddItem(item, 1) then
+					else TriggerClientEvent('QBCore:Notify', src, "Can't give item!", "error") give = false break end
+					Wait(10)
+				end
+			end
 		else
-			if QBCore.Shared.Items[item].unique then for i = 1, amount do Player.Functions.AddItem(item, 1, nil, info) Wait(10) end
-			else Player.Functions.AddItem(item, tonumber(amount), nil, info) end
+			-- If item is unique:
+			if QBCore.Shared.Items[item].unique then
+				for i = 1, amount do
+					if Player.Functions.AddItem(item, 1, nil, info) then
+					else TriggerClientEvent('QBCore:Notify', src, "Can't give item!", "error") give = false break end
+					Wait(10)
+				end
+			else
+				if Player.Functions.AddItem(item, amount, false, info) then
+					TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount)
+				else
+					TriggerClientEvent('QBCore:Notify', source,  "Can't give item!", "error") give = false
+				end
+			end
 		end
-		TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount)
+
 		if Config.Limit and not nostash then
 			stashItems = GetStashItems("["..shop.."("..num..")]")
 			for i = 1, #stashItems do
@@ -89,8 +104,15 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 				end
 			end
 		end
+		--Money checks
+		if give then
+			if balance >= (tonumber(price) * tonumber(amount)) then 
+				Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
+			else 
+				TriggerClientEvent("QBCore:Notify", src, "Not enough money", "error") return
+			end
+		end
 	end
-	
 	--Make data to send back to main shop menu
 	local data = {}
 	data.shoptable = shoptable
