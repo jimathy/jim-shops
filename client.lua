@@ -28,17 +28,19 @@ CreateThread(function()
 					EndTextCommandSetBlipName(StoreBlip)
 				end
 				if Config.Peds then
-					local i = math.random(1, #v["model"])
-					RequestModel(v["model"][i]) while not HasModelLoaded(v["model"][i]) do Wait(0) end
-					if ped["Shop - ['"..k.."("..l..")']"] == nil then ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, v["model"][i], b.x, b.y, b.z-1.0, b.a, false, false) end
-					if not v["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
-					local scenarios = { "WORLD_HUMAN_MUSCLE_FREE_WEIGHTS", "WORLD_HUMAN_GUARD_PATROL", "WORLD_HUMAN_JANITOR", "WORLD_HUMAN_MUSCLE_FLEX", "WORLD_HUMAN_MUSCLE_FREE_WEIGHTS", "PROP_HUMAN_STAND_IMPATIENT", }
-					scenario = math.random(1, #scenarios)
-					TaskStartScenarioInPlace(ped["Shop - ['"..k.."("..l..")']"], scenarios[scenario], -1, true)
-					SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
-					FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
-					SetEntityNoCollisionEntity(ped["Shop - ['"..k.."("..l..")']"], PlayerPedId(), false) 
-					if Config.Debug then print("Ped Created for Shop - ['"..k.."("..l..")']") end
+					if v["model"] then
+						local i = math.random(1, #v["model"])
+						RequestModel(v["model"][i]) while not HasModelLoaded(v["model"][i]) do Wait(0) end
+						if ped["Shop - ['"..k.."("..l..")']"] == nil then ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, v["model"][i], b.x, b.y, b.z-1.0, b.a, false, false) end
+						if not v["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
+						local scenarios = { "WORLD_HUMAN_MUSCLE_FREE_WEIGHTS", "WORLD_HUMAN_GUARD_PATROL", "WORLD_HUMAN_JANITOR", "WORLD_HUMAN_MUSCLE_FLEX", "WORLD_HUMAN_MUSCLE_FREE_WEIGHTS", "PROP_HUMAN_STAND_IMPATIENT", }
+						scenario = math.random(1, #scenarios)
+						TaskStartScenarioInPlace(ped["Shop - ['"..k.."("..l..")']"], scenarios[scenario], -1, true)
+						SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
+						FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
+						SetEntityNoCollisionEntity(ped["Shop - ['"..k.."("..l..")']"], PlayerPedId(), false) 
+						if Config.Debug then print("Ped Created for Shop - ['"..k.."("..l..")']") end
+					end
 				end
 				if Config.Debug then print("Shop - ['"..k.."("..l..")']") end
 				exports['qb-target']:AddCircleZone("Shop - ['"..k.."("..l..")']", vector3(b.x, b.y, b.z), 2.0, { name="Shop - ['"..k.."("..l..")']", debugPoly=Config.Debug, useZ=true, }, 
