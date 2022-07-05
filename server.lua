@@ -19,6 +19,7 @@ local function GetStashItems(stashId)
 	local items = {}
 	local result = MySQL.Sync.fetchScalar('SELECT items FROM stashitems WHERE stash = ?', {stashId})
 	if result then
+		
 		local stashItems = json.decode(result)
 		if stashItems then
 			for k, item in pairs(stashItems) do
@@ -79,6 +80,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 					if tonumber(i) == tonumber(amount) then -- when its on its last loop do this
 						Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
 						TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount)
+						TriggerClientEvent("jim-shops:SellAnim", src, item)
 					end
 				else 
 					TriggerClientEvent('QBCore:Notify', src, "Can't give item!", "error") break -- stop the item giving loop
@@ -90,6 +92,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 			if Player.Functions.AddItem(item, amount) then
 				Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
 				TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount)
+				TriggerClientEvent("jim-shops:SellAnim", src, item)
 			else
 				TriggerClientEvent('QBCore:Notify', source,  "Can't give item!", "error")
 			end
@@ -97,6 +100,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 		--Remove item from stash
 		if Config.Limit and not nostash then
 			stashItems = GetStashItems("["..shop.."("..num..")]")
+			if Config.Debug then print("Retrieving stash info: ["..shop.."("..num..")]") end
 			for i = 1, #stashItems do
 				if stashItems[i].name == item then
 					if (stashItems[i].amount - amount) <= 0 then stashItems[i].amount = 0 else stashItems[i].amount = stashItems[i].amount - amount end 
