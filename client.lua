@@ -11,11 +11,12 @@ RegisterNetEvent('QBCore:Client:OnGangUpdate', function(GangInfo) PlayerGang = G
 AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName() ~= resource then return end QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) end)
 
 --Loading/Unloading Asset Functions
-function loadAnimDict(dict) if Config.Debug then print("Debug: Loading Anim Dictionary: '"..dict.."'") end while not HasAnimDictLoaded(dict) do RequestAnimDict(dict) Wait(5) end end
-function unloadAnimDict(dict) if Config.Debug then print("Debug: Removing Anim Dictionary: '"..dict.."'") end RemoveAnimDict(dict) end
-function loadModel(model) if Config.Debug then print("Debug: Loading Model: '"..model.."'") end RequestModel(model) while not HasModelLoaded(model) do Wait(0) end end
-function unloadModel(model) if Config.Debug then print("Debug: Removing Model: '"..model.."'") end SetModelAsNoLongerNeeded(model) end
+function loadModel(model) if not HasModelLoaded(model) then if Config.Debug then print("^5Debug^7: ^2Loading Model^7: '^6"..model.."^7'") end RequestModel(model) while not HasModelLoaded(model) do Wait(0) end end end
+function unloadModel(model) if Config.Debug then print("^5Debug^7: ^2Removing Model^7: '^6"..model.."^7'") end SetModelAsNoLongerNeeded(model) end
+function loadAnimDict(dict)	if Config.Debug then print("^5Debug^7: ^2Loading Anim Dictionary^7: '^6"..dict.."^7'") end while not HasAnimDictLoaded(dict) do RequestAnimDict(dict) Wait(5) end end
+function unloadAnimDict(dict) if Config.Debug then print("^5Debug^7: ^2Removing Anim Dictionary^7: '^6"..dict.."^7'") end RemoveAnimDict(dict) end
 function destroyProp(entity) if Config.Debug then print("Debug: Destroying Prop: '"..entity.."'") end SetEntityAsMissionEntity(entity) Wait(5) DetachEntity(entity, true, true) Wait(5) DeleteObject(entity) end
+
 CreateThread(function()
 	for k, v in pairs(Config.Locations) do
 		if k == "blackmarket" and not Config.BlackMarket then else
@@ -41,7 +42,7 @@ CreateThread(function()
 						SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
 						FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
 						SetEntityNoCollisionEntity(ped["Shop - ['"..k.."("..l..")']"], PlayerPedId(), false)
-						if Config.Debug then print("Ped Created for Shop - ['"..k.."("..l..")']") end
+						if Config.Debug then print("^5Debug^7: ^6Ped ^2Created for Shop ^7- '^6"..k.."^7(^6"..l.."^7)'") end
 					end
 				end
 				Targets["Shop - ['"..k.."("..l..")']"] =
@@ -81,9 +82,9 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 		local lock = false
 		if Config.Limit and not custom then if stashItems[i].amount == 0 then amount = 0 lock = true else amount = tonumber(stashItems[i].amount) end end
 		if products[i].price == 0 then price = "Free" else price = "Cost: $"..products[i].price end
-		if Config.Debug then print("ShopMenu - Searching for item '"..products[i].name.."'")
+		if Config.Debug then print("^5Debug^7: ^3ShopMenu ^7- ^2Searching for item ^7'^6"..products[i].name.."^7'")
 			if not QBCore.Shared.Items[products[i].name:lower()] then
-				print ("RestockShopItems - Can't find item '"..products[i].name.."'")
+				prin ("^5Debug^7: ^3ShopItems ^7- ^1Can't ^2find item ^7'^6"..products[i].name.."^7'")
 			end
 		end
 

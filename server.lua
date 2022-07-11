@@ -4,13 +4,13 @@ AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName(
 	for k, v in pairs(Config.Products) do
 		for i = 1, #v do
 			if not QBCore.Shared.Items[Config.Products[k][i].name] then
-				print("Config.Products['"..k.."'] can't find item: "..Config.Products[k][i].name)
+				print("^5Debug^7: ^3Config^7.^3Products^7['^6"..k.."^7'] ^2can't find item^7: ^6"..Config.Products[k][i].name.."^7")
 			end
 		end
 	end
 	for k, v in pairs(Config.Locations) do
 		if v["products"] == nil then
-			print("Config.Locations['"..k.."'] can't find its product table")
+			print("^5Debug^7: ^3Config^7.^3Locations^7['^6"..k.."^7']^2 can't find its product table^7")
 		end
 	end
 end)
@@ -19,7 +19,6 @@ local function GetStashItems(stashId)
 	local items = {}
 	local result = MySQL.Sync.fetchScalar('SELECT items FROM stashitems WHERE stash = ?', {stashId})
 	if result then
-		
 		local stashItems = json.decode(result)
 		if stashItems then
 			for k, item in pairs(stashItems) do
@@ -58,11 +57,11 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 	local totalWeight = QBCore.Player.GetTotalWeight(Player.PlayerData.items)
     local maxWeight = QBCore.Config.Player.MaxWeight
 	local slots = 0
-	for k, v in pairs(Player.PlayerData.items) do slots = slots +1 end
+	for _ in pairs(Player.PlayerData.items) do slots = slots +1 end
 	slots = Config.MaxSlots - slots
 	local balance = Player.Functions.GetMoney(tostring(billtype))
 	-- If too heavy:
-	if (totalWeight + (QBCore.Shared.Items[item].weight * amount)) > maxWeight then 
+	if (totalWeight + (QBCore.Shared.Items[item].weight * amount)) > maxWeight then
 		TriggerClientEvent("QBCore:Notify", src, "Not enough space in inventory", "error")
 	-- If unique and it would poof away:
 	elseif QBCore.Shared.Items[item].unique and (tonumber(slots) < tonumber(amount)) then
@@ -72,7 +71,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 		if balance <= (tonumber(price) * tonumber(amount)) then -- Check for money first if not enough, stop here
 			TriggerClientEvent("QBCore:Notify", src, "Not enough money", "error") return
 		end
-		
+
 		-- If its a weapon or a unique item, do this:
 		if QBCore.Shared.Items[item].type == "weapon" or QBCore.Shared.Items[item].unique then
 			for i = 1, amount do -- Make a loop to put items into different slots rather than full amount in 1 slot
@@ -82,7 +81,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 						TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount)
 						TriggerClientEvent("jim-shops:SellAnim", src, item)
 					end
-				else 
+				else
 					TriggerClientEvent('QBCore:Notify', src, "Can't give item!", "error") break -- stop the item giving loop
 				end
 				Wait(5)
@@ -100,12 +99,12 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 		--Remove item from stash
 		if Config.Limit and not nostash then
 			stashItems = GetStashItems("["..shop.."("..num..")]")
-			if Config.Debug then print("Retrieving stash info: ["..shop.."("..num..")]") end
+			if Config.Debug then print("^5Debug^7: ^2Retrieving stash info^7: [^6"..shop.."^7(^6"..num.."^7)]") end
 			for i = 1, #stashItems do
 				if stashItems[i].name == item then
-					if (stashItems[i].amount - amount) <= 0 then stashItems[i].amount = 0 else stashItems[i].amount = stashItems[i].amount - amount end 
+					if (stashItems[i].amount - amount) <= 0 then stashItems[i].amount = 0 else stashItems[i].amount = stashItems[i].amount - amount end
 					TriggerEvent('jim-shops:server:SaveStashItems', "["..shop.."("..num..")]", stashItems)
-					if Config.Debug then print("Removing "..QBCore.Shared.Items[item].label.." x"..amount.." from Shop's Stash: '["..shop.."("..num..")]") end
+					if Config.Debug then print("^5Debug^7: ^2Removing ^7'^6"..QBCore.Shared.Items[item].label.." ^2x^6"..amount.." ^2from Shop's Stash^7: '[^6"..shop.."^7(^6"..num.."^7)]") end
 				end
 			end
 		end
@@ -116,7 +115,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 	custom = true
 	if Config.Limit and not nostash then
 		custom = nil
-		data.k = shop 
+		data.k = shop
 		data.l = num
 	end
 	TriggerClientEvent('jim-shops:ShopMenu', src, data, custom)
@@ -127,9 +126,9 @@ RegisterNetEvent("jim-shops:MakeStash", function()
 		local stashTable = {}
 		for l, b in pairs(v["coords"]) do
 			for i = 1, #v["products"] do
-				if Config.Debug then print("MakeStash - Searching for item '"..v["products"][i].name.."'")
-					if not QBCore.Shared.Items[v["products"][i].name:lower()] then 
-						print ("MakeStash - Can't find item '"..v["products"][i].name.."'")
+				if Config.Debug then --print("^5Debug^7: ^3MakeStash ^7- ^2Searching for item ^7'^6"..v["products"][i].name.."^7'")
+					if not QBCore.Shared.Items[v["products"][i].name:lower()] then
+						print("^5Debug^7: ^3MakeStash ^7- ^2Can't find item ^7'^6"..v["products"][i].name.."^7'")
 					end
 				end
 				local itemInfo = QBCore.Shared.Items[v["products"][i].name:lower()]
@@ -148,7 +147,7 @@ RegisterNetEvent("jim-shops:MakeStash", function()
 				}
 			end
 		if Config.Limit then TriggerEvent('jim-shops:server:SaveStashItems', "["..k.."("..l..")]", stashTable)
-		elseif Config.Limit == false then stashname = "["..k.."("..l..")]" MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', {stashname}) end 
+		elseif Config.Limit == false then stashname = "["..k.."("..l..")]" MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', {stashname}) end
 		end
 	end
 end)
@@ -162,13 +161,13 @@ RegisterNetEvent("qb-shops:server:RestockShopItems", function(storeinfo)
 	elseif string.find(storename, "robsliquor") then k = "robsliquor"
 	elseif string.find(storename, "ltdgasoline") then k = "ltdgasoline"
 	end
-	l = storename:gsub(k,"") 
+	l = storename:gsub(k,"")
 	if l == "" then l = 1 end
 	local stashTable = {}
 	for i = 1, #Config.Locations[k]["products"] do
-		if Config.Debug then print("RestockShopItems - Searching for item '"..v["products"][i].name.."'")
-			if not QBCore.Shared.Items[v["products"][i].name:lower()] then 
-				print ("RestockShopItems - Can't find item '"..v["products"][i].name.."'")
+		if Config.Debug then --print("^5Debug^7: ^3RestockShopItems ^7- ^3Searching for item ^7'^6"..v["products"][i].name.."^7'")
+			if not QBCore.Shared.Items[v["products"][i].name:lower()] then
+				print("^5Debug^7: ^3RestockShopItems ^7- ^1Can't ^2find item ^7'^6"..v["products"][i].name.."^7'")
 			end
 		end
 		local itemInfo = QBCore.Shared.Items[Config.Locations[k]["products"][i].name:lower()]
