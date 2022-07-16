@@ -1,6 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName() == resource then TriggerEvent("jim-shops:MakeStash") end
+AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName() ~= resource then return end
+	TriggerEvent("jim-shops:MakeStash")
 	for k, v in pairs(Config.Products) do
 		for i = 1, #v do
 			if not QBCore.Shared.Items[Config.Products[k][i].name] then
