@@ -55,7 +55,6 @@ CreateThread(function()
 	end
 end)
 
-
 RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 	local products = data.shoptable.products
 	local ShopMenu = {}
@@ -93,8 +92,8 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 		local text = price.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 1000)..Config.Measurement
 		if Config.Limit and not custom then text = price.."<br>Amount: x"..amount.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 1000)..Config.Measurement end
 		if products[i].requiredJob then
-			for i2 = 1, #products[i].requiredJob do
-				if QBCore.Functions.GetPlayerData().job.name == products[i].requiredJob[i2] then
+			for k, v in pairs(products[i].requiredJob) do
+				if QBCore.Functions.GetPlayerData().job.name == k and QBCore.Functions.GetPlayerData().job.grade.level >= v then
 					ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
 						params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount, custom = custom } } }
 				end

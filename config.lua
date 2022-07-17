@@ -17,7 +17,6 @@ Config = {
 	GabzAmmu = false, -- Enable if using gabz Ammunation stores
 
 	Scenarios = { -- List of scenarios the peds do, This is called "fun", much better than standing staring at the void.
-		"WORLD_HUMAN_MUSCLE_FREE_WEIGHTS",
 		"WORLD_HUMAN_GUARD_PATROL",
 		"WORLD_HUMAN_JANITOR",
 		"WORLD_HUMAN_MUSCLE_FLEX",
@@ -42,14 +41,14 @@ Config = {
 			{ name = "vodka", price = 70000, amount = 50, info = {} },
 			{ name = "bandage", price = 100, amount = 50, info = {} },
 			{ name = "lighter", price = 2, amount = 50, info = {} },
-			{ name = "rolling_paper", price = 2, amount = 5000, info = {} },
+			{ name = "rolling_paper", price = 2, amount = 5000, info = {}, },
 		},
 		["hardware"] = {
 			{ name = "lockpick", price = 200, amount = 50, info = {} },
 			{ name = "weapon_wrench", price = 250, amount = 250, info = {} },
 			{ name = "weapon_hammer", price = 250, amount = 250, info = {} },
 			{ name = "weapon_bat", price = 500, amount = 50, info = {}, requiredGang = { "lostmc" } },  -- Gang only options in stores
-			{ name = "repairkit", price = 250, amount = 50, info = {}, requiredJob = { "mechanic", "police" } },
+			{ name = "repairkit", price = 250, amount = 50, info = {}, requiredJob = { ["mechanic"] = 0, ["police"] = 0 } },
 			{ name = "screwdriverset", price = 350, amount = 50, info = {} },
 			{ name = "phone", price = 850, amount = 50, info = {} },
 			{ name = "radio", price = 250, amount = 50, info = {} },
@@ -60,7 +59,7 @@ Config = {
 			{ name = "firework4", price = 50, amount = 50, info = {} },
 			{ name = "fitbit", price = 400, amount = 150, info = {} },
 			{ name = "cleaningkit", price = 150, amount = 150, info = {} },
-			{ name = "advancedrepairkit", price = 500, amount = 50, info = {}, requiredJob = { "mechanic" } },
+			{ name = "advancedrepairkit", price = 500, amount = 50, info = {}, requiredJob = { ["mechanic"] = 0 } },
 		},
 		["weedshop"] = {
 			{ name = "joint", price = 10, amount = 1000, info = {} },
@@ -81,7 +80,7 @@ Config = {
 		["weapons"] = {
 			{ name = "weapon_knife", price = 250, amount = 250, info = nil },
 			{ name = "weapon_bat", price = 250, amount = 250, info = {} },
-			{ name = "weapon_hatchet",price = 250, amount = 250, info = {}, requiredJob = { "mechanic", "police" } },
+			{ name = "weapon_hatchet",price = 250, amount = 250, info = {}, requiredJob = { ["mechanic"] = 0, ["police"] = 0 } },
 			{ name = "weapon_pistol", price = 2500, amount = 5, info = nil, requiresLicense = true },
 			{ name = "weapon_snspistol", price = 1500, amount = 5, info = nil, requiresLicense = true },
 			{ name = "weapon_vintagepistol", price = 4000, amount = 5, info = nil, requiresLicense = true },
@@ -186,7 +185,7 @@ Config.Locations = {
     -- Hardware Store Locations
     ["hardware"] = {
         ["label"] = "Hardware Store",
- 		["type"] = "items",
+		["type"] = "items",
 		["model"] = {
 			`s_m_m_autoshop_02`,
 			`S_F_M_Autoshop_01`,
@@ -274,7 +273,7 @@ Config.Locations = {
 		["products"] = Config.Products["weedshop"],
 		["blipsprite"] = 496,
 		["blipcolour"] = 2,
-   },
+	},
 
     -- Bean Coffee Locations
     ["beancoffee"] = {
@@ -304,7 +303,7 @@ Config.Locations = {
 		["products"] = Config.Products["gearshop"],
 		["blipsprite"] = 52,
 		["blipcolour"] = 3,
-   },
+	},
 
     -- Leisure Shop Locations
     ["leisureshop"] = {
@@ -360,28 +359,6 @@ Config.Locations = {
 		["blipsprite"] = 619,
 		["blipcolour"] = 7,
 	},
-	["blackmarket"] = {
-		["label"] = "Black Market",
-		["type"] = "items",
-		["model"] = {
-			`mp_f_weed_01`,
-			`MP_M_Weed_01`,
-			`A_M_Y_MethHead_01`,
-			`A_F_Y_RurMeth_01`,
-			`A_M_M_RurMeth_01`,
-			`MP_F_Meth_01`,
-			`MP_M_Meth_01`,
-		},
-		["coords"] = {
-			vector4(776.24, 4184.08, 41.8, 92.12),
-			vector4(2482.51, 3722.28, 43.92, 39.98),
-			vector4(462.67, -1789.16, 28.59, 317.53),
-			vector4(-115.15, 6369.07, 31.52, 232.08),
-			vector4(752.52, -3198.33, 6.07, 301.72)
-		},
-		["products"] = Config.Products["blackmarket"],
-		["hideblip"] = true,
-	},
 	["lostmc"] = { -- More of a test/example - Gang accessible stores
 		["label"] = "Lost MC",
 		["type"] = "items",
@@ -430,6 +407,30 @@ if Config.GabzAmmu then
 		vector4(-1112.4, 2697.08, 18.55, 152.96),
 		vector4(841.16, -1028.63, 28.19, 294.2),
 		vector4(-1310.71, -394.33, 36.7, 340.51),
+	}
+end
+if Config.BlackMarket then
+	Config.Locations["blackmarket"] = {
+		["label"] = "Black Market",
+		["type"] = "items",
+		["model"] = {
+			`mp_f_weed_01`,
+			`MP_M_Weed_01`,
+			`A_M_Y_MethHead_01`,
+			`A_F_Y_RurMeth_01`,
+			`A_M_M_RurMeth_01`,
+			`MP_F_Meth_01`,
+			`MP_M_Meth_01`,
+		},
+		["coords"] = {
+			vector4(776.24, 4184.08, 41.8, 92.12),
+			vector4(2482.51, 3722.28, 43.92, 39.98),
+			vector4(462.67, -1789.16, 28.59, 317.53),
+			vector4(-115.15, 6369.07, 31.52, 232.08),
+			vector4(752.52, -3198.33, 6.07, 301.72)
+		},
+		["products"] = Config.Products["blackmarket"],
+		["hideblip"] = true,
 	}
 end
 Config.ItemModels = {
