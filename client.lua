@@ -19,38 +19,40 @@ function destroyProp(entity) if Config.Debug then print("Debug: Destroying Prop:
 
 CreateThread(function()
 	for k, v in pairs(Config.Locations) do
-		if k == "blackmarket" and not Config.BlackMarket then else
-			for l, b in pairs(v["coords"]) do
-				if not v["hideblip"] then
-					StoreBlip = AddBlipForCoord(b)
-					SetBlipSprite(StoreBlip, v["blipsprite"])
-					SetBlipScale(StoreBlip, 0.7)
-					SetBlipDisplay(StoreBlip, 6)
-					SetBlipColour(StoreBlip, v["blipcolour"])
-					SetBlipAsShortRange(StoreBlip, true)
-					BeginTextCommandSetBlipName("STRING")
-					AddTextComponentSubstringPlayerName(v["label"])
-					EndTextCommandSetBlipName(StoreBlip)
-				end
-				if Config.Peds then
-					if v["model"] then
-						local i = math.random(1, #v["model"])
-						loadModel(v["model"][i])
-						if ped["Shop - ['"..k.."("..l..")']"] == nil then ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, v["model"][i], b.x, b.y, b.z-1.0, b.a, false, false) end
-						if not v["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
-						TaskStartScenarioInPlace(ped["Shop - ['"..k.."("..l..")']"], Config.Scenarios[math.random(1, #Config.Scenarios)], -1, true)
-						SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
-						FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
-						SetEntityNoCollisionEntity(ped["Shop - ['"..k.."("..l..")']"], PlayerPedId(), false)
-						if Config.Debug then print("^5Debug^7: ^6Ped ^2Created for Shop ^7- '^6"..k.."^7(^6"..l.."^7)'") end
-					end
-				end
-				Targets["Shop - ['"..k.."("..l..")']"] =
-				exports['qb-target']:AddCircleZone("Shop - ['"..k.."("..l..")']", vector3(b.x, b.y, b.z), 2.0, { name="Shop - ['"..k.."("..l..")']", debugPoly=Config.Debug, useZ=true, },
-				{ options = { { event = "jim-shops:ShopMenu", icon = "fas fa-certificate", label = "Browse Shop", job = v["job"], gang = v["gang"],
-					shoptable = v, name = v["label"], k = k, l = l, }, },
-				distance = 2.0 })
+		for l, b in pairs(v["coords"]) do
+			if not v["hideblip"] then
+				StoreBlip = AddBlipForCoord(b)
+				SetBlipSprite(StoreBlip, v["blipsprite"])
+				SetBlipScale(StoreBlip, 0.7)
+				SetBlipDisplay(StoreBlip, 6)
+				SetBlipColour(StoreBlip, v["blipcolour"])
+				SetBlipAsShortRange(StoreBlip, true)
+				BeginTextCommandSetBlipName("STRING")
+				AddTextComponentSubstringPlayerName(v["label"])
+				EndTextCommandSetBlipName(StoreBlip)
 			end
+			if Config.Peds then
+				if v["model"] then
+					local i = math.random(1, #v["model"])
+					loadModel(v["model"][i])
+					if ped["Shop - ['"..k.."("..l..")']"] == nil then ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, v["model"][i], b.x, b.y, b.z-1.0, b.a, false, false) end
+					if not v["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
+					TaskStartScenarioInPlace(ped["Shop - ['"..k.."("..l..")']"], Config.Scenarios[math.random(1, #Config.Scenarios)], -1, true)
+					SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
+					FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
+					SetEntityNoCollisionEntity(ped["Shop - ['"..k.."("..l..")']"], PlayerPedId(), false)
+					if Config.Debug then print("^5Debug^7: ^6Ped ^2Created for Shop ^7- '^6"..k.."^7(^6"..l.."^7)'") end
+				end
+			end
+			local options = { { event = "jim-shops:ShopMenu", icon = "fas fa-certificate", label = (v["targetLabel"] or "Browse Shop"), job = v["job"], gang = v["gang"],
+				shoptable = v, name = v["label"], k = k, l = l, }, }
+			if k == "casino" then
+				options[#options+1] = { type = "server", event = "jim-shops:server:sellChips", icon = "fab fa-galactic-republic", label = "Trade Chips ($"..Config.SellCasinoChips.pricePer.." per chip)", }
+			end
+			Targets["Shop - ['"..k.."("..l..")']"] =
+			exports['qb-target']:AddCircleZone("Shop - ['"..k.."("..l..")']", vector3(b.x, b.y, b.z), 2.0, { name="Shop - ['"..k.."("..l..")']", debugPoly=Config.Debug, useZ=true, },
+			{ options = options,
+			distance = 2.0 })
 		end
 	end
 end)
@@ -131,7 +133,7 @@ end)
 --Selling animations are simply a pass item to seller animation
 RegisterNetEvent('jim-shops:SellAnim', function(item)
 	for _, v in pairs (ped) do
-      	if #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(v)) < 3 then
+		if #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(v)) < 2 then
 			ppRot = GetEntityRotation(v)
 			ppheading = GetEntityHeading(v)
 			ppcoords = GetEntityCoords(v)
@@ -157,6 +159,7 @@ RegisterNetEvent('jim-shops:SellAnim', function(item)
 			unloadAnimDict("amb@prop_human_atm@male@enter")
 			destroyProp(prop) unloadModel(model)
 			prop = nil
+			break
 		end
 	end
 end)

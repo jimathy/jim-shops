@@ -197,5 +197,20 @@ QBCore.Functions.CreateCallback('jim-shops:server:getLicenseStatus', function(so
     cb(licenseTable.weapon, licenseItem)
 end)
 
+RegisterNetEvent('jim-shops:server:sellChips', function()
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+	local chips = Player.Functions.GetItemByName("casinochips")
+    if not chips then TriggerClientEvent("QBCore:Notify", src, "You don't have any "..QBCore.Shared.Items["casinochips"].label.." to sell") return
+	elseif chips then
+		local amount = Player.Functions.GetItemByName("casinochips").amount
+		local price = Config.SellCasinoChips.pricePer * amount
+		Player.Functions.RemoveItem("casinochips", amount)
+		
+		Player.Functions.AddMoney("cash", price, "sold-casino-chips")
+		TriggerClientEvent('QBCore:Notify', src, "You sold your chips for $"..price)
+    end
+end)
+
 QBCore.Functions.CreateCallback('jim-shops:server:GetStashItems', function(source, cb, stashId) cb(GetStashItems(stashId)) end)
 RegisterNetEvent('jim-shops:server:SaveStashItems', function(stashId, items) MySQL.Async.insert('INSERT INTO stashitems (stash, items) VALUES (:stash, :items) ON DUPLICATE KEY UPDATE items = :items', { ['stash'] = stashId, ['items'] = json.encode(items) }) end)

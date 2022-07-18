@@ -43,6 +43,12 @@ Config = {
 			{ name = "lighter", price = 2, amount = 50, info = {} },
 			{ name = "rolling_paper", price = 2, amount = 5000, info = {}, },
 		},
+		["bar"] = {
+			{ name = "water_bottle", price = 2, amount = 50, info = {} },
+			{ name = "beer", price = 7, amount = 50, info = {} },
+			{ name = "whiskey", price = 10, amount = 50, info = {} },
+			{ name = "vodka", price = 70000, amount = 50, info = {} },
+		},
 		["hardware"] = {
 			{ name = "lockpick", price = 200, amount = 50, info = {} },
 			{ name = "weapon_wrench", price = 250, amount = 250, info = {} },
@@ -92,7 +98,7 @@ Config = {
 			{ name = "lighter", price = 2, amount = 50 },
 		},
 		["casino"] = {
-			{ name = 'casinochips', price = 100, amount = 999999 },
+			{ name = 'casinochips', price = 1, amount = 999999 },
 		},
 		["electronics"] = {
 			{ name = "phone", price = 850, amount = 50 },
@@ -106,6 +112,13 @@ Config = {
 		},
 	},
 }
+
+Config.SellCasinoChips = {
+    coords = vector4(950.37, 34.72, 71.87, 33.82),
+    ped = 'S_M_Y_CASINO_01',
+    pricePer = 1,
+}
+
 Config.Locations = {
     -- 24/7 Locations
     ["247supermarket"] = {
@@ -178,7 +191,7 @@ Config.Locations = {
 			vector4(1165.15, 2710.78, 38.16, 177.96),
 			vector4(1134.3, -983.26, 46.42, 276.3),
 		},
-        ["products"] = Config.Products["normal"],
+        ["products"] = Config.Products["bar"],
         ["blipsprite"] = 628,
 		["blipcolour"] = 31,
     },
@@ -207,6 +220,7 @@ Config.Locations = {
 	-- Ammunation VANILLA Locations
     ["ammunation"] = {
         ["label"] = "Ammunation",
+        ["targetLabel"] = "Open Ammunation",
 		["type"] = "weapons",
 		["model"] = {
 			`s_m_m_ammucountry`,
@@ -237,23 +251,31 @@ Config.Locations = {
     -- Casino Locations
 	["casino"] = {
 		["label"] = "Diamond Casino",
+		["targetLabel"] = "Buy Chips",
 		["type"] = "items",
 		["model"] = {
 			`U_F_M_CasinoShop_01`,
+			`U_F_M_CasinoCash_01`,
+			`S_F_Y_Casino_01`,
+			`S_M_Y_Casino_01`,
 		},
-		["coords"] = { vector4(949.3, 32.01, 71.84, 81.33), },
+		["coords"] = {
+			vector4(990.08, 30.35, 71.47, 94.81),
+			vector4(990.96, 31.8, 71.47, 19.59),
+		},
 		["products"] = Config.Products["casino"],
+		["hideblip"] = true,
 		["blipsprite"] = 617,
 		["blipcolour"] = 0,
 	},
     ["casino2"] = {
 		["label"] = "Casino Bar",
-		["coords"] = { vector4(950.68, 34.56, 71.85, 29.86), },
+		["coords"] = { vector4(979.44, 25.4, 71.46, 0.75), },
 		["type"] = "items",
 		["model"] = {
 			`S_M_M_HighSec_01`,
 		},
-		["products"] = Config.Products["normal"],
+		["products"] = Config.Products["bar"],
 		["blipsprite"] = 52,
 		["blipcolour"] = 0,
 	},
@@ -453,6 +475,7 @@ Config.ItemModels = {
 	["binoculars"] = `v_serv_ct_binoculars`,
 	["cleaningkit"] = `prop_huf_rag_01`,
 
+	["casinochips"] = `vw_prop_chip_100dollar_st`,
 	["diving_gear"] = `p_s_scuba_tank_s`,
 	["jerry_can"] = `prop_jerrycan_01a`,
 	["parachute"] = `p_parachute_s_shop`,
