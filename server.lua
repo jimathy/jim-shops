@@ -75,8 +75,9 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 
 		-- If its a weapon or a unique item, do this:
 		if QBCore.Shared.Items[item].type == "weapon" or QBCore.Shared.Items[item].unique then
+			if QBCore.Shared.Items[item].type == "weapon" then info = nil end
 			for i = 1, amount do -- Make a loop to put items into different slots rather than full amount in 1 slot
-				if Player.Functions.AddItem(item, 1) then
+				if Player.Functions.AddItem(item, 1, nil, info) then
 					if tonumber(i) == tonumber(amount) then -- when its on its last loop do this
 						Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
 						TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount)
@@ -89,7 +90,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 			end
 		else
 			-- if its a normal item, do normal things
-			if Player.Functions.AddItem(item, amount) then
+			if Player.Functions.AddItem(item, amount, nil, info) then
 				Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
 				TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount)
 				TriggerClientEvent("jim-shops:SellAnim", src, item)
