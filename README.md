@@ -57,6 +57,7 @@ Config.Locations = {
 	["digitalden"] = { -- general name of the shops
 		["label"] = "Digital Den", -- The label of the shop that will be seen by players
         ["targetLabel"] = "Open Digital Den", -- Custom qb-target label (default: "Browse Shop")
+		-- ["scenario"] = "PROP_HUMAN_SEAT_CHAIR_FOOD", -- Support for specifiying specific scenarios
 		["type"] = "items", -- What kind of items are in the shop
         -- ["job"] = "mechanic", -- Supports locking the shops to jobs's only
         -- ["gang"] = "lostmc", -- Supports locking the shops to gang's only

@@ -65,6 +65,8 @@ Config = {
 			{ name = "firework4", price = 50, amount = 50, info = {} },
 			{ name = "fitbit", price = 400, amount = 150, info = {} },
 			{ name = "cleaningkit", price = 150, amount = 150, info = {} },
+			{ name = "weapon_knife", price = 150, amount = 150, info = { uses = 3 } },
+			{ name = "harness", price = 150, amount = 150, info = nil },
 			{ name = "advancedrepairkit", price = 500, amount = 50, info = {}, requiredJob = { ["mechanic"] = 0 } },
 		},
 		["weedshop"] = {

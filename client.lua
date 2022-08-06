@@ -37,14 +37,14 @@ CreateThread(function()
 					loadModel(v["model"][i])
 					if ped["Shop - ['"..k.."("..l..")']"] == nil then ped["Shop - ['"..k.."("..l..")']"] = CreatePed(0, v["model"][i], b.x, b.y, b.z-1.0, b.a, false, false) end
 					if not v["killable"] then SetEntityInvincible(ped["Shop - ['"..k.."("..l..")']"], true) end
-					TaskStartScenarioInPlace(ped["Shop - ['"..k.."("..l..")']"], Config.Scenarios[math.random(1, #Config.Scenarios)], -1, true)
+					TaskStartScenarioInPlace(ped["Shop - ['"..k.."("..l..")']"], v["scenario"] or Config.Scenarios[math.random(1, #Config.Scenarios)], -1, true)
 					SetBlockingOfNonTemporaryEvents(ped["Shop - ['"..k.."("..l..")']"], true)
 					FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
 					SetEntityNoCollisionEntity(ped["Shop - ['"..k.."("..l..")']"], PlayerPedId(), false)
 					if Config.Debug then print("^5Debug^7: ^6Ped ^2Created for Shop ^7- '^6"..k.."^7(^6"..l.."^7)'") end
 				end
 			end
-			local options = { { event = "jim-shops:ShopMenu", icon = "fas fa-certificate", label = (v["targetLabel"] or "Browse Shop"), job = v["job"], gang = v["gang"],
+			local options = { { event = "jim-shops:ShopMenu", icon = "fas fa-cash-register", label = (v["targetLabel"] or "Browse Shop"), job = v["job"], gang = v["gang"],
 				shoptable = v, name = v["label"], k = k, l = l, }, }
 			if k == "casino" then
 				options[#options+1] = { type = "server", event = "jim-shops:server:sellChips", icon = "fab fa-galactic-republic", label = "Trade Chips ($"..Config.SellCasinoChips.pricePer.." per chip)", }
@@ -131,7 +131,7 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 end)
 
 --Selling animations are simply a pass item to seller animation
-RegisterNetEvent('jim-shops:SellAnim', function(item)
+RegisterNetEvent('jim-shops:SellAnim', function(data)
 	for _, v in pairs (ped) do
 		if #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(v)) < 2 then
 			ppRot = GetEntityRotation(v)
@@ -140,21 +140,23 @@ RegisterNetEvent('jim-shops:SellAnim', function(item)
 			loadAnimDict("mp_common")
 			loadAnimDict("amb@prop_human_atm@male@enter")
 			local model = `prop_paper_bag_small`
-			if Config.ItemModels[item] then model = Config.ItemModels[item] end
+			if Config.ItemModels[data.item] then model = Config.ItemModels[data.item] end
 			loadModel(model)
 			if prop == nil then prop = CreateObject(model, 0.0, 0.0, 0.0, true, false, false) end
 			AttachEntityToEntity(prop, v, GetPedBoneIndex(v, 57005), 0.1, -0.0, 0.0, -90.0, 0.0, 0.0, true, true, false, true, 1, true)
 			--Calculate if you're facing the ped--
-			ClearPedTasksImmediately(v)
+			if tostring(data.shoptable["scenario"]) ~= "PROP_HUMAN_SEAT_CHAIR_FOOD" then
+				ClearPedTasksImmediately(v)
+			end
 			if not IsPedHeadingTowardsPosition(PlayerPedId(), GetEntityCoords(v), 20.0) then TaskTurnPedToFaceCoord(PlayerPedId(), GetEntityCoords(v), 1500) Wait(1500) end
 			TaskPlayAnim(PlayerPedId(), "amb@prop_human_atm@male@enter", "enter", 1.0, 1.0, 0.3, 16, 0.2, 0, 0, 0)	--Start animations
-            TaskPlayAnim(v, "mp_common", "givetake2_b", 1.0, 1.0, 0.3, 16, 0.2, 0, 0, 0)
+			TaskPlayAnim(v, "mp_common", "givetake2_b", 1.0, 1.0, 0.3, 16, 0.2, 0, 0, 0)
 			Wait(1000)
 			AttachEntityToEntity(prop, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 57005), 0.1, -0.0, 0.0, -90.0, 0.0, 0.0, true, true, false, true, 1, true)
             Wait(1000)
             StopAnimTask(PlayerPedId(), "amb@prop_human_atm@male@enter", "enter", 1.0)
 			StopAnimTask(v, "mp_common", "givetake2_b", 1.0)
-			TaskStartScenarioInPlace(v, Config.Scenarios[math.random(1, #Config.Scenarios)], -1, true)
+			TaskStartScenarioInPlace(v, data.shoptable["scenario"] or Config.Scenarios[math.random(1, #Config.Scenarios)], -1, true)
 			unloadAnimDict("mp_common")
 			unloadAnimDict("amb@prop_human_atm@male@enter")
 			destroyProp(prop) unloadModel(model)

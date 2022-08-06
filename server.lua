@@ -81,7 +81,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 					if tonumber(i) == tonumber(amount) then -- when its on its last loop do this
 						Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
 						TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount)
-						TriggerClientEvent("jim-shops:SellAnim", src, item)
+						TriggerClientEvent("jim-shops:SellAnim", src, {item = item, shoptable = shoptable})
 					end
 				else
 					TriggerClientEvent('QBCore:Notify', src, "Can't give item!", "error") break -- stop the item giving loop
@@ -90,10 +90,11 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 			end
 		else
 			-- if its a normal item, do normal things
+			print(json.encode(info))
 			if Player.Functions.AddItem(item, amount, nil, info) then
 				Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
 				TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount)
-				TriggerClientEvent("jim-shops:SellAnim", src, item)
+				TriggerClientEvent("jim-shops:SellAnim", src, {item = item, shoptable = shoptable})
 			else
 				TriggerClientEvent('QBCore:Notify', source,  "Can't give item!", "error")
 			end
@@ -207,7 +208,7 @@ RegisterNetEvent('jim-shops:server:sellChips', function()
 		local amount = Player.Functions.GetItemByName("casinochips").amount
 		local price = Config.SellCasinoChips.pricePer * amount
 		Player.Functions.RemoveItem("casinochips", amount)
-		
+
 		Player.Functions.AddMoney("cash", price, "sold-casino-chips")
 		TriggerClientEvent('QBCore:Notify', src, "You sold your chips for $"..price)
     end
