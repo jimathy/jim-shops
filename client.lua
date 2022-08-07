@@ -44,7 +44,7 @@ CreateThread(function()
 					if Config.Debug then print("^5Debug^7: ^6Ped ^2Created for Shop ^7- '^6"..k.."^7(^6"..l.."^7)'") end
 				end
 			end
-			local options = { { event = "jim-shops:ShopMenu", icon = "fas fa-cash-register", label = (v["targetLabel"] or "Browse Shop"), job = v["job"], gang = v["gang"],
+			local options = { { event = "jim-shops:ShopMenu", icon = (v["targetIcon"] or "fas fa-cash-register"), label = (v["targetLabel"] or "Browse Shop"), item = v["requiredItem"], job = v["job"], gang = v["gang"],
 				shoptable = v, name = v["label"], k = k, l = l, }, }
 			if k == "casino" then
 				options[#options+1] = { type = "server", event = "jim-shops:server:sellChips", icon = "fab fa-galactic-republic", label = "Trade Chips ($"..Config.SellCasinoChips.pricePer.." per chip)", }

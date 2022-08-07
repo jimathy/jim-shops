@@ -56,11 +56,13 @@ ensure [jim]
 Config.Locations = {
 	["digitalden"] = { -- general name of the shops
 		["label"] = "Digital Den", -- The label of the shop that will be seen by players
+		["targetIcon"] = "fab fa-galactic-republic", -- Custom qb-target icon (default: "fas fa-cash-register")
         ["targetLabel"] = "Open Digital Den", -- Custom qb-target label (default: "Browse Shop")
-		-- ["scenario"] = "PROP_HUMAN_SEAT_CHAIR_FOOD", -- Support for specifiying specific scenarios
+		--["requiredItem"] = "phone", specify if this shop requires a certain item to be accessed (for examle:  a huntinglicense)
+		--["scenario"] = "PROP_HUMAN_SEAT_CHAIR_FOOD", -- Support for specifiying specific scenarios
 		["type"] = "items", -- What kind of items are in the shop
-        -- ["job"] = "mechanic", -- Supports locking the shops to jobs's only
-        -- ["gang"] = "lostmc", -- Supports locking the shops to gang's only
+        --["job"] = "mechanic", -- Supports locking the shops to jobs's only
+        --["gang"] = "lostmc", -- Supports locking the shops to gang's only
         ["killable"] = true, -- Makes it so you can kill the ped (maybe if you can rob that store)
 		["model"] = { -- A list of possible PED models for the shop to spawn
 			`S_M_M_LifeInvad_01`,
