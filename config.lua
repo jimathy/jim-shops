@@ -1,4 +1,4 @@
-print("^2Jim^7-^2Shops v^41^7.^46 ^7- ^2Shop Script by ^1Jimathy^7")
+print("^2Jim^7-^2Shops v^41^7.^47 ^7- ^2Shop Script by ^1Jimathy^7")
 
 -- If you need support I now have a discord available, it helps me keep track of issues and give better support.
 
@@ -7,7 +7,7 @@ print("^2Jim^7-^2Shops v^41^7.^46 ^7- ^2Shop Script by ^1Jimathy^7")
 Config = {
 	Debug = false, -- Enable to add debug boxes and message.
 	img = "qb-inventory/html/images/", -- Set this to your inventory
-	JimMenu = false, -- Enable this if you are using an updated qb-menu resource with icon support
+	JimMenu = true, -- Enable this if you are using an updated qb-menu resource with icon support
 	Peds = true, -- Set to true if you want Shops to have Peds
 	Limit = true, -- Enable this to add Stash features, This adds limits to items and gets refilled at each restart
 	MaxSlots = 41, -- Set this to your player inventory slot count, this is default "41"
@@ -15,6 +15,8 @@ Config = {
 	Measurement = "kg", -- Custom Weight measurement
 	Gabz247 = false,  -- Enable if using gabz 247 stores
 	GabzAmmu = false, -- Enable if using gabz Ammunation stores
+	VendOverride = false, -- Enable this if you want all the vending machines to use this script
+	RandomAmount = true, -- Sets wether a stash should have a "random" amount of stock or full.
 
 	Scenarios = { -- List of scenarios the peds do, This is called "fun", much better than standing staring at the void.
 		"WORLD_HUMAN_GUARD_PATROL",
@@ -30,69 +32,68 @@ Config = {
 	},
 	Products = {
 		["normal"] = {
-			{ name = "tosti", price = 2, amount = 50, info = {} },
-			{ name = "water_bottle", price = 2, amount = 50, info = {} },
-			{ name = "kurkakola", price = 2, amount = 50, info = {} },
-			{ name = "twerks_candy", price = 2, amount = 50, info = {} },
-			{ name = "snikkel_candy", price = 2, amount = 50, info = {} },
-			{ name = "sandwich", price = 2, amount = 50, info = {} },
-			{ name = "beer", price = 7, amount = 50, info = {} },
-			{ name = "whiskey", price = 10, amount = 50, info = {} },
-			{ name = "vodka", price = 70000, amount = 50, info = {} },
-			{ name = "bandage", price = 100, amount = 50, info = {} },
-			{ name = "lighter", price = 2, amount = 50, info = {} },
-			{ name = "rolling_paper", price = 2, amount = 5000, info = {}, },
+			{ name = "tosti", price = 2, amount = 50, },
+			{ name = "water_bottle", price = 2, amount = 50, },
+			{ name = "kurkakola", price = 2, amount = 50, },
+			{ name = "twerks_candy", price = 2, amount = 50, },
+			{ name = "snikkel_candy", price = 2, amount = 50, },
+			{ name = "sandwich", price = 2, amount = 50, },
+			{ name = "beer", price = 7, amount = 50, },
+			{ name = "whiskey", price = 10, amount = 50, },
+			{ name = "vodka", price = 70000, amount = 50, },
+			{ name = "bandage", price = 100, amount = 50, },
+			{ name = "lighter", price = 2, amount = 50, },
+			{ name = "rolling_paper", price = 2, amount = 5000,  },
 		},
 		["bar"] = {
-			{ name = "water_bottle", price = 2, amount = 50, info = {} },
-			{ name = "beer", price = 7, amount = 50, info = {} },
-			{ name = "whiskey", price = 10, amount = 50, info = {} },
-			{ name = "vodka", price = 70000, amount = 50, info = {} },
+			{ name = "water_bottle", price = 2, amount = 50, },
+			{ name = "beer", price = 7, amount = 50, },
+			{ name = "whiskey", price = 10, amount = 50, },
+			{ name = "vodka", price = 70000, amount = 50, },
 		},
 		["hardware"] = {
-			{ name = "lockpick", price = 200, amount = 50, info = {} },
-			{ name = "weapon_wrench", price = 250, amount = 250, info = {} },
-			{ name = "weapon_hammer", price = 250, amount = 250, info = {} },
-			{ name = "weapon_bat", price = 500, amount = 50, info = {}, requiredGang = { "lostmc" } },  -- Gang only options in stores
-			{ name = "repairkit", price = 250, amount = 50, info = {}, requiredJob = { ["mechanic"] = 0, ["police"] = 0 } },
-			{ name = "screwdriverset", price = 350, amount = 50, info = {} },
-			{ name = "phone", price = 850, amount = 50, info = {} },
-			{ name = "radio", price = 250, amount = 50, info = {} },
-			{ name = "binoculars", price = 50, amount = 50, info = {} },
-			{ name = "firework1", price = 50, amount = 50, info = {} },
-			{ name = "firework2", price = 50, amount = 50, info = {} },
-			{ name = "firework3", price = 50, amount = 50, info = {} },
-			{ name = "firework4", price = 50, amount = 50, info = {} },
-			{ name = "fitbit", price = 400, amount = 150, info = {} },
-			{ name = "cleaningkit", price = 150, amount = 150, info = {} },
-			{ name = "advancedrepairkit", price = 500, amount = 50, info = {}, requiredJob = { ["mechanic"] = 0 } },
+			{ name = "lockpick", price = 200, amount = 50, },
+			{ name = "weapon_wrench", price = 250, amount = 250, },
+			{ name = "weapon_hammer", price = 250, amount = 250, },
+			{ name = "weapon_bat", price = 500, amount = 50,  requiredGang = { "lostmc" } },  -- Gang only options in stores
+			{ name = "repairkit", price = 250, amount = 50,  requiredJob = { ["mechanic"] = 0, ["police"] = 0 } },
+			{ name = "screwdriverset", price = 350, amount = 50, },
+			{ name = "phone", price = 850, amount = 50, },
+			{ name = "radio", price = 250, amount = 50, },
+			{ name = "binoculars", price = 50, amount = 50, },
+			{ name = "firework1", price = 50, amount = 50, },
+			{ name = "firework2", price = 50, amount = 50, },
+			{ name = "firework3", price = 50, amount = 50, },
+			{ name = "firework4", price = 50, amount = 50, },
+			{ name = "fitbit", price = 400, amount = 150, },
+			{ name = "cleaningkit", price = 150, amount = 150, },
+			{ name = "advancedrepairkit", price = 500, amount = 50,  requiredJob = { ["mechanic"] = 0 } },
 		},
 		["weedshop"] = {
-			{ name = "joint", price = 10, amount = 1000, info = {} },
-			{ name = "weapon_poolcue", price = 100, amount = 1000, info = {} },
-			{ name = "weed_nutrition", price = 20, amount = 1000, info = {} },
-			{ name = "empty_weed_bag", price = 2, amount = 1000, info = {} },
-			{ name = "rolling_paper", price = 2, amount = 1000, info = {} },
+			{ name = "joint", price = 10, amount = 1000, },
+			{ name = "weapon_poolcue", price = 100, amount = 1000, },
+			{ name = "weed_nutrition", price = 20, amount = 1000, },
+			{ name = "empty_weed_bag", price = 2, amount = 1000, },
+			{ name = "rolling_paper", price = 2, amount = 1000, },
 		},
 		["gearshop"] = {
-			{ name = "diving_gear", price = 2500, amount = 10, info = {} },
-			{ name = "jerry_can", price = 200, amount = 50, info = {} },
+			{ name = "diving_gear", price = 2500, amount = 10, },
+			{ name = "jerry_can", price = 200, amount = 50, },
 		},
 		["leisureshop"] = {
-			{ name = "parachute", price = 2500, amount = 10, info = {} },
-			{ name = "binoculars", price = 50, amount = 50, info = {} },
-			{ name = "diving_gear", price = 2500, amount = 10, info = {} },
+			{ name = "parachute", price = 2500, amount = 10, },
+			{ name = "binoculars", price = 50, amount = 50, },
+			{ name = "diving_gear", price = 2500, amount = 10, },
 		},
 		["weapons"] = {
-			{ name = "weapon_knife", price = 250, amount = 250, info = nil },
-			{ name = "weapon_bat", price = 250, amount = 250, info = {} },
-			{ name = "weapon_hatchet",price = 250, amount = 250, info = {}, requiredJob = { ["mechanic"] = 0, ["police"] = 0 } },
-			{ name = "weapon_pistol", price = 2500, amount = 5, info = nil, requiresLicense = true },
-			{ name = "weapon_snspistol", price = 1500, amount = 5, info = nil, requiresLicense = true },
-			{ name = "weapon_vintagepistol", price = 4000, amount = 5, info = nil, requiresLicense = true },
-			{ name = "pistol_ammo", price = 250, amount = 250, info = {}, requiresLicense = true },
+			{ name = "weapon_knife", price = 250, amount = 250, },
+			{ name = "weapon_bat", price = 250, amount = 250, },
+			{ name = "weapon_hatchet",price = 250, amount = 250,  requiredJob = { ["mechanic"] = 0, ["police"] = 0 } },
+			{ name = "weapon_pistol", price = 2500, amount = 5, requiresLicense = true },
+			{ name = "weapon_snspistol", price = 1500, amount = 5, requiresLicense = true },
+			{ name = "weapon_vintagepistol", price = 4000, amount = 5, requiresLicense = true },
+			{ name = "pistol_ammo", price = 250, amount = 250,  requiresLicense = true },
 		},
-
 		["coffeeplace"] = {
 			{ name = "coffee", price = 5, amount = 500 },
 			{ name = "lighter", price = 2, amount = 50 },
@@ -106,6 +107,16 @@ Config = {
 			{ name = "screwdriverset", price = 350, amount = 50, },
 			{ name = "binoculars", price = 50, amount = 50, },
 			{ name = "fitbit", price = 400, amount = 150, },
+		},
+		["vending"] = {
+			{ name = "water_bottle", price = 100, amount = 25, },
+			{ name = "kurkakola", price = 100, amount = 25, },
+			{ name = "sprunk", price = 100, amount = 25, },
+			{ name = "sprunklight", price = 100, amount = 25, },
+			{ name = "ecola", price = 100, amount = 25, },
+			{ name = "ecolalight", price = 100, amount = 25, },
+			{ name = "twerks_candy", price = 100, amount = 25, },
+			{ name = "snikkel_candy", price = 100, amount = 25, },
 		},
 		["blackmarket"] = {
 			{ name = "radioscanner", price = 850, amount = 5 },
@@ -455,6 +466,26 @@ if Config.BlackMarket then
 		["hideblip"] = true,
 	}
 end
+
+if Config.VendOverride then
+	Config.Locations["vendingmachine"] = {
+		["label"] = "Vending Machine",
+		["targetIcon"] = "fas fa-calculator",
+		["targetLabel"] = "Vending Machine",
+		["type"] = "items",
+		["logo"] = "https://static.wikia.nocookie.net/gtawiki/images/d/d4/Ecola-GTAO-LSTunersBanner.png",
+		["model"] = { -- You can add more models to this, but these make the most sense for the vending machine stuff
+			`prop_vend_soda_01`,
+			`prop_vend_soda_02`,
+			`prop_vend_snak_01`,
+			`prop_vend_snak_01_tu`
+		},
+		["coords"] = { -- If you want to place custom vending machine locations
+			vector4(131.13, -3007.16, 7.04, 0.0), -- GABZ LS Tuners
+		},
+		["products"] = Config.Products["vending"],
+	}
+end
 Config.ItemModels = {
 	["repairkit"] = `v_ind_cs_toolbox4`,
 	["advancedrepairkit"] = `v_ind_cs_toolbox4`,
@@ -463,6 +494,10 @@ Config.ItemModels = {
 	["sandwich"] = `prop_sandwich_01`,
 	["water_bottle"] = `ba_prop_club_water_bottle`,
 	["kurkacola"] = `prop_ecola_can`,
+	["sprunk"] = `v_res_tt_can03`,
+	["sprunklight"] = `v_res_tt_can03`,
+	["ecola"] = `prop_ecola_can`,
+	["ecolalight"] = `prop_ecola_can`,
 	["twerks_candy"] = `prop_choc_pq`,
 	["snikkel_candy"] = `prop_choc_pq`,
 	["beer"] = `prop_sh_beer_pissh_01`,

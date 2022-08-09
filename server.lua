@@ -90,7 +90,6 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 			end
 		else
 			-- if its a normal item, do normal things
-			print(json.encode(info))
 			if Player.Functions.AddItem(item, amount, nil, info) then
 				Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
 				TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount)
@@ -101,13 +100,16 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 		end
 		--Remove item from stash
 		if Config.Limit and not nostash then
-			stashItems = GetStashItems("["..shop.."("..num..")]")
-			if Config.Debug then print("^5Debug^7: ^2Retrieving stash info^7: [^6"..shop.."^7(^6"..num.."^7)]") end
+			local stashname = ""
+			if num == "" then stashname = shop
+			else stashname = "["..shop.."("..num..")]" end
+			stashItems = GetStashItems(stashname)
+			if Config.Debug then print("^5Debug^7: ^2Retrieving stash info^7: '^6"..stashname.."^7'") end
 			for i = 1, #stashItems do
 				if stashItems[i].name == item then
 					if (stashItems[i].amount - amount) <= 0 then stashItems[i].amount = 0 else stashItems[i].amount = stashItems[i].amount - amount end
-					TriggerEvent('jim-shops:server:SaveStashItems', "["..shop.."("..num..")]", stashItems)
-					if Config.Debug then print("^5Debug^7: ^2Removing ^7'^6"..QBCore.Shared.Items[item].label.." ^2x^6"..amount.." ^2from Shop's Stash^7: '[^6"..shop.."^7(^6"..num.."^7)]") end
+					TriggerEvent('jim-shops:server:SaveStashItems', stashname, stashItems)
+					if Config.Debug then print("^5Debug^7: ^2Removing ^7'^6"..QBCore.Shared.Items[item].label.." ^2x^6"..amount.." ^2from Shop's Stash^7: '^6"..stashname.."^7'") end
 				end
 			end
 		end
@@ -118,41 +120,81 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 	custom = true
 	if Config.Limit and not nostash then
 		custom = nil
-		data.k = shop
-		data.l = num
+		if num == "" then data.vendID = shop data.vend = true
+		else data.k = shop data.l = num end
 	end
 	TriggerClientEvent('jim-shops:ShopMenu', src, data, custom)
 end)
 
 RegisterNetEvent("jim-shops:MakeStash", function()
+	local result = MySQL.Sync.fetchAll('SELECT * FROM stashitems', {1})
+
+	for _, v in pairs(result) do --Clear Vending Machine Stashes
+		if string.find(v.stash, "Vend") then print(v.stash) end
+		MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', { v.stash })
+	end
 	for k, v in pairs(Config.Locations) do
-		local stashTable = {}
-		for l, b in pairs(v["coords"]) do
-			for i = 1, #v["products"] do
-				if Config.Debug then --print("^5Debug^7: ^3MakeStash ^7- ^2Searching for item ^7'^6"..v["products"][i].name.."^7'")
-					if not QBCore.Shared.Items[v["products"][i].name:lower()] then
-						print("^5Debug^7: ^3MakeStash ^7- ^2Can't find item ^7'^6"..v["products"][i].name.."^7'")
+		if k ~= "vendingmachine" then
+			local stashTable = {}
+			for l, b in pairs(v["coords"]) do
+				MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', {"["..k.."("..l..")]"})
+				Wait(10)
+				for i = 1, #v["products"] do
+					if Config.Debug then print("^5Debug^7: ^3MakeStash ^7- ^2Searching for item ^7'^6"..v["products"][i].name.."^7'")
+						if not QBCore.Shared.Items[v["products"][i].name:lower()] then
+							print("^5Debug^7: ^3MakeStash ^7- ^2Can't find item ^7'^6"..v["products"][i].name.."^7'")
+						end
+					end
+					local itemInfo = QBCore.Shared.Items[v["products"][i].name:lower()]
+					if itemInfo then
+						stashTable[i] = {
+							name = itemInfo["name"],
+							amount = tonumber(v["products"][i].amount),
+							info = v["products"][i].info or nil,
+							label = itemInfo["label"],
+							description = itemInfo["description"] ~= nil and itemInfo["description"] or "",
+							weight = itemInfo["weight"],
+							type = itemInfo["type"],
+							unique = itemInfo["unique"],
+							useable = itemInfo["useable"],
+							image = itemInfo["image"],
+							slot = i,
+						}
+						if Config.RandomAmount then stashTable[i].amount = math.random(1, tonumber(v["products"][i].amount)) end
+						if itemInfo["name"] == "casinochips" then stashTable[i].amount = v["products"][i].amount end
 					end
 				end
-				local itemInfo = QBCore.Shared.Items[v["products"][i].name:lower()]
-				stashTable[i] = {
-					name = itemInfo["name"],
-					amount = tonumber(v["products"][i].amount),
-					info = {},
-					label = itemInfo["label"],
-					description = itemInfo["description"] ~= nil and itemInfo["description"] or "",
-					weight = itemInfo["weight"],
-					type = itemInfo["type"],
-					unique = itemInfo["unique"],
-					useable = itemInfo["useable"],
-					image = itemInfo["image"],
-					slot = i,
-				}
+			if Config.Limit then TriggerEvent('jim-shops:server:SaveStashItems', "["..k.."("..l..")]", stashTable)
+			elseif not Config.Limit then stashname = "["..k.."("..l..")]" MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', {stashname}) end
 			end
-		if Config.Limit then TriggerEvent('jim-shops:server:SaveStashItems', "["..k.."("..l..")]", stashTable)
-		elseif Config.Limit == false then stashname = "["..k.."("..l..")]" MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', {stashname}) end
 		end
 	end
+end)
+
+RegisterNetEvent("jim-shops:GenerateVend", function(data)
+	local stashTable = {}
+	local v = data[1].shoptable
+	for i = 1, #v["products"] do
+		local itemInfo = QBCore.Shared.Items[v["products"][i].name:lower()]
+		if not itemInfo then print("^5Debug^7: ^3MakeStash ^7- ^2Can't find item ^7'^6"..v["products"][i].name.."^7'")
+		elseif itemInfo then
+			stashTable[i] = {
+				name = itemInfo["name"],
+				amount = tonumber(v["products"][i].amount),
+				info = v["products"][i].info or {},
+				label = itemInfo["label"],
+				description = itemInfo["description"] ~= nil and itemInfo["description"] or "",
+				weight = itemInfo["weight"],
+				type = itemInfo["type"],
+				unique = itemInfo["unique"],
+				useable = itemInfo["useable"],
+				image = itemInfo["image"],
+				slot = i,
+			}
+			if Config.RandomAmount then stashTable[i].amount = math.random(1, tonumber(v["products"][i].amount)) end
+		end
+	end
+	TriggerEvent('jim-shops:server:SaveStashItems', data[2], stashTable)
 end)
 
 --Compatability Wrapper Event for qb-truckerjob to refill shop stashes
@@ -174,19 +216,21 @@ RegisterNetEvent("qb-shops:server:RestockShopItems", function(storeinfo)
 			end
 		end
 		local itemInfo = QBCore.Shared.Items[Config.Locations[k]["products"][i].name:lower()]
-		stashTable[i] = {
-			name = itemInfo["name"],
-			amount = tonumber(Config.Locations[k]["products"][i].amount),
-			info = {},
-			label = itemInfo["label"],
-			description = itemInfo["description"] ~= nil and itemInfo["description"] or "",
-			weight = itemInfo["weight"],
-			type = itemInfo["type"],
-			unique = itemInfo["unique"],
-			useable = itemInfo["useable"],
-			image = itemInfo["image"],
-			slot = i,
-		}
+		if itemInfo then
+			stashTable[i] = {
+				name = itemInfo["name"],
+				amount = tonumber(Config.Locations[k]["products"][i].amount),
+				info = {},
+				label = itemInfo["label"],
+				description = itemInfo["description"] ~= nil and itemInfo["description"] or "",
+				weight = itemInfo["weight"],
+				type = itemInfo["type"],
+				unique = itemInfo["unique"],
+				useable = itemInfo["useable"],
+				image = itemInfo["image"],
+				slot = i,
+			}
+		end
 	end
 	if Config.Limit then TriggerEvent('jim-shops:server:SaveStashItems', "["..k.."("..l..")]", stashTable) end
 end)
@@ -202,15 +246,14 @@ end)
 RegisterNetEvent('jim-shops:server:sellChips', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-	local chips = Player.Functions.GetItemByName("casinochips")
-    if not chips then TriggerClientEvent("QBCore:Notify", src, "You don't have any "..QBCore.Shared.Items["casinochips"].label.." to sell") return
-	elseif chips then
+    if not Player.Functions.GetItemByName("casinochips") then TriggerClientEvent("QBCore:Notify", src, "You don't have any "..QBCore.Shared.Items["casinochips"].label.." to sell") return
+	elseif Player.Functions.GetItemByName("casinochips") then
 		local amount = Player.Functions.GetItemByName("casinochips").amount
 		local price = Config.SellCasinoChips.pricePer * amount
-		Player.Functions.RemoveItem("casinochips", amount)
-
-		Player.Functions.AddMoney("cash", price, "sold-casino-chips")
-		TriggerClientEvent('QBCore:Notify', src, "You sold your chips for $"..price)
+		if Player.Functions.RemoveItem("casinochips", amount) then
+			TriggerClientEvent('QBCore:Notify', src, "You sold your chips for $"..price)
+			Player.Functions.AddMoney("cash", price, "sold-casino-chips")
+		end
     end
 end)
 

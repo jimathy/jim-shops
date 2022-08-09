@@ -1,6 +1,6 @@
 name "Jim-Shops"
 author "Jimathy"
-version "v1.6"
+version "v1.7"
 description "Shop Script By Jimathy"
 fx_version "cerulean"
 game "gta5"

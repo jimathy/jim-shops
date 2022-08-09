@@ -48,6 +48,8 @@ ensure [jim]
 - `Measurement` Custom Weight measurement, default "kg"
 - `Gabz247` Enable if using gabz 247 stores
 - `GabzAmmu` Enable if using gabz Ammunation stores
+- `VendOverride` -- Enable this if you want all the vending machines to use this script
+- `RandomAmount` -- Sets wether a stash should have a "random" amount of stock or full.
 
 ## Examples and Explanations
 ![](https://user-images.githubusercontent.com/1885302/161044087-c9eb8f8d-a4a5-4174-a048-73a610231abe.jpg)
@@ -65,6 +67,7 @@ Config.Locations = {
         --["gang"] = "lostmc", -- Supports locking the shops to gang's only
         ["killable"] = true, -- Makes it so you can kill the ped (maybe if you can rob that store)
 		["model"] = { -- A list of possible PED models for the shop to spawn
+			`sf_prop_sf_vend_drink_01a`, -- You can specfiy props and it will load these instead of a ped model
 			`S_M_M_LifeInvad_01`,
 			`IG_Ramp_Hipster`,
 			`A_M_Y_Hipster_02`,
