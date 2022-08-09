@@ -106,7 +106,7 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 		QBCore.Functions.TriggerCallback('jim-shops:server:GetStashItems', function(stash) p:resolve(stash) end, vendID)
 		stashItems = Citizen.Await(p)
 		if json.encode(stashItems) == "[]" then
-			print("^5Debug^7: ^2Generating Vending Machine Stash^7: ^6"..vendID)
+			if Config.Debug then print("^5Debug^7: ^2Generating Vending Machine Stash^7: ^6"..vendID) end
 			TriggerServerEvent("jim-shops:GenerateVend", {data, vendID})
 			Wait(1000)
 			local p = promise.new()
