@@ -130,8 +130,7 @@ RegisterNetEvent("jim-shops:MakeStash", function()
 	local result = MySQL.Sync.fetchAll('SELECT * FROM stashitems', {1})
 
 	for _, v in pairs(result) do --Clear Vending Machine Stashes
-		if string.find(v.stash, "Vend") then print(v.stash) end
-		MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', { v.stash })
+		if string.find(v.stash, "Vend") then MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', { v.stash }) end
 	end
 	for k, v in pairs(Config.Locations) do
 		if k ~= "vendingmachine" then
