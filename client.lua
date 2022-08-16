@@ -72,17 +72,17 @@ CreateThread(function()
 							end
 						end
 						FreezeEntityPosition(ped["Shop - ['"..k.."("..l..")']"], true)
-						local options = { { event = "jim-shops:ShopMenu", icon = (v["targetIcon"] or "fas fa-cash-register"), label = (v["targetLabel"] or "Browse Shop"), item = v["requiredItem"], job = v["job"] or nil, gang = v["gang"] or nil,
-						shoptable = v, name = v["label"], k = k, l = l, }, }
-						if k == "casino" then
-							options[#options+1] = { type = "server", event = "jim-shops:server:sellChips", icon = "fab fa-galactic-republic", label = "Trade Chips ($"..Config.SellCasinoChips.pricePer.." per chip)", }
-						end
-						Targets["Shop - ['"..k.."("..l..")']"] =
-						exports['qb-target']:AddCircleZone("Shop - ['"..k.."("..l..")']", vector3(b.x, b.y, b.z), 2.0, { name="Shop - ['"..k.."("..l..")']", debugPoly=Config.Debug, useZ=true, },
-						{ options = options, distance = 2.0 })
 						if Config.Debug then print("^5Debug^7: ^6Ped ^2Created for Shop ^7- '^6"..k.."^7(^6"..l.."^7)'") end
 					end
 				end
+				local options = { { event = "jim-shops:ShopMenu", icon = (v["targetIcon"] or "fas fa-cash-register"), label = (v["targetLabel"] or "Browse Shop"), item = v["requiredItem"], job = v["job"] or nil, gang = v["gang"] or nil,
+				shoptable = v, name = v["label"], k = k, l = l, }, }
+				if k == "casino" then
+					options[#options+1] = { type = "server", event = "jim-shops:server:sellChips", icon = "fab fa-galactic-republic", label = "Trade Chips ($"..Config.SellCasinoChips.pricePer.." per chip)", }
+				end
+				Targets["Shop - ['"..k.."("..l..")']"] =
+					exports['qb-target']:AddCircleZone("Shop - ['"..k.."("..l..")']", vector3(b.x, b.y, b.z), 2.0, { name="Shop - ['"..k.."("..l..")']", debugPoly=Config.Debug, useZ=true, },
+					{ options = options, distance = 2.0 })
 			end
 		end
 	end
