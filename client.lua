@@ -148,24 +148,36 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 			if products[i].requiredJob then
 			for k, v in pairs(products[i].requiredJob) do
 				if QBCore.Functions.GetPlayerData().job.name == k and QBCore.Functions.GetPlayerData().job.grade.level >= v then
-					ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
+					local icon, header = nil, nil
+					if products[i].info ~= nil and products[i].info.image ~= nil then icon = "qb-inventory/html/images/"..products[i].info.image else icon = products[i].name end
+					if products[i].info ~= nil and products[i].info.label ~= nil then header = products[i].info.label else header = setheader end
+					ShopMenu[#ShopMenu + 1] = { icon = icon, header = header, txt = text, isMenuHeader = lock,
 						params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info or {}, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount, custom = custom } } }
 					end
 				end
 			elseif products[i].requiredGang then
 			for i2 = 1, #products[i].requiredGang do
 				if QBCore.Functions.GetPlayerData().gang.name == products[i].requiredGang[i2] then
-					ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
+					local icon, header = nil, nil
+					if products[i].info ~= nil and products[i].info.image ~= nil then icon = "qb-inventory/html/images/"..products[i].info.image else icon = products[i].name end
+					if products[i].info ~= nil and products[i].info.label ~= nil then header = products[i].info.label else header = setheader end
+					ShopMenu[#ShopMenu + 1] = { icon = icon, header = header, txt = text, isMenuHeader = lock,
 						params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info or {}, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount, custom = custom } } }
 					end
 				end
 			elseif products[i].requiresLicense then
 				if hasLicense and hasLicenseItem then
-					ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
+					local icon, header = nil, nil
+					if products[i].info ~= nil and products[i].info.image ~= nil then icon = "qb-inventory/html/images/"..products[i].info.image else icon = products[i].name end
+					if products[i].info ~= nil and products[i].info.label ~= nil then header = products[i].info.label else header = setheader end
+					ShopMenu[#ShopMenu + 1] = { icon = icon, header = header, txt = text, isMenuHeader = lock,
 					params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info or {}, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount, custom = custom } } }
 				end
 			else
-				ShopMenu[#ShopMenu + 1] = { icon = products[i].name, header = setheader, txt = text, isMenuHeader = lock,
+				local icon, header = nil, nil
+				if products[i].info ~= nil and products[i].info.image ~= nil then icon = "qb-inventory/html/images/"..products[i].info.image else icon = products[i].name end
+				if products[i].info ~= nil and products[i].info.label ~= nil then header = products[i].info.label else header = setheader end
+				ShopMenu[#ShopMenu + 1] = { icon = icon, header = header, txt = text, isMenuHeader = lock,
 				params = { event = "jim-shops:Charge", args = {
 					item = products[i].name,
 					cost = products[i].price,
