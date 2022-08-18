@@ -106,7 +106,7 @@ Products = {
 ---
 ## Support for external shops
 - You can easily change shops created in other scripts by swapping out the inventory event with my custom event
-    - If you have a script that opens a shop, you can swap out the event `inventory:server:OpenInventory` for `jim-shop:ShopOpen` and it will open in my shop layout instead of the default inventory layout
+    - If you have a script that opens a shop, you can swap out the event `inventory:server:OpenInventory` for `jim-shops:ShopOpen` and it will open in my shop layout instead of the default inventory layout
     - All my scripts have an option to toggle this in the config
     - But it's very unlikely someone elses script won't
 - For example:
@@ -118,11 +118,11 @@ RegisterNetEvent('qb-ambulancejob:armory', function()
     end
 end)
 ```
-- Simply changing the event name from `inventory:server:OpenInventory` to `jim-shop:ShopOpen` will make it use my script instead
+- Simply changing the event name from `inventory:server:OpenInventory` to `jim-shops:ShopOpen` will make it use my script instead
 ```lua
 RegisterNetEvent('qb-ambulancejob:armory', function()
     if onDuty then
-        TriggerServerEvent("jim-shop:ShopOpen", "shop", "hospital", Config.Items)
+        TriggerServerEvent("jim-shops:ShopOpen", "shop", "hospital", Config.Items)
     end
 end)
 ```
