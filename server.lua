@@ -56,7 +56,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
     local Player = QBCore.Functions.GetPlayer(src)
 	--Inventory space checks
 	local totalWeight = QBCore.Player.GetTotalWeight(Player.PlayerData.items)
-    local maxWeight = QBCore.Config.Player.MaxWeight
+    local maxWeight = 12000 -- Fix until I work out how to get the player weight again
 	local slots = 0
 	for _ in pairs(Player.PlayerData.items) do slots = slots +1 end
 	slots = Config.MaxSlots - slots
