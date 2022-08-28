@@ -51,11 +51,13 @@ RegisterServerEvent('jim-shops:ShopOpen', function(shop, name, shoptable)
 	TriggerClientEvent('jim-shops:ShopMenu', source, data, true)
 end)
 
+local function GetTotalWeight(items) local weight = 0 if not items then return 0 end for _, item in pairs(items) do weight += item.weight * item.amount end return tonumber(weight) end
+
 RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shoptable, price, info, shop, num, nostash)
 	local src = source
     local Player = QBCore.Functions.GetPlayer(src)
 	--Inventory space checks
-	local totalWeight = QBCore.Player.GetTotalWeight(Player.PlayerData.items)
+	local totalWeight = GetTotalWeight(Player.PlayerData.items)
     local maxWeight = 120000 -- Fix until I work out how to get the player weight again
 	local slots = 0
 	for _ in pairs(Player.PlayerData.items) do slots = slots +1 end
