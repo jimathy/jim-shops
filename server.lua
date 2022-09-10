@@ -93,7 +93,8 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 		else
 			-- if its a normal item, do normal things
 			if Player.Functions.AddItem(item, amount, nil, info) then
-				Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
+				Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')	
+				if Config.ApGov then exports['ap-government']:chargeCityTax(Player.PlayerData.source, "Item", (tonumber(price) * tonumber(amount)) end	
 				TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount)
 				TriggerClientEvent("jim-shops:SellAnim", src, {item = item, shoptable = shoptable})
 			else
