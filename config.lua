@@ -9,6 +9,7 @@ Config = {
 	img = "qb-inventory/html/images/", -- Set this to your inventory
 	JimMenu = true, -- Enable this if you are using an updated qb-menu resource with icon support
 	ApGov = false, -- Add support for AP-Goverment Tax 
+	PsMDT = false, -- Add support for PS-MDT to Register weapon bought from the shop
 	Peds = true, -- Set to true if you want Shops to have Peds
 	Limit = true, -- Enable this to add Stash features, This adds limits to items and gets refilled at each restart
 	MaxSlots = 41, -- Set this to your player inventory slot count, this is default "41"
