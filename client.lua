@@ -4,6 +4,10 @@ PlayerJob = {}
 Targets = {}
 ped = {}
 
+RegisterNetEvent('QBCore:Client:UpdateObject', function()
+	QBCore = exports['qb-core']:GetCoreObject()
+end)
+
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function() QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) end)
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end)
 RegisterNetEvent('QBCore:Client:SetDuty', function(duty) onDuty = duty end)
@@ -89,109 +93,111 @@ CreateThread(function()
 end)
 
 RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
-	local products = data.shoptable.products
-	local ShopMenu = {}
-	local hasLicense, hasLicenseItem, stashItems = nil
-	local setheader = ""
-	local vendID = data.vendID or nil
+	QBCore.Functions.TriggerCallback('jim-shops:server:refreshObject', function(QBCore)
+		local products = data.shoptable.products
+		local ShopMenu = {}
+		local hasLicense, hasLicenseItem, stashItems = nil
+		local setheader = ""
+		local vendID = data.vendID or nil
 
-	if Config.Limit and data.vend then
-		if not vendID then vendID = "["..string.sub(data.shoptable.label, 1, 4)..math.floor(GetEntityCoords(data.entity).x or 1)..math.floor(GetEntityCoords(data.entity).y or 1).."]" end
-		local p = promise.new()
-		QBCore.Functions.TriggerCallback('jim-shops:server:GetStashItems', function(stash) p:resolve(stash) end, vendID)
-		stashItems = Citizen.Await(p)
-		if json.encode(stashItems) == "[]" then
-			if Config.Debug then print("^5Debug^7: ^2Generating Vending Machine Stash^7: ^6"..vendID) end
-			TriggerServerEvent("jim-shops:GenerateVend", {data, vendID})
-			Wait(1000)
+		if Config.Limit and data.vend then
+			if not vendID then vendID = "["..string.sub(data.shoptable.label, 1, 4)..math.floor(GetEntityCoords(data.entity).x or 1)..math.floor(GetEntityCoords(data.entity).y or 1).."]" end
 			local p = promise.new()
 			QBCore.Functions.TriggerCallback('jim-shops:server:GetStashItems', function(stash) p:resolve(stash) end, vendID)
 			stashItems = Citizen.Await(p)
+			if json.encode(stashItems) == "[]" then
+				if Config.Debug then print("^5Debug^7: ^2Generating Vending Machine Stash^7: ^6"..vendID) end
+				TriggerServerEvent("jim-shops:GenerateVend", {data, vendID})
+				Wait(1000)
+				local p = promise.new()
+				QBCore.Functions.TriggerCallback('jim-shops:server:GetStashItems', function(stash) p:resolve(stash) end, vendID)
+				stashItems = Citizen.Await(p)
+			end
 		end
-	end
 
-	if Config.Limit and not custom and not data.vend then
-		local p = promise.new()
-		QBCore.Functions.TriggerCallback('jim-shops:server:GetStashItems', function(stash) p:resolve(stash) end, "["..data.k.."("..data.l..")]")
-		stashItems = Citizen.Await(p)
-	end
+		if Config.Limit and not custom and not data.vend then
+			local p = promise.new()
+			QBCore.Functions.TriggerCallback('jim-shops:server:GetStashItems', function(stash) p:resolve(stash) end, "["..data.k.."("..data.l..")]")
+			stashItems = Citizen.Await(p)
+		end
 
-	if data.shoptable["logo"] then ShopMenu[#ShopMenu + 1] = { isDisabled = true, header = "<center><img src="..data.shoptable["logo"].." width=250.0rem>", txt = "", isMenuHeader = true }
-	else ShopMenu[#ShopMenu + 1] = { header = data.shoptable["label"], txt = "", isMenuHeader = true } end
+		if data.shoptable["logo"] then ShopMenu[#ShopMenu + 1] = { isDisabled = true, header = "<center><img src="..data.shoptable["logo"].." width=250.0rem>", txt = "", isMenuHeader = true }
+		else ShopMenu[#ShopMenu + 1] = { header = data.shoptable["label"], txt = "", isMenuHeader = true } end
 
-	ShopMenu[#ShopMenu + 1] = { icon = "fas fa-circle-xmark", header = "", txt = "Close", params = { event = "jim-shops:CloseMenu" } }
+		ShopMenu[#ShopMenu + 1] = { icon = "fas fa-circle-xmark", header = "", txt = "Close", params = { event = "jim-shops:CloseMenu" } }
 
-	if data.shoptable["type"] == "weapons" then
-		local p = promise.new()	local p2 = promise.new()
-		QBCore.Functions.TriggerCallback("jim-shops:server:getLicenseStatus", function(hasLic, hasLicItem) p:resolve(hasLic) p2:resolve(hasLicItem) end)
-		hasLicense = Citizen.Await(p) hasLicenseItem = Citizen.Await(p2)
-	end
-	for i = 1, #products do
-		local amount, text, setheader = table.unpack({nil,nil,nil})
-		local lock = false
-		if Config.Debug then print("^5Debug^7: ^3ShopMenu ^7- ^2Searching for item ^7'^6"..products[i].name.."^7'") end
-		if not QBCore.Shared.Items[products[i].name:lower()] then
-			print("^5Debug^7: ^3ShopItems ^7- ^1Can't ^2find item ^7'^6"..products[i].name.."^7'")
-		else
-			if Config.Limit and not custom then
-				if stashItems[i].amount == 0 then amount = 0 lock = true else amount = tonumber(stashItems[i].amount) end
-			end
-			if products[i].price == 0 then price = "Free" else price = "Cost: $"..products[i].price end
-
-			if not Config.JimMenu then setheader = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px onerror='this.onerror=null; this.remove();'>"..QBCore.Shared.Items[products[i].name].label
-			else setheader = QBCore.Shared.Items[products[i].name].label end
-			local text = price.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 1000)..Config.Measurement
-			if Config.Limit and not custom then
-				if amount ~= 0 then	text = price.."<br>Amount: x"..amount.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 1000)..Config.Measurement
-				else text = price.."<br>Out Of Stock<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 1000)..Config.Measurement end
-			end
-			if products[i].requiredJob then
-			for k, v in pairs(products[i].requiredJob) do
-				if QBCore.Functions.GetPlayerData().job.name == k and QBCore.Functions.GetPlayerData().job.grade.level >= v then
-					local icon, header = nil, nil
-					if products[i].info ~= nil and products[i].info.image ~= nil then icon = "qb-inventory/html/images/"..products[i].info.image else icon = products[i].name end
-					if products[i].info ~= nil and products[i].info.label ~= nil then header = products[i].info.label else header = setheader end
-					ShopMenu[#ShopMenu + 1] = { icon = icon, header = header, txt = text, isMenuHeader = lock,
-						params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info or {}, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount, custom = custom } } }
-					end
-				end
-			elseif products[i].requiredGang then
-			for i2 = 1, #products[i].requiredGang do
-				if QBCore.Functions.GetPlayerData().gang.name == products[i].requiredGang[i2] then
-					local icon, header = nil, nil
-					if products[i].info ~= nil and products[i].info.image ~= nil then icon = "qb-inventory/html/images/"..products[i].info.image else icon = products[i].name end
-					if products[i].info ~= nil and products[i].info.label ~= nil then header = products[i].info.label else header = setheader end
-					ShopMenu[#ShopMenu + 1] = { icon = icon, header = header, txt = text, isMenuHeader = lock,
-						params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info or {}, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount, custom = custom } } }
-					end
-				end
-			elseif products[i].requiresLicense then
-				if hasLicense and hasLicenseItem then
-					local icon, header = nil, nil
-					if products[i].info ~= nil and products[i].info.image ~= nil then icon = "qb-inventory/html/images/"..products[i].info.image else icon = products[i].name end
-					if products[i].info ~= nil and products[i].info.label ~= nil then header = products[i].info.label else header = setheader end
-					ShopMenu[#ShopMenu + 1] = { icon = icon, header = header, txt = text, isMenuHeader = lock,
-					params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info or {}, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount, custom = custom } } }
-				end
+		if data.shoptable["type"] == "weapons" then
+			local p = promise.new()	local p2 = promise.new()
+			QBCore.Functions.TriggerCallback("jim-shops:server:getLicenseStatus", function(hasLic, hasLicItem) p:resolve(hasLic) p2:resolve(hasLicItem) end)
+			hasLicense = Citizen.Await(p) hasLicenseItem = Citizen.Await(p2)
+		end
+		for i = 1, #products do
+			local amount, text, setheader = table.unpack({nil,nil,nil})
+			local lock = false
+			if Config.Debug then print("^5Debug^7: ^3ShopMenu ^7- ^2Searching for item ^7'^6"..products[i].name.."^7'") end
+			if not QBCore.Shared.Items[products[i].name:lower()] then
+				print("^5Debug^7: ^3ShopItems ^7- ^1Can't ^2find item ^7'^6"..products[i].name.."^7'")
 			else
-				local icon, header = nil, nil
-				if products[i].info ~= nil and products[i].info.image ~= nil then icon = "qb-inventory/html/images/"..products[i].info.image else icon = products[i].name end
-				if products[i].info ~= nil and products[i].info.label ~= nil then header = products[i].info.label else header = setheader end
-				ShopMenu[#ShopMenu + 1] = { icon = icon, header = header, txt = text, isMenuHeader = lock,
-				params = { event = "jim-shops:Charge", args = {
-					item = products[i].name,
-					cost = products[i].price,
-					info = products[i].info,
-					shoptable = data.shoptable,
-					k = data.k or vendID,
-					l = data.l or "",
-					amount = amount,
-					custom = custom,
-				} } }
+				if Config.Limit and not custom then
+					if stashItems[i].amount == 0 then amount = 0 lock = true else amount = tonumber(stashItems[i].amount) end
+				end
+				if products[i].price == 0 then price = "Free" else price = "Cost: $"..products[i].price end
+
+				if not Config.JimMenu then setheader = "<img src=nui://"..Config.img..QBCore.Shared.Items[products[i].name].image.." width=30px onerror='this.onerror=null; this.remove();'>"..QBCore.Shared.Items[products[i].name].label
+				else setheader = QBCore.Shared.Items[products[i].name].label end
+				local text = price.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 1000)..Config.Measurement
+				if Config.Limit and not custom then
+					if amount ~= 0 then	text = price.."<br>Amount: x"..amount.."<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 1000)..Config.Measurement
+					else text = price.."<br>Out Of Stock<br>Weight: "..(QBCore.Shared.Items[products[i].name].weight / 1000)..Config.Measurement end
+				end
+				if products[i].requiredJob then
+				for k, v in pairs(products[i].requiredJob) do
+					if QBCore.Functions.GetPlayerData().job.name == k and QBCore.Functions.GetPlayerData().job.grade.level >= v then
+						local icon, header = nil, nil
+						if products[i].info ~= nil and products[i].info.image ~= nil then icon = "qb-inventory/html/images/"..products[i].info.image else icon = products[i].name end
+						if products[i].info ~= nil and products[i].info.label ~= nil then header = products[i].info.label else header = setheader end
+						ShopMenu[#ShopMenu + 1] = { icon = icon, header = header, txt = text, isMenuHeader = lock,
+							params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info or {}, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount, custom = custom } } }
+						end
+					end
+				elseif products[i].requiredGang then
+				for i2 = 1, #products[i].requiredGang do
+					if QBCore.Functions.GetPlayerData().gang.name == products[i].requiredGang[i2] then
+						local icon, header = nil, nil
+						if products[i].info ~= nil and products[i].info.image ~= nil then icon = "qb-inventory/html/images/"..products[i].info.image else icon = products[i].name end
+						if products[i].info ~= nil and products[i].info.label ~= nil then header = products[i].info.label else header = setheader end
+						ShopMenu[#ShopMenu + 1] = { icon = icon, header = header, txt = text, isMenuHeader = lock,
+							params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info or {}, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount, custom = custom } } }
+						end
+					end
+				elseif products[i].requiresLicense then
+					if hasLicense and hasLicenseItem then
+						local icon, header = nil, nil
+						if products[i].info ~= nil and products[i].info.image ~= nil then icon = "qb-inventory/html/images/"..products[i].info.image else icon = products[i].name end
+						if products[i].info ~= nil and products[i].info.label ~= nil then header = products[i].info.label else header = setheader end
+						ShopMenu[#ShopMenu + 1] = { icon = icon, header = header, txt = text, isMenuHeader = lock,
+						params = { event = "jim-shops:Charge", args = { item = products[i].name, cost = products[i].price, info = products[i].info or {}, shoptable = data.shoptable, k = data.k, l = data.l, amount = amount, custom = custom } } }
+					end
+				else
+					local icon, header = nil, nil
+					if products[i].info ~= nil and products[i].info.image ~= nil then icon = "qb-inventory/html/images/"..products[i].info.image else icon = products[i].name end
+					if products[i].info ~= nil and products[i].info.label ~= nil then header = products[i].info.label else header = setheader end
+					ShopMenu[#ShopMenu + 1] = { icon = icon, header = header, txt = text, isMenuHeader = lock,
+					params = { event = "jim-shops:Charge", args = {
+						item = products[i].name,
+						cost = products[i].price,
+						info = products[i].info,
+						shoptable = data.shoptable,
+						k = data.k or vendID,
+						l = data.l or "",
+						amount = amount,
+						custom = custom,
+					} } }
+				end
 			end
 		end
-	end
-	exports['qb-menu']:openMenu(ShopMenu)
+		exports['qb-menu']:openMenu(ShopMenu)
+	end)
 end)
 --Selling animations are simply a pass item to seller animation
 RegisterNetEvent('jim-shops:SellAnim', function(data)
@@ -248,27 +254,29 @@ end)
 RegisterNetEvent('jim-shops:CloseMenu', function() exports['qb-menu']:closeMenu() end)
 
 RegisterNetEvent('jim-shops:Charge', function(data)
-	if data.cost == "Free" then price = data.cost else price = "$"..data.cost end
-	if QBCore.Shared.Items[data.item].weight == 0 then weight = "" else weight = "Weight: "..(QBCore.Shared.Items[data.item].weight / 1000)..Config.Measurement end
-	local settext = "- Confirm Purchase -<br><br>"
-	if Config.Limit and data.amount ~= nil then settext = settext.."Amount: "..data.amount.."<br>" end
-	settext = settext..weight.."<br> Cost per item: "..price.."<br><br>- Payment Type -"
-	local header = "<center><p><img src=nui://"..Config.img..QBCore.Shared.Items[data.item].image.." width=100px></p>"..QBCore.Shared.Items[data.item].label
-	if data.shoptable["logo"] then header = "<center><p><img src="..data.shoptable["logo"].." width=150px></img></p>"..header end
+	QBCore.Functions.TriggerCallback('jim-shops:server:refreshObject', function(QBCore)
+		if data.cost == "Free" then price = data.cost else price = "$"..data.cost end
+		if QBCore.Shared.Items[data.item].weight == 0 then weight = "" else weight = "Weight: "..(QBCore.Shared.Items[data.item].weight / 1000)..Config.Measurement end
+		local settext = "- Confirm Purchase -<br><br>"
+		if Config.Limit and data.amount ~= nil then settext = settext.."Amount: "..data.amount.."<br>" end
+		settext = settext..weight.."<br> Cost per item: "..price.."<br><br>- Payment Type -"
+		local header = "<center><p><img src=nui://"..Config.img..QBCore.Shared.Items[data.item].image.." width=100px></p>"..QBCore.Shared.Items[data.item].label
+		if data.shoptable["logo"] then header = "<center><p><img src="..data.shoptable["logo"].." width=150px></img></p>"..header end
 
-	local newinputs = {
-		{ type = 'radio', name = 'billtype', text = settext, options = { { value = "cash", text = "Cash" }, { value = "bank", text = "Card" } } },
-		{ type = 'number', isRequired = true, name = 'amount', text = 'Amount to buy' } }
+		local newinputs = {
+			{ type = 'radio', name = 'billtype', text = settext, options = { { value = "cash", text = "Cash" }, { value = "bank", text = "Card" } } },
+			{ type = 'number', isRequired = true, name = 'amount', text = 'Amount to buy' } }
 
-	local dialog = exports['qb-input']:ShowInput({ header = header, submitText = "Pay", inputs = newinputs })
-	if dialog then
-		if not dialog.amount then return end
-		if Config.Limit and data.custom == nil then	if tonumber(dialog.amount) > tonumber(data.amount) then TriggerEvent("QBCore:Notify", "Incorrect amount", "error") TriggerEvent("jim-shops:Charge", data) return end end
-		if tonumber(dialog.amount) <= 0 then TriggerEvent("QBCore:Notify", "Incorrect amount", "error") TriggerEvent("jim-shops:Charge", data) return end
-		if data.cost == "Free" then data.cost = 0 end
-		if data.amount == nil then nostash = true end
-		TriggerServerEvent('jim-shops:GetItem', dialog.amount, dialog.billtype, data.item, data.shoptable, data.cost, data.info, data.k, data.l or nil, nostash)
-	end
+		local dialog = exports['qb-input']:ShowInput({ header = header, submitText = "Pay", inputs = newinputs })
+		if dialog then
+			if not dialog.amount then return end
+			if Config.Limit and data.custom == nil then	if tonumber(dialog.amount) > tonumber(data.amount) then TriggerEvent("QBCore:Notify", "Incorrect amount", "error") TriggerEvent("jim-shops:Charge", data) return end end
+			if tonumber(dialog.amount) <= 0 then TriggerEvent("QBCore:Notify", "Incorrect amount", "error") TriggerEvent("jim-shops:Charge", data) return end
+			if data.cost == "Free" then data.cost = 0 end
+			if data.amount == nil then nostash = true end
+			TriggerServerEvent('jim-shops:GetItem', dialog.amount, dialog.billtype, data.item, data.shoptable, data.cost, data.info, data.k, data.l or nil, nostash)
+		end
+	end)
 end)
 
 AddEventHandler('onResourceStop', function(resource) if resource ~= GetCurrentResourceName() then return end

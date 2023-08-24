@@ -1,5 +1,10 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
+RegisterNetEvent('QBCore:Server:UpdateObject', function()
+	if source ~= '' then return false end
+	QBCore = exports['qb-core']:GetCoreObject()
+end)
+
 AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName() ~= resource then return end
 	TriggerEvent("jim-shops:MakeStash")
 	for k, v in pairs(Config.Products) do
@@ -260,4 +265,5 @@ RegisterNetEvent('jim-shops:server:sellChips', function()
 end)
 
 QBCore.Functions.CreateCallback('jim-shops:server:GetStashItems', function(source, cb, stashId) cb(GetStashItems(stashId)) end)
+QBCore.Functions.CreateCallback('jim-shops:server:refreshObject', function(source, cb) cb(QBCore) end)
 RegisterNetEvent('jim-shops:server:SaveStashItems', function(stashId, items) MySQL.Async.insert('INSERT INTO stashitems (stash, items) VALUES (:stash, :items) ON DUPLICATE KEY UPDATE items = :items', { ['stash'] = stashId, ['items'] = json.encode(items) }) end)
