@@ -4,7 +4,7 @@
 
 Config = {
 	System = {
-		Debug = true, -- Enable to add debug boxes and message.
+		Debug = false, -- Enable to add debug boxes and message.
 		img = "qb-inventory/html/images/", -- Set this to your inventory
 
 		Notify = "qb",
@@ -24,11 +24,11 @@ Config = {
 		ApGov = false, -- Add support for AP-Goverment Tax
 
 		MaxSlots = 41, -- Set this to your player inventory slot count, this is default "41"
-		BlackMarket = true, -- enable to add blackmarket locations (defined at the bottom of this file)
+		BlackMarket = false, -- enable to add blackmarket locations (defined at the bottom of this file)
 		Measurement = "kg", -- Custom Weight measurement
 		Gabz247 = false,  -- Enable if using gabz 247 stores
 		GabzAmmu = false, -- Enable if using gabz Ammunation stores
-		VendOverride = true, -- Enable this if you want all the vending machines to use this script
+		VendOverride = false, -- Enable this if you want all the vending machines to use this script
 		RandomAmount = true, -- Sets wether a stash should have a "random" amount of stock or full.
 		SellCasinoChips = {
 			coords = vector4(950.37, 34.72, 71.87, 33.82),
