@@ -1,3 +1,52 @@
+----- Changes in this version:
+- Full QB and OX support for inventory, input, menu and callbacks. Config options to specify QB or OX for each
+- Full support for changing QB-Core export in config so shop can easily be used with qb-core, qbx-core, or a custom one if you've renamed it
+- Support in config for custom qb-menu names, so you can use qbx-menu, qb-menu or jimathy-menu etc
+- Extra monetary types are possible for items besides bank and cash. You can specify an item requires a specific money type, or an entire shop. Great for crypto or dirty money sales
+
+Full shop Sample:
+```
+	Config.Locations["blackmarket"] = {
+		["label"] = "Black Market",
+		["type"] = "items",
+		["paymentType"] = {{type = "dirtymoney", text = "Dirty Money"}},
+		["model"] = {
+			`A_M_Y_MethHead_01`,
+		},
+		["coords"] = {
+			vector4(776.24, 4184.08, 41.8, 92.12),
+		},
+		["products"] = Config.Products["blackmarket"],
+		["hideblip"] = true,
+	}
+```
+Single Item Sample:
+```
+		["freshfood"] = {
+			{ name = "strawberry", price = 3.5, amount = 10, info = {}, paymentType = {{type = "crypto", text = "QBit Coin" }} },
+
+```
+
+- Licenses now allow multiple license types instead of just weapons, and only looks at the metatable
+- Every license listed must be owned in order to buy the item
+
+Sample:
+```
+{ name = "weapon_pistol", price = 2500, amount = 5, requiresLicense = {"weapon", "hunting"} },
+```
+
+- New parameter to check for inventory items that must be held to buy an item
+
+Sample:
+```
+{ name = "weapon_pistol", price = 2500, amount = 5, requiresItem = {"huntinglicense"} },
+```
+
+- Refactored the shop building to use several if's instead of elseif so items can require multiple things, such as jobrole police & requireslicense weapon before you can buy it.
+
+- Config.SellCasinoChips now includes chipItem for easy changing your casino chip if needed
+
+----- Original README Information
 # jim-shops
 - QBCore based shops system
 - Written from scratch by me, but based on `qb-shops` and `qb-menu`
@@ -55,7 +104,7 @@ ensure [jim]
 ![](https://user-images.githubusercontent.com/1885302/161044087-c9eb8f8d-a4a5-4174-a048-73a610231abe.jpg)
 - Example of a `shop`
 ```lua
-Config.Locations = {
+Locations = {
 	["digitalden"] = { -- general name of the shops
 		["label"] = "Digital Den", -- The label of the shop that will be seen by players
 		["targetIcon"] = "fab fa-galactic-republic", -- Custom qb-target icon (default: "fas fa-cash-register")
