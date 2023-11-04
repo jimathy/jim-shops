@@ -54,7 +54,7 @@ CreateThread(function()
 					Core.Functions.TriggerCallback('jim-shops:server:getBlackMarketLoc', function(stash) p:resolve(stash) end)
 					coord = Citizen.Await(p)
 				elseif Config.System.Callback == "ox" then
-					coord = lib.callback.await('jim-shops:server:GetStasgetBlackMarketLochItems', false)
+					coord = lib.callback.await('jim-shops:server:getBlackMarketLoc', false)
 				end
 				Locations["blackmarket"]["coords"] = {}
 				Locations["blackmarket"]["coords"][1] = coord
