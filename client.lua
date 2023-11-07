@@ -34,7 +34,7 @@ CreateThread(function()
 
 				elseif Config.System.Target == "ox" then
 
-					exports.ox_targtet:addModel(v["model"], {{
+					exports.ox_target:addModel(v["model"], {{
 						icon = (v["targetIcon"]), label = (v["targetLabel"]),
 						onSelect = function() TriggerEvent("jim-shops:ShopMenu", { shoptable = v, name = v["label"], vend = true }) end,
 						canInteract = function(_, distance)
