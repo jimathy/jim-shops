@@ -19,13 +19,12 @@ AddEventHandler('onResourceStart', function(r) if GetCurrentResourceName() ~= r 
 		if v["products"] == nil then
 			print("^5Debug^7: ^3Config^7.^3Locations^7['^6"..k.."^7']^2 can't find its product table^7")
 		end
+		Locations[k]["model"] = { Locations[k]["model"][math.random(1, #Locations[k]["model"])] } -- Pick a single ped model from the list of possible ones
 	end
 	if Config.Overrides.BlackMarket then
 		BlackMarketSyncCoord = Locations["blackmarket"]["coords"][math.random(1, #Locations["blackmarket"]["coords"])]
 	end
 end)
-
-
 
 local function GetStashItems(stashId)
 	local items = {}
@@ -339,6 +338,9 @@ end)
 if Config.System.Callback == "qb" then
 	Core.Functions.CreateCallback('jim-shops:server:getBlackMarketLoc', function(source, cb)
 		cb(BlackMarketSyncCoord)
+	end)
+	Core.Functions.CreateCallBack('jim-shops:server:syncShops', function(source,cb)
+		cb(Locations)
 	end)
 	Core.Functions.CreateCallback('jim-shops:server:getLicenseStatus', function(source, cb, licenseArray)
 		local src = source

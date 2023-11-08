@@ -6,7 +6,16 @@ RegisterNetEvent('QBCore:Client:SetDuty', function(duty) onDuty = duty end)
 RegisterNetEvent('QBCore:Client:OnGangUpdate', function(GangInfo) PlayerGang = GangInfo end)
 AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName() ~= resource then return end Core.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) end)
 
+local pedVoices = { -- Testing forcing certain voices for jim-talktonpc
+	[`mp_m_shopkeep_01`] = "MP_M_SHOPKEEP_01_PAKISTANI_MINI_01",
+	[`S_F_Y_Shop_LOW`] = "S_F_Y_SHOP_LOW_WHITE_MINI_01",
+	[`S_F_Y_SweatShop_01`] = "S_F_Y_SHOP_LOW_WHITE_MINI_01",
+}
+
 CreateThread(function()
+	local p = promise.new()
+	Core.Functions.TriggerCallback('jim-shops:server:getBlackMarketLoc', function(locs) p:resolve(locs) end)
+	Locations = Citizen.Await(p)
 	for k, v in pairs(Locations) do
 		if k == "vendingmachine" and Config.Overrides.VendOverride then
 			for l, b in pairs(v["coords"]) do
@@ -18,6 +27,7 @@ CreateThread(function()
 							if not Peds["Shop - ['"..k.."("..l..")']"] then
 								Peds["Shop - ['"..k.."("..l..")']"] = CreateObject(v["model"][i], b.x, b.y, b.z-1.03, 0, 0, 0)
 								SetEntityHeading(Peds["Shop - ['"..k.."("..l..")']"], b.w)
+								SetAmbientVoiceName(Peds["Shop - ['"..k.."("..l..")']"], pedVoices[v["model"][i]])
 							end
 						end
 						FreezeEntityPosition(Peds["Shop - ['"..k.."("..l..")']"], true)
@@ -25,7 +35,6 @@ CreateThread(function()
 					end
 				end
 				if Config.System.Target == "qb" then
-
 					exports['qb-target']:AddTargetModel(v["model"], {
 						options = { {
 							event = "jim-shops:ShopMenu", icon = (v["targetIcon"]), label = (v["targetLabel"]),
@@ -33,7 +42,6 @@ CreateThread(function()
 						distance = 1.5, })
 
 				elseif Config.System.Target == "ox" then
-
 					exports.ox_targtet:addModel(v["model"], {{
 						icon = (v["targetIcon"]), label = (v["targetLabel"]),
 						onSelect = function() TriggerEvent("jim-shops:ShopMenu", { shoptable = v, name = v["label"], vend = true }) end,
@@ -41,7 +49,6 @@ CreateThread(function()
 							return distance < 1.5 and true or false
 						end
 					}})
-
 				else
 					if Config.System.Debug then print("^5Debug^7: ^2Config option ^6Config.System.Target ^2should be ^7ox ^2or ^7qb") end
 				end
