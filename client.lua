@@ -78,10 +78,7 @@ CreateThread(function()
 						if IsModelAPed(v["model"][i]) then
 							if not Peds[label] then
 								Peds[label] = makePed(v["model"][i], b, true, v["scenario"] or nil, nil)
-
-								print(GetAmbientVoiceNameHash(Peds["Shop - ['"..k.."("..l..")']"]))
 								SetAmbientVoiceName(Peds["Shop - ['"..k.."("..l..")']"], pedVoices[v["model"][i]])
-								print(GetAmbientVoiceNameHash(Peds["Shop - ['"..k.."("..l..")']"]))
 								if GetResourceState("jim-talktonpc") == "started" then exports["jim-talktonpc"]:createDistanceMessage("shopgreetspec", Peds[label], 3.0, false) end
 							end
 							if not v["killable"] then SetEntityInvincible(Peds[label], true) end
