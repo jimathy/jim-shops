@@ -10,11 +10,12 @@ local pedVoices = { -- Testing forcing certain voices for jim-talktonpc
 	[`mp_m_shopkeep_01`] = "MP_M_SHOPKEEP_01_PAKISTANI_MINI_01",
 	[`S_F_Y_Shop_LOW`] = "S_F_Y_SHOP_LOW_WHITE_MINI_01",
 	[`S_F_Y_SweatShop_01`] = "S_F_Y_SHOP_LOW_WHITE_MINI_01",
+	--add ped model and voice names here
 }
 
 CreateThread(function()
 	local p = promise.new()
-	Core.Functions.TriggerCallback('jim-shops:server:getBlackMarketLoc', function(locs) p:resolve(locs) end)
+	Core.Functions.TriggerCallback('jim-shops:server:syncShops', function(locs) p:resolve(locs) end)
 	Locations = Citizen.Await(p)
 	for k, v in pairs(Locations) do
 		if k == "vendingmachine" and Config.Overrides.VendOverride then
@@ -27,7 +28,6 @@ CreateThread(function()
 							if not Peds["Shop - ['"..k.."("..l..")']"] then
 								Peds["Shop - ['"..k.."("..l..")']"] = CreateObject(v["model"][i], b.x, b.y, b.z-1.03, 0, 0, 0)
 								SetEntityHeading(Peds["Shop - ['"..k.."("..l..")']"], b.w)
-								SetAmbientVoiceName(Peds["Shop - ['"..k.."("..l..")']"], pedVoices[v["model"][i]])
 							end
 						end
 						FreezeEntityPosition(Peds["Shop - ['"..k.."("..l..")']"], true)
@@ -78,6 +78,10 @@ CreateThread(function()
 						if IsModelAPed(v["model"][i]) then
 							if not Peds[label] then
 								Peds[label] = makePed(v["model"][i], b, true, v["scenario"] or nil, nil)
+
+								print(GetAmbientVoiceNameHash(Peds["Shop - ['"..k.."("..l..")']"]))
+								SetAmbientVoiceName(Peds["Shop - ['"..k.."("..l..")']"], pedVoices[v["model"][i]])
+								print(GetAmbientVoiceNameHash(Peds["Shop - ['"..k.."("..l..")']"]))
 								if GetResourceState("jim-talktonpc") == "started" then exports["jim-talktonpc"]:createDistanceMessage("shopgreetspec", Peds[label], 3.0, false) end
 							end
 							if not v["killable"] then SetEntityInvincible(Peds[label], true) end

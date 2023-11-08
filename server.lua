@@ -336,12 +336,8 @@ RegisterNetEvent("qb-shops:server:RestockShopItems", function(storeinfo)
 end)
 
 if Config.System.Callback == "qb" then
-	Core.Functions.CreateCallback('jim-shops:server:getBlackMarketLoc', function(source, cb)
-		cb(BlackMarketSyncCoord)
-	end)
-	Core.Functions.CreateCallBack('jim-shops:server:syncShops', function(source,cb)
-		cb(Locations)
-	end)
+	Core.Functions.CreateCallback('jim-shops:server:getBlackMarketLoc', function(source, cb) cb(BlackMarketSyncCoord) end)
+	Core.Functions.CreateCallback('jim-shops:server:syncShops', function(source, cb) cb(Locations) end)
 	Core.Functions.CreateCallback('jim-shops:server:getLicenseStatus', function(source, cb, licenseArray)
 		local src = source
 		local hasLicense = true
@@ -365,6 +361,7 @@ if Config.System.Callback == "qb" then
 	Core.Functions.CreateCallback('jim-shops:server:GetStashItems',function(source, cb, stashId) cb(GetStashItems(stashId)) end)
 elseif Config.System.Callback == "ox" then
 	lib.callback.register('jim-shops:server:getBlackMarketLoc', function(source) return GetStashItems(BlackMarketSyncCoord) end)
+	lib.callback.register('jim-shops:server:syncShops', function(source) cb(Locations) end)
 	lib.callback.register('jim-shops:server:getLicenseStatus', function(source, licenseArray)
 		local src = source
 		local hasLicense = true
