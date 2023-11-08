@@ -112,7 +112,7 @@ if Config.Inv == "ox" then
 else
     function HasItem(items, amount)
         local amount, count = amount or 1, 0
-        for _, itemData in pairs(QBCore.Functions.GetPlayerData().items) do
+        for _, itemData in pairs(Core.Functions.GetPlayerData().items) do
             if itemData and (itemData.name == items) then
                 if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Item^7: '^3"..tostring(items).."^7' ^2Slot^7: ^3"..itemData.slot.." ^7x(^3"..tostring(itemData.amount).."^7)") end
                 count += (itemData.amount or 1)
@@ -130,7 +130,7 @@ function progressBar(data)
 			anim = { dict = data.dict, clip = data.anim, flag = data.flag or 15, scenario = data.task }, disable = { combat = true }, }) then result = true
 		else result = false	end
 	else
-		QBCore.Functions.Progressbar("mechbar",	data.label,	data.time, data.dead, data.cancel,
+		Core.Functions.Progressbar("mechbar",	data.label,	data.time, data.dead, data.cancel,
 			{ disableMovement = false, disableCarMovement = false, disableMouse = false, disableCombat = true, },
 			{ animDict = data.dict, anim = data.anim, flags = data.flag, task = data.task }, {}, {}, function()
 				result = true
