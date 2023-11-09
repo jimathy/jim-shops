@@ -31,7 +31,7 @@ CreateThread(function()
 							end
 						end
 						FreezeEntityPosition(Peds["Shop - ['"..k.."("..l..")']"], true)
-						if Config.Debug then print("^5Debug^7: ^6Ped ^2Created for Shop ^7- '^6"..k.."^7(^6"..l.."^7)'") end
+						if Config.System.Debug then print("^5Debug^7: ^6Ped ^2Created for Shop ^7- '^6"..k.."^7(^6"..l.."^7)'") end
 					end
 				end
 				if Config.System.Target == "qb" then

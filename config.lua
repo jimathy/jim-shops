@@ -40,3 +40,4 @@ Config = {
 }
 
 Core = exports['qb-core']:GetCoreObject()
+RegisterNetEvent('QBCore:Client:UpdateObject', function() Core = exports["qb-core"]:GetCoreObject() end)
