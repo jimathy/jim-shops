@@ -14,9 +14,13 @@ local pedVoices = { -- Testing forcing certain voices for jim-talktonpc
 }
 
 CreateThread(function()
-	local p = promise.new()
-	Core.Functions.TriggerCallback('jim-shops:server:syncShops', function(locs) p:resolve(locs) end)
-	Locations = Citizen.Await(p)
+	if Config.System.Callback == "qb" then
+		local p = promise.new()
+		Core.Functions.TriggerCallback('jim-shops:server:syncShops', function(locs) p:resolve(locs) end)
+		Locations = Citizen.Await(p)
+	elseif Config.System.Callback == "ox" then
+		Locations = lib.callback.await('jim-shops:server:syncShops', false)
+	end
 	for k, v in pairs(Locations) do
 		if k == "vendingmachine" and Config.Overrides.VendOverride then
 			for l, b in pairs(v["coords"]) do
@@ -291,8 +295,14 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 	if Config.System.Menu == "qb" then
 		exports[Config.System.MenuExport]:openMenu(ShopMenu)
 	elseif Config.System.Menu == "ox" then
-		lib.registerContext({id = vendID or ("["..data.k.."("..data.l..")]"), title = data.shoptable["logo"] and '!['..''.. ']('..data.shoptable["logo"]..')' or data.shoptable["label"], options = ShopMenu})
-		lib.showContext(vendID or ("["..data.k.."("..data.l..")]"))
+		local shopName = ""
+		if data.custom or custom then
+			shopName = vendID or ("["..data.shoptable.label.."]")
+		else
+			shopName = vendID or ("["..data.k.."("..data.l..")]")
+		end
+		lib.registerContext({id = shopName, title = data.shoptable["logo"] and '!['..''.. ']('..data.shoptable["logo"]..')' or data.shoptable["label"], options = ShopMenu})
+		lib.showContext(shopName)
 	end
 end)
 
