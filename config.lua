@@ -7,12 +7,25 @@ Config = {
 		Debug = false, -- Enable to add debug boxes and message.
 		img = "qb-inventory/html/images/", -- Set this to your inventory
 
-		Notify = "qb",
-		Inv = "qb", -- Inventory system, options are qb or ox
-		Target = "qb", -- Targetting system, options are qb or ox
-		Menu = "qb", -- Input + Menu system, options are qb or ox
+		--- FRAMEWORK OPTIONS ---
+		Inv = "qb", 		-- Supports "qb"	(qb-inventory) -- leave as "qb" for ps-inventory
+							-- "ox"				(ox_inventory)
 
-		MenuExport = "qb-menu", -- If using "qb", what is your menu called, usually qb-menu, qbx-menu, jixel-menu etc
+		Menu = "qb",        -- Supports "qb"    (qb-menu)
+							-- "ox"             (ox_lib)
+							-- "gta"            (warmenu)
+
+		Notify = "gta",     -- Supports "qb"    (qb-core)
+							-- "ox"             (ox_lib)
+							-- "gta"            (gta native)
+
+		Callback = "qb",    -- Supports "qb"    (qb-core)
+							-- "ox"             (ox_ib)
+
+		Target = "qb",      -- Supports "qb"    (qb-target)
+							-- "ox"             (ox_target)
+
+		MenuExport = "qb-menu", -- If using "qb", what is your menu called, usually "qb-menu", "qbx-menu", "jixel-menu" etc
 		Callback = "qb", -- use qb-core callbacks or oxlib callbacks, parameters are qb or ox
 	},
 
@@ -26,7 +39,7 @@ Config = {
 		MaxSlots = 41, -- Set this to your player inventory slot count, this is default "41"
 		BlackMarket = false, -- enable to add blackmarket locations (defined at the bottom of this file)
 		Measurement = "kg", -- Custom Weight measurement
-		Gabz247 = false,  -- Enable if using gabz 247 stores
+		Gabz247 = true,  -- Enable if using gabz 247 stores
 		GabzAmmu = false, -- Enable if using gabz Ammunation stores
 		VendOverride = false, -- Enable this if you want all the vending machines to use this script
 		RandomAmount = true, -- Sets wether a stash should have a "random" amount of stock or full.

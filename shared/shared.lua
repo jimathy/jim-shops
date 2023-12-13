@@ -1,6 +1,6 @@
 print("^2Jim^7-^2Shops ^7v^4"..GetResourceMetadata(GetCurrentResourceName(), 'version', nil):gsub("%.", "^7.^4").."^7 - ^2Shop Script by ^1Jimathy^7")
 
-br = Config.System.Menu == "ox" and "\n" or "<br>"
+br = (Config.System.Menu == "ox" or Config.System.Menu == "gta") and "\n" or "<br>"
 
 local time = 1000
 function loadModel(model)
@@ -85,19 +85,6 @@ function destroyProp(entity)
 	DeleteObject(entity)
 end
 
-function triggerNotify(title, message, type, src)
-	if Config.Notify == "okok" then
-		if not src then exports['okokNotify']:Alert(title, message, 6000, type)
-		else TriggerClientEvent('okokNotify:Alert', src, title, message, 6000, type) end
-	elseif Config.Notify == "qb" then
-		if not src then	TriggerEvent("QBCore:Notify", message, type)
-		else TriggerClientEvent("QBCore:Notify", src, message, type) end
-	elseif Config.Notify == "ox" then
-		if not src then exports.ox_lib:notify({title = title, description = message, type = type or "success"})
-		else TriggerClientEvent('ox_lib:notify', src, { type = type or "success", title = title, description = message }) end
-	end
-end
-
 function pairsByKeys(t) local a = {} for n in pairs(t) do a[#a+1] = n end table.sort(a) local i = 0 local iter = function() i += 1 if a[i] == nil then return nil else return a[i], t[a[i]] end end return iter end
 
 function countTable(table) local i = 0 for keys in pairs(table) do i += 1 end return i end
@@ -123,21 +110,4 @@ else
     end
 end
 
-function progressBar(data)
-	local result = nil
-	if Config.ProgressBar == "ox" then
-		if exports.ox_lib:progressBar({	duration = data.time, label = data.label, useWhileDead = data.dead or false, canCancel = data.cancel or true,
-			anim = { dict = data.dict, clip = data.anim, flag = data.flag or 15, scenario = data.task }, disable = { combat = true }, }) then result = true
-		else result = false	end
-	else
-		Core.Functions.Progressbar("mechbar",	data.label,	data.time, data.dead, data.cancel,
-			{ disableMovement = false, disableCarMovement = false, disableMouse = false, disableCombat = true, },
-			{ animDict = data.dict, anim = data.anim, flags = data.flag, task = data.task }, {}, {}, function()
-				result = true
-		end, function()
-			result = false
-		end, data.icon)
-	end
-	while result == nil do Wait(10) end
-	return result
-end
+function getName(id) return Locations[id].label end

@@ -2,7 +2,6 @@ PlayerGang, PlayerJob, Targets, Peds, Blips = {}, {}, {}, {}, {}
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function() Core.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) end)
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end)
-RegisterNetEvent('QBCore:Client:SetDuty', function(duty) onDuty = duty end)
 RegisterNetEvent('QBCore:Client:OnGangUpdate', function(GangInfo) PlayerGang = GangInfo end)
 AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName() ~= resource then return end Core.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) end)
 
@@ -14,13 +13,7 @@ local pedVoices = { -- Testing forcing certain voices for jim-talktonpc
 }
 
 CreateThread(function()
-	if Config.System.Callback == "qb" then
-		local p = promise.new()
-		Core.Functions.TriggerCallback('jim-shops:server:syncShops', function(locs) p:resolve(locs) end)
-		Locations = Citizen.Await(p)
-	elseif Config.System.Callback == "ox" then
-		Locations = lib.callback.await('jim-shops:server:syncShops', false)
-	end
+	Locations = triggerCallback("jim-shops:server:syncShops")
 	for k, v in pairs(Locations) do
 		if k == "vendingmachine" and Config.Overrides.VendOverride then
 			for l, b in pairs(v["coords"]) do
@@ -59,14 +52,7 @@ CreateThread(function()
 			end
 		else
 			if k == "blackmarket" then -- Server synced blackmarket coord
-				local coord = nil
-				if Config.System.Callback == "qb" then
-					local p = promise.new()
-					Core.Functions.TriggerCallback('jim-shops:server:getBlackMarketLoc', function(stash) p:resolve(stash) end)
-					coord = Citizen.Await(p)
-				elseif Config.System.Callback == "ox" then
-					coord = lib.callback.await('jim-shops:server:getBlackMarketLoc', false)
-				end
+				local coord = triggerCallback("jim-shops:server:getBlackMarketLoc")
 				Locations["blackmarket"]["coords"] = {}
 				Locations["blackmarket"]["coords"][1] = coord
 			end
@@ -95,63 +81,28 @@ CreateThread(function()
 						end
 					end
 				end
-				if Config.System.Target == "qb" then
-					local options = { {
-						event = "jim-shops:ShopMenu",
-						icon = (v["targetIcon"] or "fas fa-cash-register"),
-						label = (v["targetLabel"] or "Browse Shop"),
-						item = v["requiredItem"],
-						job = v["job"] or nil,
-						gang = v["gang"] or nil,
-						shoptable = v, name = v["label"], k = k, l = l, },
+				local options = { {
+					icon = (v["targetIcon"] or "fas fa-cash-register"),
+					label = (v["targetLabel"] or "Browse Shop"),
+					item = v["requiredItem"],
+					job = v["job"] or nil,
+					gang = v["gang"] or nil,
+					action = function()
+						TriggerEvent("jim-shops:ShopMenu", { shoptable = v, name = v["label"], k = k, l = l, entity = Peds[label] })
+					end,
+					},
+				}
+				if k == "casino" then
+					options[#options+1] = {
+						action = function() TriggerServerEvent("jim-shops:server:sellChips") end,
+						icon = "fab fa-galactic-republic", label = "Trade Chips ($"..Config.Overrides.SellCasinoChips.pricePer.." per chip)",
 					}
-					if k == "casino" then
-						options[#options+1] = {
-							action = function() TriggerServerEvent("jim-shops:server:sellChips") end,
-							icon = "fab fa-galactic-republic", label = "Trade Chips ($"..Config.Overrides.SellCasinoChips.pricePer.." per chip)",
-						}
-					end
-					if Config.Overrides.Peds then -- if Config.Overrides.Peds is enaabled
-						Targets[label] = exports['qb-target']:AddTargetEntity(Peds[label], { options = options, distance = 2.0 })
-					else
-						Targets[label] = exports['qb-target']:AddCircleZone(label, vector3(b.x, b.y, b.z), 2.0,	{ name=label, debugPoly=Config.System.Debug, useZ=true, },
-							{ options = options, distance = 2.0 })
-					end
-				elseif Config.System.Target == "ox" then
-					local options = {{
-						event = "jim-shops:ShopMenu",
-						icon = (v["targetIcon"] or "fas fa-cash-register"),
-						label = (v["targetLabel"] or "Browse Shop"),
-						idlabel = label,
-						items = v["requiredItem"],
-						groups = (v["job"] or v["gang"] or nil),
-						shoptable = v,
-						name = v["label"],
-						k = k,
-						l = l,
-						canInteract = function(_, distance)
-							return distance < 2.0 and true or false
-						end
-					}}
-					if k == "casino" then
-						options[#options+1] = {
-							onSelect = function() TriggerServerEvent("jim-shops:server:sellChips") end,
-							icon = "fab fa-galactic-republic", label = "Trade Chips ($"..Config.Overrides.SellCasinoChips.pricePer.." per chip)", }
-					end
-					if Config.Overrides.Peds then
-						Targets[label] = exports.ox_target:addLocalEntity(Peds[label], options)
-					else
-						Targets[label] = exports.ox_target:addSphereZone({
-							coords = vector3(b.x, b.y, b.z),
-							radius = 2.0,
-							debug = Config.System.Debug,
-							options = options
-						})
-					end
+				end
+				if Config.Overrides.Peds then
+					Targets[label] = createEntityTarget(Peds[label], options, 2.0)
 				else
-					if Config.System.Debug then
-						print("^5Debug^7: ^2Config option ^6Config.System.Target ^2should be ^7ox ^2or ^7qb")
-					end
+					Targets[label] = exports['qb-target']:AddCircleZone(label, vector3(b.x, b.y, b.z), 2.0,	{ name=label, debugPoly=Config.System.Debug, useZ=true, },
+						{ options = options, distance = 2.0 })
 				end
 			end
 		end
@@ -159,21 +110,22 @@ CreateThread(function()
 end)
 
 RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
-	local products,  hasLicence, hasLicenceItems, stashItems, set, vendID = data.shoptable.products, nil, nil, nil, "", data.vendID or nil
+	local products, hasLicence, hasLicenceItems, stashItems, vendID = data.shoptable.products, nil, nil, {}, data.vendID or nil
 	local ShopMenu = {}
-	local setheader = " "	
-	
-	if data.custom and not custom then custom = true end	
-	if GetResourceState("jim-talktonpc") == "started" then exports["jim-talktonpc"]:createCam(data.entity, true, "shop", true) end
+	local setheader = " "
+
+	if data.custom and not custom then custom = true end
+	if GetResourceState("jim-talktonpc") == "started" then
+		exports["jim-talktonpc"]:createCam(data.entity, true, "shop", true)
+	end
 
 	if Config.Overrides.Limit and data.vend then
 		if not vendID then
 			vendID = "["..string.sub(data.shoptable.label, 1, 4)..math.floor(GetEntityCoords(data.entity).x or 1)..math.floor(GetEntityCoords(data.entity).y or 1).."]"
 		end
-
 		if Config.System.Callback == "qb" then
 			local p = promise.new()
-			Core.Functions.TriggerCallback('jim-shops:server:GetStashItems', function(stash) p:resolve(stash) end, vendID)
+			Core.Functions.TriggerCallback('jim-shops:server:GetStashItems', function(cb) p:resolve(cb) end, vendID)
 			stashItems = Citizen.Await(p)
 		elseif Config.System.Callback == "ox" then
 			stashItems = lib.callback.await('jim-shops:server:GetStashItems', false, vendID)
@@ -197,15 +149,13 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 		if Config.System.Callback == "qb" then
 			local p = promise.new()
 			Core.Functions.TriggerCallback('jim-shops:server:GetStashItems', function(stash) p:resolve(stash) end, "["..data.k.."("..data.l..")]")
-			stashItems = Citizen.Await(p)			
+			stashItems = Citizen.Await(p)
 		elseif Config.System.Callback == "ox" then
 			stashItems = lib.callback.await('jim-shops:server:GetStashItems', false, "["..data.k.."("..data.l..")]")
 		end
 	end
-	if Config.System.Menu == "qb" then
-		ShopMenu[#ShopMenu + 1] = {	isDisabled = true, header = data.shoptable["logo"] and "<center><img src="..data.shoptable["logo"].." width=250.0rem>" or data.shoptable["label"],	isMenuHeader = true }
-		ShopMenu[#ShopMenu + 1] = { icon = "fas fa-circle-xmark", header = " ", txt = "Close", params = { event = "jim-shops:CloseMenu" } }
-	end
+
+	print("["..data.k.."("..data.l..")]")
 
 	for i = 1, #products do
 		local amount, lock = products[i].amount, false
@@ -221,7 +171,7 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 			text = text..price..br.."Weight: "..(Core.Shared.Items[products[i].name].weight / 1000)..Config.Overrides.Measurement
 
 			if Config.Overrides.Limit and not custom then
-				if stashItems[i] then					
+				if stashItems[i] then
 					if not stashItems[i].amount or stashItems[i].amount == 0 then
 						amount = 0
 						lock = true
@@ -230,9 +180,12 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 					end
 					if amount ~= 0 then
 						text = price..br.."Amount: x"..amount..br.."Weight: "..(Core.Shared.Items[products[i].name].weight / 1000)..Config.Overrides.Measurement
-					else
+					elseif amount == 0 then
 						text = price..br.."Out Of Stock"..br.."Weight: "..(Core.Shared.Items[products[i].name].weight / 1000)..Config.Overrides.Measurement
 					end
+				else
+					text = price..br.."Out Of Stock"..br.."Weight: "..(Core.Shared.Items[products[i].name].weight / 1000)..Config.Overrides.Measurement
+					lock = true
 				end
 			end
 			local canSee = false
@@ -260,55 +213,49 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 			if products[i].requiresItem then
 				for _, v in pairs(products[i].requiresItem) do canSee = HasItem(v) Wait(0) end
 			end
-			if canSee or (not products[i].requiresItem and not products[i].requiresLicense and not products[i].requiredGang and not products[i].requiredJob)  then
-				ShopMenu[#ShopMenu + 1] = {
+			if canSee or (not products[i].requiresItem and not products[i].requiresLicense and not products[i].requiredGang and not products[i].requiredJob) then
+				ShopMenu[#ShopMenu+1] = {
 					icon = "nui://"..Config.System.img..Core.Shared.Items[products[i].name].image,
 					image = "nui://"..Config.System.img..Core.Shared.Items[products[i].name].image,
-					header = Core.Shared.Items[products[i].name].label, txt = text, isMenuHeader = lock,
-					title = Core.Shared.Items[products[i].name].label, description = text, disabled = Config.System.Menu == "ox" and lock,
-					params = { event = "jim-shops:Charge", args = {
-						item = products[i].name,
-						cost = products[i].price,
-						info = products[i].info,
-						shoptable = data.shoptable,
-						vendID = vendID,
-						k = data.k or vendID,
-						l = data.l or "",
-						amount = amount,
-						custom = custom,
-					} },
-					event = "jim-shops:Charge", args = {
-						item = products[i].name,
-						cost = products[i].price,
-						info = products[i].info,
-						shoptable = data.shoptable,
-						vendID = vendID,
-						k = data.k or vendID,
-						l = data.l or "",
-						amount = amount,
-						custom = custom,
-					}
+					isMenuHeader = lock,
+					header = Core.Shared.Items[products[i].name].label, txt = text,
+					onSelect = function()
+						TriggerEvent("jim-shops:Charge", {
+							item = products[i].name,
+							cost = products[i].price,
+							info = products[i].info,
+							shoptable = data.shoptable,
+							vendID = vendID,
+							k = data.k or vendID,
+							l = data.l or "",
+							amount = amount,
+							custom = custom,
+						})
+					end,
 				}
 			end
 		end
 	end
+	local header = ""
 	if Config.System.Menu == "qb" then
-		exports[Config.System.MenuExport]:openMenu(ShopMenu)
+		header = data.shoptable["logo"] and "<center><img src="..data.shoptable["logo"].." width=250.0rem>" or data.shoptable["label"]
 	elseif Config.System.Menu == "ox" then
-		local shopName = ""
-		if custom then
-			shopName = vendID or ("["..data.shoptable.label.."]")
-		else
-			shopName = vendID or ("["..data.k.."("..data.l..")]")
-		end
-		lib.registerContext({id = shopName, title = data.shoptable["logo"] and '!['..''.. ']('..data.shoptable["logo"]..')' or data.shoptable["label"], options = ShopMenu})
-		lib.showContext(shopName)
+		header = data.shoptable["logo"] and '!['..''.. ']('..data.shoptable["logo"]..')' or data.shoptable["label"]
+	elseif Config.System.Menu == "gta" then
+		header =  data.shoptable["label"]
 	end
+	openMenu(ShopMenu, {
+		header = header,
+		canClose = true,
+		onExit = function() end,
+	})
 end)
 
 --Selling animations are simply a pass item to seller animation
 RegisterNetEvent('jim-shops:SellAnim', function(data) local Ped = PlayerPedId()
-	if GetResourceState("jim-talktonpc") == "started" then exports["jim-talktonpc"]:injectEmotion("thanks") end
+	if GetResourceState("jim-talktonpc") == "started" then
+		exports["jim-talktonpc"]:injectEmotion("thanks")
+	end
 	if string.find(data.shoptable.label, "Vending") then
 		loadAnimDict("mp_common")
 		loadAnimDict("amb@prop_human_atm@male@enter")
@@ -353,51 +300,65 @@ RegisterNetEvent('jim-shops:SellAnim', function(data) local Ped = PlayerPedId()
 	end
 end)
 
-RegisterNetEvent('jim-shops:CloseMenu', function()
-	if GetResourceState("jim-talktonpc") == "started" then exports["jim-talktonpc"]:stopCam() end
-	exports[Config.System.MenuExport]:closeMenu()
-end)
-
 RegisterNetEvent('jim-shops:Charge', function(data) local dialog
 	local price = data.cost == "Free" and data.cost or "$"..data.cost
 	local weight = Core.Shared.Items[data.item].weight == 0 and "" or "Weight: "..(Core.Shared.Items[data.item].weight / 1000)..Config.Overrides.Measurement
-
+	local settext = ""
 	local header = "<center><p><img src=nui://"..Config.System.img..Core.Shared.Items[data.item].image.." width=100px></p>"..Core.Shared.Items[data.item].label
-	if data.shoptable["logo"] then header = "<center><p><img src="..data.shoptable["logo"].." width=150px></img></p>"..header end	
+	if data.shoptable["logo"] then
+		header = "<center><p><img src="..data.shoptable["logo"].." width=150px></img></p>"..header
+	end
+	local max = data.amount if max == 0 and not Config.Overrides.Limit then max = nil end
 	if Config.System.Menu == "ox" then
-		local settext = (Config.Overrides.Limit == true and data.amount ~= 0) and "Amnt: "..data.amount.." | Cost: "..price or "Cost: "..price
-		local max = data.amount if max == 0 and not Config.Overrides.Limit then max = nil end
-		local dialog = exports.ox_lib:inputDialog(Core.Shared.Items[data.item].label, {
-			{ type = 'select', label = "Payment Type", default = "cash",
-				options = {
-					{ value = "cash", label = "Cash", },
-					{ value = "bank", label = "Card", },
-				}
-			},
-			{ type = 'number', label = "Amount to buy", description = settext, min = 0, max = max, default = 1 },
-		})
-		if dialog then
-			if data.cost == "Free" then data.cost = 0 end
-			if data.custom then nostash = true end
-			if not data.amount == nil then nostash = true end
-			TriggerServerEvent('jim-shops:GetItem', dialog[2], dialog[1], data.item, data.shoptable, data.cost, data.info, data.k, data.l or nil, nostash)
-
-		end
+		settext = (Config.Overrides.Limit == true and data.amount ~= 0) and "Amnt: "..data.amount.." | Cost: "..price or "Cost: "..price
 	else
-		local settext =
+		settext =
 		"- Confirm Purchase -"..br..br.. ((Config.Overrides.Limit and data.amount ~= 0) and "Amount: "..data.amount..br or "") ..weight..br.." Cost per item: "..price..br..br.."- Payment Type -"
-		local newinputs = {
-			{ type = 'radio', name = 'billtype', text = settext, options = { { value = "cash", text = "Cash" }, { value = "bank", text = "Card" } } },
-			{ type = 'number', isRequired = true, name = 'amount', text = 'Amount to buy' } }
-
-		local dialog = exports['qb-input']:ShowInput({ header = header, submitText = "Pay", inputs = newinputs })
+	end
+	local newinputs = { {
+			type = 'radio',
+			label = "Payment Type",
+			name = 'billtype',
+			text = settext,
+			options = {
+				{ value = "cash", text = "Cash" },
+				{ value = "bank", text = "Card" }
+			}
+		},
+		{
+			type = 'number',
+			isRequired = true,
+			name = 'amount',
+			text = 'Amount to buy',
+			txt = settext,
+			min = 0, max = max, default = 1
+		},
+	}
+	local dialog = createInput(Config.System.Menu == "qb" and header or Core.Shared.Items[data.item].label, newinputs)
+	if dialog then
+		for k, v in pairs(dialog) do
+			if k == 1 then dialog.billtype = v dialog[1] = nil end
+			if k == 2 then dialog.amount = v dialog[2] = nil end
+			if dialog.billtype == "Card" then dialog.billtype = "bank" end
+			if dialog.billtype == "Cash" then dialog.billtype = "cash" end
+		end
 		if dialog then
 			if not dialog.amount then return end
-			if Config.Overrides.Limit and data.custom == nil then	if tonumber(dialog.amount) > tonumber(data.amount) then triggerNotify(nil, "Incorrect amount", "error") TriggerEvent("jim-shops:Charge", data) return end end
-			if tonumber(dialog.amount) <= 0 then triggerNotify(nil, "Incorrect amount", "error") TriggerEvent("jim-shops:Charge", data) return end
+			if Config.Overrides.Limit and data.custom == nil then
+				if tonumber(dialog.amount) > tonumber(data.amount) then
+					triggerNotify(getName(data.k), "Incorrect amount", "error")
+					TriggerEvent("jim-shops:Charge", data)
+					return
+				end
+			end
+			if tonumber(dialog.amount) <= 0 then
+				triggerNotify(getName(data.k), "Incorrect amount", "error")
+				TriggerEvent("jim-shops:Charge", data)
+				return
+			end
 			if data.cost == "Free" then data.cost = 0 end
 			if not data.amount then nostash = true end
-			TriggerServerEvent('jim-shops:GetItem', dialog.amount, dialog.billtype, data.item, data.shoptable, data.cost, data.info, data.k, data.l or nil, nostash)
+			TriggerServerEvent('jim-shops:GetItem', tonumber(dialog.amount), dialog.billtype, data.item, data.shoptable, data.cost, data.info, data.k, data.l or nil, nostash)
 		end
 	end
 end)
@@ -410,3 +371,4 @@ AddEventHandler('onResourceStop', function(resource) if resource ~= GetCurrentRe
 	end
 	for _, v in pairs(Peds) do unloadModel(v) if IsModelAPed(GetEntityModel(v)) then DeletePed(v) else DeleteObject(v) end end
 end)
+
