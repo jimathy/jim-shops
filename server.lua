@@ -105,6 +105,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 	--Money Check
 	if balance < (tonumber(price) * tonumber(amount)) then -- Check for money first if not enough, stop here
 		triggerNotify(nil, "Not enough money", "error", src)
+		return
 	end
 	-- If its a weapon or a unique item, do this:
 	if Config.System.Inv == "qb" then
