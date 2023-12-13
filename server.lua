@@ -28,26 +28,49 @@ end)
 
 local function GetStashItems(stashId)
 	local items = {}
-	local result = MySQL.Sync.fetchScalar('SELECT items FROM stashitems WHERE stash = ?', {stashId})
-	if result then
-		local stashItems = json.decode(result)
+	if Config.System.Inv == "qb" then
+		local result = MySQL.Sync.fetchScalar('SELECT items FROM stashitems WHERE stash = ?', {stashId})
+		if result then
+			local stashItems = json.decode(result)
+			if stashItems then
+				for k, item in pairs(stashItems) do
+					local itemInfo = QBCore.Shared.Items[item.name:lower()]
+					if itemInfo then
+						items[item.slot] = {
+							name = itemInfo["name"],
+							amount = tonumber(item.amount),
+							info = item.info ~= nil and item.info or "",
+							label = itemInfo["label"],
+							description = itemInfo["description"] ~= nil and itemInfo["description"] or "",
+							weight = itemInfo["weight"],
+							type = itemInfo["type"],
+							unique = itemInfo["unique"],
+							useable = itemInfo["useable"],
+							image = itemInfo["image"],
+							slot = item.slot,
+						}
+					end
+				end
+			end
+		end
+	elseif Config.System.Inv == "ox" then		
+		local stashItems = exports.ox_inventory:Inventory(stashId).items		
 		if stashItems then
-			for k, item in pairs(stashItems) do
-				local itemInfo = Core.Shared.Items[item.name:lower()]
-				if itemInfo then
-					items[item.slot] = {
-						name = itemInfo["name"],
-						amount = tonumber(item.amount) or tonumber(item.count),
-						info = item.info ~= nil and item.info or "",
-						label = itemInfo["label"],
-						description = itemInfo["description"] ~= nil and itemInfo["description"] or "",
-						weight = itemInfo["weight"],
-						type = itemInfo["type"],
-						unique = itemInfo["unique"],
-						useable = itemInfo["useable"],
-						image = itemInfo["image"],
-						slot = item.slot,
-					}
+			for k,item in pairs(stashItems) do
+				local itemInfo = exports.ox_inventory:Items(item.name)
+				items[item.slot] = {
+					name = item.name,
+					amount = item.count,
+					info = item.metadata,
+					label = item.label,
+					description = item.description,
+					weight = itemInfo.weight,
+					type = itemInfo.type,
+					slot = item.slot,
+					unique = not itemInfo.stack					
+				}
+				if not itemInfo.stack and item.metadata.qty then
+					items[item.slot].amount = item.metadata.qty
 				end
 			end
 		end
@@ -81,6 +104,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 		totalWeight = exports.ox_inventory:CanCarryAmount(src, item, amount)
 	end
     local maxWeight = 120000 -- Fix until I work out how to get the player weight again
+	local numsuccess = 0
 	local slots = 0
 	for _ in pairs(Player.PlayerData.items) do slots = slots +1 end
 	slots = Config.Overrides.MaxSlots - slots
@@ -118,6 +142,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 						TriggerClientEvent('inventory:client:ItemBox', src, Core.Shared.Items[item], "add", amount)
 						TriggerClientEvent("jim-shops:SellAnim", src, {item = item, shoptable = shoptable})
 					end
+					numsuccess = numsuccess + 1
 				else
 					triggerNotify(nil, "Can't give item!", "error", src) break -- stop the item giving loop
 				end
@@ -130,6 +155,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 				if Config.Overrides.ApGov then exports['ap-government']:chargeCityTax(Player.PlayerData.source, "Item", (tonumber(price) * tonumber(amount))) end
 				TriggerClientEvent('inventory:client:ItemBox', src, Core.Shared.Items[item], "add", amount)
 				TriggerClientEvent("jim-shops:SellAnim", src, {item = item, shoptable = shoptable})
+				numsuccess = amount
 			else
 				triggerNotify(nil, "Can't give item!", "error", src)
 			end
@@ -138,7 +164,6 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 		local itemInfo = exports.ox_inventory:Items(item)
 		if itemInfo.weapon or not itemInfo.stack then
 			if itemInfo.weapon then info = nil end
-			local numsuccess = 0
 			for i = 1, amount do
 				local success, response = exports.ox_inventory:AddItem(src, item, 1, info)
 				if success then
@@ -150,7 +175,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 			if numsuccess > 0 then
 				Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * numsuccess), 'shop-purchase')
 				if Config.Overrides.ApGov then exports['ap-government']:chargeCityTax(Player.PlayerData.source, "Item", (tonumber(price) * tonumber(numsuccess))) end
-				TriggerClientEvent('inventory:client:ItemBox', src, item.name, "add", numsuccess)
+				TriggerClientEvent('inventory:client:ItemBox', src, item, "add", numsuccess)
 				TriggerClientEvent('jim-shops:SellAnim', src, {item = item, shoptable = shoptable})
 			end
 		else
@@ -158,25 +183,36 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 			if success then
 				Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
 				if Config.Overrides.ApGov then exports['ap-government']:chargeCityTax(Player.PlayerData.source, "Item", (tonumber(price) * tonumber(amount))) end
-				TriggerClientEvent('inventory:client:ItemBox', src, item.name, "add", amount)
+				TriggerClientEvent('inventory:client:ItemBox', src, item, "add", amount)
 				TriggerClientEvent("jim-shops:SellAnim", src, {item = item, shoptable = shoptable})
+				numsuccess = amount
 			else
 				TriggerClientEvent('QBCore:Notify', source,  "Can't give item!", "error")
 			end
 		end
 	end
+	
 	--Remove item from stash
 	if Config.Overrides.Limit and not nostash then
 		local stashname = ""
 		if num == "" then stashname = shop
 		else stashname = "["..shop.."("..num..")]" end
-		local stashItems = GetStashItems(stashname)
+		local stashItems = GetStashItems(stashname)		
 		if Config.System.Debug then print("^5Debug^7: ^2Retrieving stash info^7: '^6"..stashname.."^7'") end
-		for i = 1, #stashItems do
-			if stashItems[i].name == item then
-				if (stashItems[i].amount - amount) <= 0 then stashItems[i].amount = 0 else stashItems[i].amount = stashItems[i].amount - amount end
-				TriggerEvent('jim-shops:server:SaveStashItems', stashname, stashItems)
-				if Config.System.Debug then print("^5Debug^7: ^2Removing ^7'^6"..Core.Shared.Items[item].label.." ^2x^6"..amount.." ^2from Shop's Stash^7: '^6"..stashname.."^7'") end
+		for i = 1, #stashItems do			
+			if stashItems[i].name:lower() == item:lower() then				
+				if Config.System.Inv == "qb" then					
+					if (stashItems[i].amount - numsuccess) <= 0 then stashItems[i].amount = 0 else stashItems[i].amount = stashItems[i].amount - numsuccess end				
+					TriggerEvent('jim-shops:server:SaveStashItems', stashname, stashItems)
+				elseif Config.System.Inv == "ox" then
+					if stashItems[i].unique then											
+						if (stashItems[i].info.qty - numsuccess) <= 0 then stashItems[i].info.qty = 0 else stashItems[i].info.qty = stashItems[i].info.qty - numsuccess end
+						exports.ox_inventory:SetMetadata(stashname, stashItems[i].slot, stashItems[i].info)
+					else
+						exports.ox_inventory:RemoveItem(stashname, item, numsuccess)
+					end
+				end
+				if Config.Debug then print("^5Debug^7: ^2Removing ^7'^6"..QBCore.Shared.Items[item].label.." ^2x^6"..amount.." ^2from Shop's Stash^7: '^6"..stashname.."^7'") end
 			end
 		end
 	end
@@ -198,16 +234,23 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 end)
 
 RegisterNetEvent("jim-shops:MakeStash", function()
-	local result = MySQL.Sync.fetchAll('SELECT * FROM stashitems', {1})
-	for _, v in pairs(result) do --Clear Vending Machine Stashes
-		if string.find(v.stash, "Vend") then MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', { v.stash }) end
+	if Config.System.Inv == "qb" then
+		local result = MySQL.Sync.fetchAll('SELECT * FROM stashitems', {1})
+		for _, v in pairs(result) do --Clear Vending Machine Stashes
+			if string.find(v.stash, "Vend") then MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', { v.stash }) end
+		end
 	end
 	for k, v in pairs(Locations) do
 		if k ~= "vendingmachine" then
 			local stashTable = {}
 			for l, b in pairs(v["coords"]) do
-				local stashname = "[" .. k .. "(" .. l .. ")]"
-				MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', {stashname})
+				if Config.System.Inv == "qb" then
+					MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', {"["..k.."("..l..")]"})
+				elseif Config.System.Inv == "ox" then
+					local stashname = "[" .. k .. "(" .. l .. ")]"
+					exports.ox_inventory:RegisterStash(stashname,k,100,1000000,null)
+					exports.ox_inventory:ClearInventory(stashname, "")					
+				end
 				Wait(10)
 				for i = 1, #v["products"] do
 					if Config.System.Debug then
@@ -222,29 +265,51 @@ RegisterNetEvent("jim-shops:MakeStash", function()
 							end
 						end
 					end
-					local itemInfo = Core.Shared.Items[v["products"][i].name:lower()]
-					if itemInfo then
-						stashTable[i] = {
-							name = itemInfo["name"],
-							amount = tonumber(v["products"][i].amount),
-							info = v["products"][i].info or nil,
-							label = itemInfo["label"],
-							description = itemInfo["description"] ~= nil and itemInfo["description"] or "",
-							weight = itemInfo["weight"],
-							type = itemInfo["type"],
-							unique = itemInfo["unique"],
-							useable = itemInfo["useable"],
-							image = itemInfo["image"],
-							slot = i,
-						}
-						if Config.Overrides.RandomAmount then
-							stashTable[i].amount = math.random(1, tonumber(v["products"][i].amount))
+					if Config.System.Inv == "qb" then
+						local itemInfo = QBCore.Shared.Items[v["products"][i].name:lower()]
+						if itemInfo then
+							stashTable[i] = {
+								name = itemInfo["name"],
+								amount = tonumber(v["products"][i].amount),
+								info = v["products"][i].info or nil,
+								label = itemInfo["label"],
+								description = itemInfo["description"] ~= nil and itemInfo["description"] or "",
+								weight = itemInfo["weight"],
+								type = itemInfo["type"],
+								unique = itemInfo["unique"],
+								useable = itemInfo["useable"],
+								image = itemInfo["image"],
+								slot = i,
+							}
+							if Config.Overrides.RandomAmount then stashTable[i].amount = math.random(1, tonumber(v["products"][i].amount)) end
+							if itemInfo["name"] == Config.Overrides.SellCasinoChips.chipItem then stashTable[i].amount = v["products"][i].amount end
 						end
-						if itemInfo["name"] == Config.CasinoChips then stashTable[i].amount = v["products"][i].amount end
+					elseif Config.System.Inv == "ox" then
+						if exports.ox_inventory:Items(v["products"][i].name) then						
+							stashTable[i] = {
+								name = v["products"][i].name,
+								amount = tonumber(v["products"][i].amount),
+								info = v["products"][i].info or {},
+								slot = i,
+							}
+							if Config.Overrides.RandomAmount then stashTable[i].amount = math.random(1, tonumber(v["products"][i].amount)) end	
+							if not exports.ox_inventory:Items(v["products"][i].name).stack then								
+								stashTable[i].info.qty = stashTable[i].amount
+								stashTable[i].amount = 1
+							end
+							if stashTable[i].name == Config.Overrides.SellCasinoChips.chipItem then stashTable[i].amount = v["products"][i].amount end							
+							exports.ox_inventory:AddItem(stashname, stashTable[i].name, stashTable[i].amount, stashTable[i].info, stashTable[i].slot)																					
+						end						
 					end
 				end
-				if Config.Overrides.Limit then TriggerEvent('jim-shops:server:SaveStashItems', "["..k.."("..l..")]", stashTable)
-				elseif not Config.Overrides.Limit then stashname = "["..k.."("..l..")]" MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', {stashname}) end
+				if Config.System.Inv == "qb" then
+					if Config.Overrides.Limit then TriggerEvent('jim-shops:server:SaveStashItems', "["..k.."("..l..")]", stashTable)
+					elseif not Config.Overrides.Limit then stashname = "["..k.."("..l..")]" MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', {stashname}) 
+					end				
+				elseif Config.System.Inv == "ox" then
+					stashname = "["..k.."("..l..")]"
+					if not Config.Overrides.Limit then exports.ox_inventory:ClearInventory(stashname, {}) end
+				end
 			end
 		end
 	end
@@ -362,7 +427,7 @@ if Config.System.Callback == "qb" then
 	Core.Functions.CreateCallback('jim-shops:server:GetStashItems',function(source, cb, stashId) cb(GetStashItems(stashId)) end)
 elseif Config.System.Callback == "ox" then
 	lib.callback.register('jim-shops:server:getBlackMarketLoc', function(source) return GetStashItems(BlackMarketSyncCoord) end)
-	lib.callback.register('jim-shops:server:syncShops', function(source) cb(Locations) end)
+	lib.callback.register('jim-shops:server:syncShops', function(source) return Locations end)
 	lib.callback.register('jim-shops:server:getLicenseStatus', function(source, licenseArray)
 		local src = source
 		local hasLicense = true

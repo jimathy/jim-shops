@@ -14,13 +14,17 @@ local pedVoices = { -- Testing forcing certain voices for jim-talktonpc
 }
 
 CreateThread(function()
-	local p = promise.new()
-	Core.Functions.TriggerCallback('jim-shops:server:syncShops', function(locs) p:resolve(locs) end)
-	Locations = Citizen.Await(p)
+	if Config.System.Callback == "qb" then
+		local p = promise.new()
+		Core.Functions.TriggerCallback('jim-shops:server:syncShops', function(locs) p:resolve(locs) end)
+		Locations = Citizen.Await(p)
+	elseif Config.System.Callback == "ox" then
+		Locations = lib.callback.await('jim-shops:server:syncShops', false)
+	end
 	for k, v in pairs(Locations) do
 		if k == "vendingmachine" and Config.Overrides.VendOverride then
 			for l, b in pairs(v["coords"]) do
-				if Config.Peds then
+				if Config.Overrides.Peds then
 					if v["model"] then
 						local i = math.random(1, #v["model"])
 						loadModel(v["model"][i])
@@ -157,8 +161,9 @@ end)
 RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 	local products,  hasLicence, hasLicenceItems, stashItems, set, vendID = data.shoptable.products, nil, nil, nil, "", data.vendID or nil
 	local ShopMenu = {}
-	local setheader = " "
-
+	local setheader = " "	
+	
+	if data.custom and not custom then custom = true end	
 	if GetResourceState("jim-talktonpc") == "started" then exports["jim-talktonpc"]:createCam(data.entity, true, "shop", true) end
 
 	if Config.Overrides.Limit and data.vend then
@@ -192,8 +197,7 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 		if Config.System.Callback == "qb" then
 			local p = promise.new()
 			Core.Functions.TriggerCallback('jim-shops:server:GetStashItems', function(stash) p:resolve(stash) end, "["..data.k.."("..data.l..")]")
-			stashItems = Citizen.Await(p)
-			print(json.encode(stashItems))
+			stashItems = Citizen.Await(p)			
 		elseif Config.System.Callback == "ox" then
 			stashItems = lib.callback.await('jim-shops:server:GetStashItems', false, "["..data.k.."("..data.l..")]")
 		end
@@ -204,7 +208,7 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 	end
 
 	for i = 1, #products do
-		local amount, lock = 0, "", false
+		local amount, lock = products[i].amount, false
 		if Config.System.Debug then print("^5Debug^7: ^3ShopMenu ^7- ^2Searching for item ^7'^6"..products[i].name.."^7'") end
 
 		if not Core.Shared.Items[products[i].name:lower()] then
@@ -217,7 +221,7 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 			text = text..price..br.."Weight: "..(Core.Shared.Items[products[i].name].weight / 1000)..Config.Overrides.Measurement
 
 			if Config.Overrides.Limit and not custom then
-				if stashItems[i] then
+				if stashItems[i] then					
 					if not stashItems[i].amount or stashItems[i].amount == 0 then
 						amount = 0
 						lock = true
@@ -291,8 +295,14 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 	if Config.System.Menu == "qb" then
 		exports[Config.System.MenuExport]:openMenu(ShopMenu)
 	elseif Config.System.Menu == "ox" then
-		lib.registerContext({id = vendID or ("["..data.k.."("..data.l..")]"), title = data.shoptable["logo"] and '!['..''.. ']('..data.shoptable["logo"]..')' or data.shoptable["label"], options = ShopMenu})
-		lib.showContext(vendID or ("["..data.k.."("..data.l..")]"))
+		local shopName = ""
+		if custom then
+			shopName = vendID or ("["..data.shoptable.label.."]")
+		else
+			shopName = vendID or ("["..data.k.."("..data.l..")]")
+		end
+		lib.registerContext({id = shopName, title = data.shoptable["logo"] and '!['..''.. ']('..data.shoptable["logo"]..')' or data.shoptable["label"], options = ShopMenu})
+		lib.showContext(shopName)
 	end
 end)
 
@@ -353,8 +363,7 @@ RegisterNetEvent('jim-shops:Charge', function(data) local dialog
 	local weight = Core.Shared.Items[data.item].weight == 0 and "" or "Weight: "..(Core.Shared.Items[data.item].weight / 1000)..Config.Overrides.Measurement
 
 	local header = "<center><p><img src=nui://"..Config.System.img..Core.Shared.Items[data.item].image.." width=100px></p>"..Core.Shared.Items[data.item].label
-	if data.shoptable["logo"] then header = "<center><p><img src="..data.shoptable["logo"].." width=150px></img></p>"..header end
-
+	if data.shoptable["logo"] then header = "<center><p><img src="..data.shoptable["logo"].." width=150px></img></p>"..header end	
 	if Config.System.Menu == "ox" then
 		local settext = (Config.Overrides.Limit == true and data.amount ~= 0) and "Amnt: "..data.amount.." | Cost: "..price or "Cost: "..price
 		local max = data.amount if max == 0 and not Config.Overrides.Limit then max = nil end
@@ -369,6 +378,7 @@ RegisterNetEvent('jim-shops:Charge', function(data) local dialog
 		})
 		if dialog then
 			if data.cost == "Free" then data.cost = 0 end
+			if data.custom then nostash = true end
 			if not data.amount == nil then nostash = true end
 			TriggerServerEvent('jim-shops:GetItem', dialog[2], dialog[1], data.item, data.shoptable, data.cost, data.info, data.k, data.l or nil, nostash)
 
