@@ -15,7 +15,7 @@ Config = {
 							-- "ox"             (ox_lib)
 							-- "gta"            (warmenu)
 
-		Notify = "gta",     -- Supports "qb"    (qb-core)
+		Notify = "qb",     -- Supports "qb"    (qb-core)
 							-- "ox"             (ox_lib)
 							-- "gta"            (gta native)
 
@@ -26,7 +26,6 @@ Config = {
 							-- "ox"             (ox_target)
 
 		MenuExport = "qb-menu", -- If using "qb", what is your menu called, usually "qb-menu", "qbx-menu", "jixel-menu" etc
-		Callback = "qb", -- use qb-core callbacks or oxlib callbacks, parameters are qb or ox
 	},
 
 
@@ -39,7 +38,7 @@ Config = {
 		MaxSlots = 41, -- Set this to your player inventory slot count, this is default "41"
 		BlackMarket = false, -- enable to add blackmarket locations (defined at the bottom of this file)
 		Measurement = "kg", -- Custom Weight measurement
-		Gabz247 = true,  -- Enable if using gabz 247 stores
+		Gabz247 = false,  -- Enable if using gabz 247 stores
 		GabzAmmu = false, -- Enable if using gabz Ammunation stores
 		VendOverride = false, -- Enable this if you want all the vending machines to use this script
 		RandomAmount = true, -- Sets wether a stash should have a "random" amount of stock or full.
@@ -51,6 +50,3 @@ Config = {
 		}
 	},
 }
-
-Core = exports['qb-core']:GetCoreObject()
-RegisterNetEvent('QBCore:Client:UpdateObject', function() Core = exports["qb-core"]:GetCoreObject() end)

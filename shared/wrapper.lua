@@ -1,6 +1,50 @@
 function isOx()
     return (Config.System.Menu == "ox" or Config.System.Menu == "gta")
 end
+
+Items = {}
+-- Load item lists from qb-core or ox_lib
+if GetResourceState("qb-core") == "started" then
+    Core = Core or exports['qb-core']:GetCoreObject()
+    RegisterNetEvent('QBCore:Client:UpdateObject', function() Core = exports["qb-core"]:GetCoreObject() end)
+    Items = Core.Shared.Items
+end
+if GetResourceState("ox_core") == "started" then
+    Items = {}
+    Items = exports.ox_inventory:Items()
+    for k, v in pairs(Items) do
+        if v.client and v.client.image then
+            Items[k].image = (Items[k].client.image):gsub("nui://ox_inventory/web/images/","")
+        else
+            Items[k].image = k..".png"
+        end
+    end
+end
+
+-- Get Job/Gang Role per core
+function getJob(type)
+    local groups = {}
+    local jobTable = {}
+    if GetResourceState("qb-core") == "started" then
+        if type == "job" then
+            groups = Core.Functions.GetPlayerData().job
+            jobTable.name = groups.name
+            jobTable.grade = groups.grade.level
+        elseif type == "gang" then
+            groups = Core.Functions.GetPlayerData().gang
+            jobTable.name = groups.name
+            jobTable.grade = groups.grade.level
+        end
+    elseif GetResourceState("ox_core") == "started" then
+        groups = exports.ox_core.GetPlayerData()?.groups
+        for k, v in pairs(groups) do
+            jobTable.name = k
+            jobTable.grade = v
+        end
+    end
+    return jobTable
+end
+
 function openMenu(Menu, data)
     if Config.System.Menu == "ox" then
         if data.onBack then
@@ -97,7 +141,6 @@ function openMenu(Menu, data)
                             Menu[k].txt = nil
                         end
                         if Menu[k].txt and Menu[k].txt ~= "" and WarMenu.IsItemHovered() then
-                            print(Menu[k].isMenuHeader)
                             if Menu[k].disabled or Menu[k].isMenuHeader then
                                 WarMenu.ToolTip("~b~Unavailable", 0.18, true)
                             else

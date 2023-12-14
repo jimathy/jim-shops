@@ -5,7 +5,7 @@ AddEventHandler('onResourceStart', function(r) if GetCurrentResourceName() ~= r 
 	for k, v in pairs(Products) do
 		for i = 1, #v do
 			if Config.System.Inv == "qb" then
-				if not Core.Shared.Items[Products[k][i].name] then
+				if not Items[Products[k][i].name] then
 					print("^5Debug^7: ^3Config^7.^3Products^7['^6"..k.."^7'] ^2can't find item^7: ^6"..Products[k][i].name.."^7")
 				end
 			elseif Config.System.Inv == "ox" then
@@ -34,7 +34,7 @@ local function GetStashItems(stashId)
 			local stashItems = json.decode(result)
 			if stashItems then
 				for _, item in pairs(stashItems) do
-					local itemInfo = Core.Shared.Items[item.name:lower()]
+					local itemInfo = Items[item.name:lower()]
 					if itemInfo then
 						items[item.slot] = {
 							name = itemInfo["name"],
@@ -57,7 +57,7 @@ local function GetStashItems(stashId)
 		local stashItems = exports.ox_inventory:Inventory(stashId).items
 		if stashItems then
 			for _, item in pairs(stashItems) do
-				local itemInfo = Core.Shared.Items[item.name:lower()]
+				local itemInfo = Items[item.name:lower()]
 				if itemInfo then
 					items[item.slot] = {
 						name = itemInfo["name"],
@@ -94,30 +94,64 @@ local function GetTotalWeight(items)
 	return tonumber(weight)
 end
 
+function getMoney(source, billtype) local cash = 0 local src = source
+	if Config.System.Inv == "qb" then
+        cash = Core.Functions.GetPlayer(src).Functions.GetMoney(billtype)
+	elseif Config.System.Inv == "ox" then
+        if billtype == "cash" then
+            cash = exports.ox_inventory:Search(src, 'count', "money")
+        elseif billtype == "bank" then
+            -- no default support for ox_lib bank
+            -- Add your event for charging the bank balance amount here
+			cash = exports.ox_inventory:Search(src, 'count', "money")
+        end
+    end
+    return cash
+end
+
+function removeMoney(source, billtype, cost) local cash = 0 local src = sourcelocal src = source local success = nil
+    if Config.Debug then print("^5Debug^7: ^2Charging ^2Player: '^6"..cost.."^7'") end
+	if Config.System.Inv == "qb" then
+        success = Core.Functions.GetPlayer(src).Functions.RemoveMoney(billtype, cost)
+	elseif Config.System.Inv == "ox" then
+        if billtype == "cash" then
+            success = exports.ox_inventory:RemoveItem(src, "money", cost)
+        elseif billtype == "bank" then
+            -- no default support for ox_lib bank
+            -- Add your event for getting the bank balance amount here
+			success = true
+        end
+    end
+	return success
+end
+
 RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shoptable, price, info, shop, num, nostash)
-	local src = source local Player = Core.Functions.GetPlayer(src)
+	local src = source
+	local Player = nil
+	local inventory = nil
 	--Inventory space checks
 	local totalWeight = nil
 	if Config.System.Inv == "qb" then
-		totalWeight = GetTotalWeight(Player.PlayerData.items)
+		Player = Core.Functions.GetPlayer(src)
+		inventory = Player.PlayerData.items
+		totalWeight = GetTotalWeight(inventory)
 	elseif Config.System.Inv == "ox" then
-		local PlayerInventory = exports.ox_inventory.Inventory(src)
+		inventory = exports.ox_inventory.Inventory(src)
 		totalWeight = exports.ox_inventory:CanCarryAmount(src, item, amount)
 	end
     local maxWeight = 120000 -- Fix until I work out how to get the player weight again
 	local numsuccess = 0
 	local slots = 0
-	for _ in pairs(Player.PlayerData.items) do slots = slots +1 end
+	for _ in pairs(inventory) do slots = slots +1 end
 	slots = Config.Overrides.MaxSlots - slots
-	local balance = Player.Functions.GetMoney(tostring(billtype))
-
+	local balance = getMoney(src, tostring(billtype))
 	if Config.System.Inv == "qb" then
 		-- If too heavy:
-		if (totalWeight + (Core.Shared.Items[item].weight * amount)) > maxWeight then
+		if (totalWeight + (Items[item].weight * amount)) > maxWeight then
 			triggerNotify(getName(shop), "Not enough space in inventory", "error", src)
 			return
 			-- If unique and it would poof away:
-		elseif Core.Shared.Items[item].unique and (tonumber(slots) < tonumber(amount)) then
+		elseif Items[item].unique and (tonumber(slots) < tonumber(amount)) then
 			triggerNotify(getName(shop), "Not enough slots in inventory", "error", src)
 			return
 		end
@@ -134,13 +168,13 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 	end
 	-- If its a weapon or a unique item, do this:
 	if Config.System.Inv == "qb" then
-		if Core.Shared.Items[item].type == "weapon" or Core.Shared.Items[item].unique then
-			if Core.Shared.Items[item].type == "weapon" then info = nil end
+		if Items[item].type == "weapon" or Items[item].unique then
+			if Items[item].type == "weapon" then info = nil end
 			for i = 1, amount do -- Make a loop to put items into different slots rather than full amount in 1 slot
 				if Player.Functions.AddItem(item, 1, nil, info) then
 					if tonumber(i) == tonumber(amount) then -- when its on its last loop do this
-						Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
-						TriggerClientEvent('inventory:client:ItemBox', src, Core.Shared.Items[item], "add", amount)
+						removeMoney(src, tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
+						TriggerClientEvent('inventory:client:ItemBox', src, Items[item], "add", amount)
 						TriggerClientEvent("jim-shops:SellAnim", src, {item = item, shoptable = shoptable})
 					end
 					numsuccess = numsuccess + 1
@@ -152,9 +186,9 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 		else
 			-- if its a normal item, do normal things
 			if Player.Functions.AddItem(item, amount, nil, info) then
-				Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'shop-purchase')
+				removeMoney(src, tostring(billtype), (tonumber(price) * tonumber(amount)), 'shop-purchase')
 				if Config.Overrides.ApGov then exports['ap-government']:chargeCityTax(Player.PlayerData.source, "Item", (tonumber(price) * tonumber(amount))) end
-				TriggerClientEvent('inventory:client:ItemBox', src, Core.Shared.Items[item], "add", amount)
+				TriggerClientEvent('inventory:client:ItemBox', src, Items[item], "add", amount)
 				TriggerClientEvent("jim-shops:SellAnim", src, {item = item, shoptable = shoptable})
 				numsuccess = amount
 			else
@@ -174,16 +208,16 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 				end
 			end
 			if numsuccess > 0 then
-				Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * numsuccess), 'shop-purchase')
-				if Config.Overrides.ApGov then exports['ap-government']:chargeCityTax(Player.PlayerData.source, "Item", (tonumber(price) * tonumber(numsuccess))) end
+				removeMoney(src, tostring(billtype), (tonumber(price) * numsuccess))
+				if Config.Overrides.ApGov then exports['ap-government']:chargeCityTax(src, "Item", (tonumber(price) * tonumber(numsuccess))) end
 				TriggerClientEvent('inventory:client:ItemBox', src, item, "add", numsuccess)
 				TriggerClientEvent('jim-shops:SellAnim', src, {item = item, shoptable = shoptable})
 			end
 		else
 			local success, response = exports.ox_inventory:AddItem(src, item, amount, info)
 			if success then
-				Player.Functions.RemoveMoney(tostring(billtype), (tonumber(price) * tonumber(amount)), 'ticket-payment')
-				if Config.Overrides.ApGov then exports['ap-government']:chargeCityTax(Player.PlayerData.source, "Item", (tonumber(price) * tonumber(amount))) end
+				removeMoney(src, tostring(billtype), (tonumber(price) * tonumber(amount)))
+				if Config.Overrides.ApGov then exports['ap-government']:chargeCityTax(src, "Item", (tonumber(price) * tonumber(amount))) end
 				TriggerClientEvent('inventory:client:ItemBox', src, item, "add", amount)
 				TriggerClientEvent("jim-shops:SellAnim", src, {item = item, shoptable = shoptable})
 				numsuccess = amount
@@ -213,7 +247,7 @@ RegisterServerEvent('jim-shops:GetItem', function(amount, billtype, item, shopta
 						local success, response = exports.ox_inventory:RemoveItem(stashname, item, numsuccess)
 					end
 				end
-				if Config.System.Debug then print("^5Debug^7: ^2Removing ^7'^3"..Core.Shared.Items[item].label.."^7' ^2x^6"..numsuccess.." ^2from Shop's Stash^7: '^6"..stashname.."^7'") end
+				if Config.System.Debug then print("^5Debug^7: ^2Removing ^7'^3"..Items[item].label.."^7' ^2x^6"..numsuccess.." ^2from Shop's Stash^7: '^6"..stashname.."^7'") end
 			end
 		end
 	end
@@ -239,7 +273,7 @@ RegisterNetEvent("jim-shops:MakeStash", function()
 	if Config.System.Inv == "qb" then
 		local result = MySQL.Sync.fetchAll('SELECT * FROM stashitems', {1})
 		for _, v in pairs(result) do --Clear Vending Machine Stashes
-			if string.find(v.stash, "Vend") then MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', { v.stash }) end
+			--if string.find(v.stash, "Vend") then MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', { v.stash }) end
 		end
 	end
 
@@ -249,7 +283,7 @@ RegisterNetEvent("jim-shops:MakeStash", function()
 				local stashTable = {}
 				local stashname = "["..k.."("..i..")]"
 				if Config.System.Inv == "qb" then
-					MySQL.Async.execute('DELETE FROM stashitems WHERE stash = ?', {stashname})
+					--MySQL.Async.execute('DELETE FROM stashitems WHERE stash = ?', {stashname})
 				elseif Config.System.Inv == "ox" then
 					exports.ox_inventory:ClearInventory(stashname, "")
 					exports.ox_inventory:RegisterStash(stashname, k, 100, 1000000, nil)
@@ -259,7 +293,7 @@ RegisterNetEvent("jim-shops:MakeStash", function()
 					if Config.System.Debug then
 						print("^5Debug^7: ^3MakeStash ^7- ^2Searching for item ^7'^6"..v["products"][i].name.."^7'")
 						if Config.System.Inv == "qb" then
-							if not Core.Shared.Items[v["products"][i].name:lower()] then
+							if not Items[v["products"][i].name:lower()] then
 								print("^5Debug^7: ^3MakeStash ^7- ^2Can't find item ^7'^6"..v["products"][i].name.."^7'")
 							end
 						elseif Config.System.Inv == "ox" then
@@ -269,7 +303,7 @@ RegisterNetEvent("jim-shops:MakeStash", function()
 						end
 					end
 					if Config.System.Inv == "qb" then
-						local itemInfo = Core.Shared.Items[v["products"][i].name:lower()]
+						local itemInfo = Items[v["products"][i].name:lower()]
 						if itemInfo then
 							stashTable[i] = {
 								name = itemInfo["name"],
@@ -324,7 +358,7 @@ AddEventHandler('onResourceStop', function(r)
 			for i = 1, #v.coords do
 				local stashname = "["..k.."("..i..")]"
 				if Config.System.Inv == "qb" then
-					MySQL.Async.execute('DELETE FROM stashitems WHERE stash = ?', {stashname})
+					--MySQL.Async.execute('DELETE FROM stashitems WHERE stash = ?', {stashname})
 				elseif Config.System.Inv == "ox" then
 					exports.ox_inventory:RemoveInventory(stashname)
 				end
@@ -333,7 +367,7 @@ AddEventHandler('onResourceStop', function(r)
 		if Config.System.Inv == "qb" then
 			local result = MySQL.Sync.fetchAll('SELECT * FROM stashitems', {1})
 			for _, v in pairs(result) do --Clear Vending Machine Stashes
-				if string.find(v.stash, "Vend") then MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', { v.stash }) end
+				--if string.find(v.stash, "Vend") then MySQL.Async.execute('DELETE FROM stashitems WHERE stash= ?', { v.stash }) end
 			end
 		end
 	end
@@ -343,7 +377,7 @@ RegisterNetEvent("jim-shops:GenerateVend", function(data)
 	local stashTable = {}
 	local v = data[1].shoptable
 	for i = 1, #v["products"] do
-		local itemInfo = Core.Shared.Items[v["products"][i].name:lower()]
+		local itemInfo = Items[v["products"][i].name:lower()]
 		if not itemInfo then print("^5Debug^7: ^3MakeStash ^7- ^2Can't find item ^7'^6"..v["products"][i].name.."^7'")
 		elseif itemInfo then
 			stashTable[i] = {
@@ -381,7 +415,7 @@ RegisterNetEvent("qb-shops:server:RestockShopItems", function(storeinfo)
 	for i = 1, #Config.Locations[k]["products"] do
 		if Config.System.Debug then --print("^5Debug^7: ^3RestockShopItems ^7- ^3Searching for item ^7'^6"..v["products"][i].name.."^7'")
 			if Config.System.Inv == "qb" then
-				if not Core.Shared.Items[v["products"][i].name:lower()] then
+				if not Items[v["products"][i].name:lower()] then
 					print("^5Debug^7: ^3RestockShopItems ^7- ^1Can't ^2find item ^7'^6"..v["products"][i].name.."^7'")
 				end
 			elseif Config.System.Inv == "ox" then
@@ -392,7 +426,7 @@ RegisterNetEvent("qb-shops:server:RestockShopItems", function(storeinfo)
 			end
 		end
 		if Config.System.Inv == "qb" then
-			local itemInfo = Core.Shared.Items[Config.Locations[k]["products"][i].name:lower()]
+			local itemInfo = Items[Config.Locations[k]["products"][i].name:lower()]
 			if itemInfo then
 				stashTable[i] = {
 					name = itemInfo["name"],
@@ -475,7 +509,7 @@ elseif Config.System.Callback == "ox" then
 		end
 		return hasItem
 	end)
-	lib.callback.register('jim-shops:server:GetStashItems', function(source, stashId) print(stashId) return GetStashItems(stashId) end)
+	lib.callback.register('jim-shops:server:GetStashItems', function(source, stashId) return GetStashItems(stashId) end)
 end
 
 RegisterNetEvent('jim-shops:server:sellChips', function()
@@ -483,7 +517,7 @@ RegisterNetEvent('jim-shops:server:sellChips', function()
     local Player = Core.Functions.GetPlayer(src)
 	if Config.System.Inv == "qb" then
 		if not Player.Functions.GetItemByName(Config.Overrides.SellCasinoChips.chipItem) then
-			triggerNotify(getName("casino"), "You don't have any "..Core.Shared.Items[Config.Overrides.SellCasinoChips.chipItem].label.." to sell", src) return
+			triggerNotify(getName("casino"), "You don't have any "..Items[Config.Overrides.SellCasinoChips.chipItem].label.." to sell", src) return
 		elseif Player.Functions.GetItemByName(Config.Overrides.SellCasinoChips.chipItem) then
 			local amount = Player.Functions.GetItemByName(Config.Overrides.SellCasinoChips.chipItem).amount
 			local price = Config.Overrides.SellCasinoChips.pricePer * amount

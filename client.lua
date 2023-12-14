@@ -1,9 +1,4 @@
-PlayerGang, PlayerJob, Targets, Peds, Blips = {}, {}, {}, {}, {}
-
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function() Core.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) end)
-RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end)
-RegisterNetEvent('QBCore:Client:OnGangUpdate', function(GangInfo) PlayerGang = GangInfo end)
-AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName() ~= resource then return end Core.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) end)
+Targets, Peds, Blips = {}, {}, {}
 
 local pedVoices = { -- Testing forcing certain voices for jim-talktonpc
 	[`mp_m_shopkeep_01`] = "MP_M_SHOPKEEP_01_PAKISTANI_MINI_01",
@@ -155,20 +150,18 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 		end
 	end
 
-	print("["..data.k.."("..data.l..")]")
-
 	for i = 1, #products do
 		local amount, lock = products[i].amount, false
 		if Config.System.Debug then print("^5Debug^7: ^3ShopMenu ^7- ^2Searching for item ^7'^6"..products[i].name.."^7'") end
 
-		if not Core.Shared.Items[products[i].name:lower()] then
+		if not Items[products[i].name:lower()] then
 			print("^5Debug^7: ^3ShopItems ^7- ^1Can't ^2find item ^7'^6"..products[i].name.."^7'")
 		else
 			if products[i].price == 0 then price = "Free" else price = "Cost: $"..products[i].price end
 
 			local text = ""
 			if products[i].info and products[i].info.item then text = text.."Item: "..products[i].info.item..br end
-			text = text..price..br.."Weight: "..(Core.Shared.Items[products[i].name].weight / 1000)..Config.Overrides.Measurement
+			text = text..price..br.."Weight: "..(Items[products[i].name].weight / 1000)..Config.Overrides.Measurement
 
 			if Config.Overrides.Limit and not custom then
 				if stashItems[i] then
@@ -179,26 +172,26 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 						amount = tonumber(stashItems[i].amount)
 					end
 					if amount ~= 0 then
-						text = price..br.."Amount: x"..amount..br.."Weight: "..(Core.Shared.Items[products[i].name].weight / 1000)..Config.Overrides.Measurement
+						text = price..br.."Amount: x"..amount..br.."Weight: "..(Items[products[i].name].weight / 1000)..Config.Overrides.Measurement
 					elseif amount == 0 then
-						text = price..br.."Out Of Stock"..br.."Weight: "..(Core.Shared.Items[products[i].name].weight / 1000)..Config.Overrides.Measurement
+						text = price..br.."Out Of Stock"..br.."Weight: "..(Items[products[i].name].weight / 1000)..Config.Overrides.Measurement
 					end
 				else
-					text = price..br.."Out Of Stock"..br.."Weight: "..(Core.Shared.Items[products[i].name].weight / 1000)..Config.Overrides.Measurement
+					text = price..br.."Out Of Stock"..br.."Weight: "..(Items[products[i].name].weight / 1000)..Config.Overrides.Measurement
 					lock = true
 				end
 			end
 			local canSee = false
 			if products[i].requiredJob then
 				for k, v in pairs(products[i].requiredJob) do
-					if Core.Functions.GetPlayerData().job.name == k and Core.Functions.GetPlayerData().job.grade.level >= v then
+					if getJob("job").name == k and getJob("job").grade >= v then
 						canSee = true
 					end
 				end
 			end
 			if products[i].requiredGang then
 				for i2 = 1, #products[i].requiredGang do
-					if Core.Functions.GetPlayerData().gang.name == products[i].requiredGang[i2] then canSee = true end
+					if getJob("gang").name == products[i].requiredGang[i2] then canSee = true end
 				end
 			end
 			if products[i].requiresLicense then
@@ -215,10 +208,10 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 			end
 			if canSee or (not products[i].requiresItem and not products[i].requiresLicense and not products[i].requiredGang and not products[i].requiredJob) then
 				ShopMenu[#ShopMenu+1] = {
-					icon = "nui://"..Config.System.img..Core.Shared.Items[products[i].name].image,
-					image = "nui://"..Config.System.img..Core.Shared.Items[products[i].name].image,
+					icon = "nui://"..Config.System.img..Items[products[i].name].image,
+					image = "nui://"..Config.System.img..Items[products[i].name].image,
 					isMenuHeader = lock,
-					header = Core.Shared.Items[products[i].name].label, txt = text,
+					header = Items[products[i].name].label, txt = text,
 					onSelect = function()
 						TriggerEvent("jim-shops:Charge", {
 							item = products[i].name,
@@ -252,7 +245,8 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 end)
 
 --Selling animations are simply a pass item to seller animation
-RegisterNetEvent('jim-shops:SellAnim', function(data) local Ped = PlayerPedId()
+RegisterNetEvent('jim-shops:SellAnim', function(data)
+	local Ped = PlayerPedId()
 	if GetResourceState("jim-talktonpc") == "started" then
 		exports["jim-talktonpc"]:injectEmotion("thanks")
 	end
@@ -302,9 +296,9 @@ end)
 
 RegisterNetEvent('jim-shops:Charge', function(data) local dialog
 	local price = data.cost == "Free" and data.cost or "$"..data.cost
-	local weight = Core.Shared.Items[data.item].weight == 0 and "" or "Weight: "..(Core.Shared.Items[data.item].weight / 1000)..Config.Overrides.Measurement
+	local weight = Items[data.item].weight == 0 and "" or "Weight: "..(Items[data.item].weight / 1000)..Config.Overrides.Measurement
 	local settext = ""
-	local header = "<center><p><img src=nui://"..Config.System.img..Core.Shared.Items[data.item].image.." width=100px></p>"..Core.Shared.Items[data.item].label
+	local header = "<center><p><img src=nui://"..Config.System.img..Items[data.item].image.." width=100px></p>"..Items[data.item].label
 	if data.shoptable["logo"] then
 		header = "<center><p><img src="..data.shoptable["logo"].." width=150px></img></p>"..header
 	end
@@ -334,7 +328,7 @@ RegisterNetEvent('jim-shops:Charge', function(data) local dialog
 			min = 0, max = max, default = 1
 		},
 	}
-	local dialog = createInput(Config.System.Menu == "qb" and header or Core.Shared.Items[data.item].label, newinputs)
+	local dialog = createInput(Config.System.Menu == "qb" and header or Items[data.item].label, newinputs)
 	if dialog then
 		for k, v in pairs(dialog) do
 			if k == 1 then dialog.billtype = v dialog[1] = nil end
