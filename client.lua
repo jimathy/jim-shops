@@ -204,7 +204,7 @@ RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
 				end
 			end
 			if products[i].requiresItem then
-				for _, v in pairs(products[i].requiresItem) do canSee = HasItem(v) Wait(0) end
+				for _, v in pairs(products[i].requiresItem) do canSee = HasItem(v) and hasLicense Wait(0) end
 			end
 			if canSee or (not products[i].requiresItem and not products[i].requiresLicense and not products[i].requiredGang and not products[i].requiredJob) then
 				ShopMenu[#ShopMenu+1] = {
