@@ -1,10 +1,10 @@
 Products = {
     ["normal"] = {
-        { name = "tosti", price = 2, amount = 50, },
-        { name = "water_bottle", price = 2, amount = 50, },
-        { name = "kurkakola", price = 2, amount = 50, },
-        { name = "twerks_candy", price = 2, amount = 50, },
-        { name = "snikkel_candy", price = 2, amount = 50, },
+        --{ name = "tosti", price = 2, amount = 50, },
+        --{ name = "water_bottle", price = 2, amount = 50, },
+        --{ name = "kurkakola", price = 2, amount = 50, },
+        --{ name = "twerks_candy", price = 2, amount = 50, },
+       -- { name = "snikkel_candy", price = 2, amount = 50, },
         { name = "sandwich", price = 2, amount = 50, },
         { name = "beer", price = 7, amount = 50, },
         { name = "whiskey", price = 10, amount = 50, },
@@ -14,7 +14,7 @@ Products = {
         { name = "rolling_paper", price = 2, amount = 5000,  },
     },
     ["bar"] = {
-        { name = "water_bottle", price = 2, amount = 50, },
+        --{ name = "water_bottle", price = 2, amount = 50, },
         { name = "beer", price = 7, amount = 50, },
         { name = "whiskey", price = 10, amount = 50, },
         { name = "vodka", price = 70000, amount = 50, },
@@ -77,14 +77,14 @@ Products = {
         { name = "fitbit", price = 400, amount = 150, },
     },
     ["vending"] = {
-        { name = "water_bottle", price = 100, amount = 25, },
-        { name = "kurkakola", price = 100, amount = 25, },
+       -- { name = "water_bottle", price = 100, amount = 25, },
+        --{ name = "kurkakola", price = 100, amount = 25, },
         { name = "sprunk", price = 100, amount = 25, },
         { name = "sprunklight", price = 100, amount = 25, },
         { name = "ecola", price = 100, amount = 25, },
         { name = "ecolalight", price = 100, amount = 25, },
-        { name = "twerks_candy", price = 100, amount = 25, },
-        { name = "snikkel_candy", price = 100, amount = 25, },
+        --{ name = "twerks_candy", price = 100, amount = 25, },
+        --{ name = "snikkel_candy", price = 100, amount = 25, },
     },
     ["blackmarket"] = {
         { name = "radioscanner", price = 850, amount = 5 },

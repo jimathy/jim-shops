@@ -1,15 +1,43 @@
 name "Jim-Shops"
 author "Jimathy"
-version "2.1"
-description "Shop Script By Jimathy"
+version "3.0"
+description "Shop Script"
 fx_version "cerulean"
 game "gta5"
 lua54 'yes'
 
-shared_scripts { 'config.lua', 'shared/*.lua',  }
-client_scripts { 'client.lua', }
-server_scripts { '@oxmysql/lib/MySQL.lua', 'server.lua', }
+server_script '@oxmysql/lib/MySQL.lua'
 
-shared_script '@ox_lib/init.lua'
+shared_scripts {
+	--'locales/*.lua',
+	'config.lua',
 
---client_script '@warmenu/warmenu.lua'
+    -- Required core scripts
+    '@ox_lib/init.lua',
+    '@ox_core/lib/init.lua',
+
+    '@es_extended/imports.lua',
+
+    '@qbx_core/modules/playerdata.lua',
+
+    --Jim Bridge
+    '@jim_bridge/starter.lua',
+
+	'shared/*.lua',
+}
+client_scripts {
+    '@PolyZone/client.lua',
+    '@PolyZone/BoxZone.lua',
+    '@PolyZone/EntityZone.lua',
+    '@PolyZone/CircleZone.lua',
+    '@PolyZone/ComboZone.lua',
+    'client/*.lua'
+}
+
+server_script 'server/*.lua'
+
+files {
+    'images/**.*',
+}
+
+dependency 'jim_bridge'
