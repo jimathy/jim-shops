@@ -43,7 +43,7 @@ end)
 --Wrapper converting for opening shops externally
 RegisterServerEvent('jim-shops:ShopOpen', function(shop, name, shoptable)
 	local src = source
-	local data = { shoptable = { products = shoptable.items, label = shoptable.label, }, custom = true }
+	local data = { shopTable = { products = shoptable.items, label = shoptable.label, }, custom = true }
 	TriggerClientEvent('jim-shops:ShopMenu', src, data, true)
 end)
 
