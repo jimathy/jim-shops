@@ -111,7 +111,7 @@ RegisterServerEvent('jim-shops:server:BuyItem', function(data)
 			Wait(5)
 		end
 	else		-- if its a normal item, do normal things
-		addItem(data.item, 1, data.info, src)
+		addItem(data.item, data.amount, data.info, src)
 	end
 
 	if cost == 0 then
