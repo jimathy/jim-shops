@@ -219,46 +219,68 @@ Shops.Stores.Charge = function(data)
         settext =
         "- Confirm Purchase -"..br..br.. ((Config.Overrides.generateStoreLimits and data.amount ~= 0) and "Amount: "..data.amount..br or "") ..weight..br.." Cost per item: "..price..br..br.."- Payment Type -"
     end
-	print(price, type(price), price == "$0")
-	local dialog = createInput(Config.System.Menu == "qb" and header or Items[data.item].label, {
-		(price == "$0" and {
-            type = 'radio',
-            label = "Payment Type",
-            name = 'billtype',
-            text = settext,
-            options = {
-				data.shopTable.societyCharge and { value = "society", text = "Society" } or nil,
-				{ value = "cash", text = "Cash" },
-                { value = "bank", text = "Card" },
-            }
-        } or nil),
-        {
+	--print(price, type(price), price == "$0")
+	local dialogTable = {}
+	if price ~= "$0" then
+		dialogTable = {
+			{
+				type = 'radio',
+				label = "Payment Type",
+				name = 'billtype',
+				text = settext,
+				options = {
+					{ value = "cash", text = "Cash" },
+					{ value = "bank", text = "Card" },
+					data.shopTable.societyCharge and { value = "society", text = "Society" } or nil,
+				}
+			},
+			{
+				type = 'number',
+				isRequired = true,
+				name = 'amount',
+				text = 'Amount to buy',
+				txt = settext,
+				min = 0, max = max, default = 1
+			}
+		}
+	else
+
+        dialogTable = {{
             type = 'number',
             isRequired = true,
             name = 'amount',
             text = 'Amount to buy',
             txt = settext,
             min = 0, max = max, default = 1
-        },
-	})
+        }}
+	end
+	local dialog = createInput(Config.System.Menu == "qb" and header or Items[data.item].label, dialogTable)
 
     if dialog then
+		jsonPrint(dialog)
 		local amount, billType = 0, nil
         if dialog[1] then   -- if ox menu, auto adjust values
-            billType = dialog[1]
-            amount = dialog[2]
+			if not dialog[2] then
+				print("must be free")
+				amount = dialog[1]
+				print(amount, billType)
+			else
+				amount = dialog[2]
+				billType = dialog[1]
+			end
 		else
 			billType = dialog.billtype
-			amount = dialog.amount
+			amount = tonumber(dialog.amount)
 		end
 
-		if Config.Overrides.generateStoreLimits and data.custom == nil then
-			if amount > tonumber(data.amount) then
+		if Config.Overrides.generateStoreLimits and not data.custom then
+			if amount > max then
 				triggerNotify(getName(data.shop), "Incorrect amount", "error")
 				Shops.Vending.Charge(data)
 				return
 			end
 		end
+		print(amount)
 		if amount <= 0 then
 			triggerNotify(getName(data.shop), "Incorrect amount", "error")
 			Shops.Vending.Charge(data)
