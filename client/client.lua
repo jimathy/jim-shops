@@ -204,6 +204,7 @@ Shops.Stores.Menu = function(data, custom)
 end
 
 Shops.Stores.Charge = function(data)
+	jsonPrint(data)
     local price = data.cost == "Free" and data.cost or "$"..data.cost
     local weight = Items[data.item].weight == 0 and "" or "Weight: "..(Items[data.item].weight / 1000)..Config.Overrides.Measurement
     local settext = ""
@@ -218,18 +219,19 @@ Shops.Stores.Charge = function(data)
         settext =
         "- Confirm Purchase -"..br..br.. ((Config.Overrides.generateStoreLimits and data.amount ~= 0) and "Amount: "..data.amount..br or "") ..weight..br.." Cost per item: "..price..br..br.."- Payment Type -"
     end
-
+	print(price, type(price), price == "$0")
 	local dialog = createInput(Config.System.Menu == "qb" and header or Items[data.item].label, {
-		{
+		(price == "$0" and {
             type = 'radio',
             label = "Payment Type",
             name = 'billtype',
             text = settext,
             options = {
-                { value = "cash", text = "Cash" },
-                { value = "bank", text = "Card" }
+				data.shopTable.societyCharge and { value = "society", text = "Society" } or nil,
+				{ value = "cash", text = "Cash" },
+                { value = "bank", text = "Card" },
             }
-        },
+        } or nil),
         {
             type = 'number',
             isRequired = true,
@@ -241,10 +243,15 @@ Shops.Stores.Charge = function(data)
 	})
 
     if dialog then
-		local billType = (dialog.billtype or dialog[1]):lower()
-		local amount = tonumber(dialog.amount or dialog[2])
+		local amount, billType = 0, nil
+        if dialog[1] then   -- if ox menu, auto adjust values
+            billType = dialog[1]
+            amount = dialog[2]
+		else
+			billType = dialog.billtype
+			amount = dialog.amount
+		end
 
-		if not dialog.amount then return end
 		if Config.Overrides.generateStoreLimits and data.custom == nil then
 			if amount > tonumber(data.amount) then
 				triggerNotify(getName(data.shop), "Incorrect amount", "error")

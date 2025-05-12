@@ -41,9 +41,9 @@ createCallback('jim-shops:server:getLicenseStatus', function(source, licenseArra
 end)
 
 --Wrapper converting for opening shops externally
-RegisterServerEvent('jim-shops:ShopOpen', function(shop, name, shoptable)
+RegisterServerEvent('jim-shops:ShopOpen', function(shop, name, shopTable)
 	local src = source
-	local data = { shopTable = { products = shoptable.items, label = shoptable.label, }, custom = true }
+	local data = { shopTable = { products = shopTable.items, label = shopTable.label, societyCharge = shopTable.society or shopTable.societyCharge or nil }, custom = true }
 	TriggerClientEvent('jim-shops:ShopMenu', src, data, true)
 end)
 
@@ -57,10 +57,11 @@ local function GetTotalWeight(items)
 end
 
 RegisterServerEvent('jim-shops:server:BuyItem', function(data)
-	jsonPrint(data)
+	--jsonPrint(data)
 	local src = source
 	local Player = nil
 	local inventory = nil
+
 	--Inventory space checks
 	local totalWeight = nil
 	if isStarted(QBInv) then
@@ -71,16 +72,24 @@ RegisterServerEvent('jim-shops:server:BuyItem', function(data)
 		inventory = exports[OXInv]:Inventory(src)
 		totalWeight = exports[OXInv]:CanCarryAmount(src, data.item, data.amount)
 	end
-    local maxWeight = 120000 -- Fix until I work out how to get the player weight again
+	-- Check for empty slots
 	local slots = 0
 	for _ in pairs(inventory) do
 		slots += 1
 	end
+	-- create table and check if the player can acutally hold the amount
+	if canCarry({ [data.item] = data.amount }, src) then
+		totalWeight += (Items[data.item].weight * data.amount)
+	else
+		triggerNotify(getName(data.shop), "Not enough space in inventory", "error", src)
+		return
+	end
+
 	slots = Config.Overrides.MaxSlots - slots
 	local balance = data.shopTable.societyCharge and getSocietyAccount(data.shopTable.societyCharge) or getPlayer(src)[tostring(data.billType)]
 	local cost = (data.price * data.amount)
 	-- If too heavy:
-	if (totalWeight + (Items[data.item].weight * data.amount)) > maxWeight then
+	if (totalWeight + (Items[data.item].weight * data.amount)) > InventoryWeight then
 		triggerNotify(getName(data.shop), "Not enough space in inventory", "error", src)
 		return
 		-- If unique and it would poof away:
@@ -105,20 +114,28 @@ RegisterServerEvent('jim-shops:server:BuyItem', function(data)
 		addItem(data.item, 1, data.info, src)
 	end
 
-	if data.shopTable.societyCharge then
-		triggerNotify(getName(data.shop), "Charing society for purchase", "success", src)
-		chargeSociety(data.shopTable.societyCharge, cost)
+	if cost == 0 then
+		triggerNotify(nil, "Free item", "success", src)
 	else
-		chargePlayer(cost, tostring(data.billType), src)
+		if tostring(data.billType) == "society" then
+			local societyCharge = data.shopTable.societyCharge or data.society
+			triggerNotify(getName(data.shop), "Charing society for purchase", "success", src)
+			chargeSociety(societyCharge, cost)
+		else
+			chargePlayer(cost, tostring(data.billType), src)
+		end
 	end
-	if data.shopTable.societyOwned then	-- if store is "owned" by a society, send money to their bank
+
+	if data.shopTable.societyOwned then
+		-- if store is "owned" by a society, send money to their bank
+		-- required the shop table to have `societyOwned = job` otherwise this will fail1
 		fundSociety(data.shopTable.societyOwned, cost)
 	end
 	TriggerClientEvent("jim-shops:SellAnim", src, data)
 
-
 	--Remove item from stash
-	if Config.Overrides.generateStoreLimits and data.stash then
+	if Config.Overrides.generateStoreLimits and data.stash and not data.custom then
+		--jsonPrint(data)
 		local stashName = data.vendID or data.shop..(data.shopNum and "_"..data.shopNum or "")
 
 		debugPrint("^5Debug^7: ^2Adjusting cache info^7: '^6"..stashName.."^7'")
