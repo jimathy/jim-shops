@@ -83,7 +83,6 @@ RegisterServerEvent('jim-shops:server:BuyItem', function(data)
 	if Items[data.item].type == "weapon" or Items[data.item].unique then
 		if Items[data.item].type == "weapon" then data.info = nil end
 		for i = 1, data.amount do -- Make a loop to put items into different slots rather than full amount in 1 slot
-		print("adding 1")
 			addItem(data.item, 1, data.info, src)
 			Wait(5)
 		end

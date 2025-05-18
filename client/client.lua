@@ -95,6 +95,8 @@ Shops.Stores.Menu = function(data, custom)
 		exports["jim-talktonpc"]:createCam(data.entity, true, "shop", true)
 	end
 
+	--if data.shopTable.products
+
 	if Config.Overrides.generateStoreLimits and not custom then
 		stashItems = triggerCallback('jim-shops:callback:GetStashItems', data.shop.."_"..data.shopNum)
 	end
@@ -261,9 +263,7 @@ Shops.Stores.Charge = function(data)
 		local amount, billType = 0, nil
         if dialog[1] then   -- if ox menu, auto adjust values
 			if not dialog[2] then
-				print("must be free")
 				amount = dialog[1]
-				print(amount, billType)
 			else
 				amount = dialog[2]
 				billType = dialog[1]
@@ -280,7 +280,7 @@ Shops.Stores.Charge = function(data)
 				return
 			end
 		end
-		print(amount)
+
 		if amount <= 0 then
 			triggerNotify(getName(data.shop), "Incorrect amount", "error")
 			Shops.Vending.Charge(data)
