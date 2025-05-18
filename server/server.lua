@@ -59,59 +59,36 @@ end
 RegisterServerEvent('jim-shops:server:BuyItem', function(data)
 	--jsonPrint(data)
 	local src = source
-	local Player = nil
-	local inventory = nil
+	local cost = (data.price * data.amount)
+	local balance = data.shopTable.societyCharge
+		and getSocietyAccount(data.shopTable.societyCharge)
+		or getPlayer(src)[tostring(data.billType)]
 
 	--Inventory space checks
-	local totalWeight = nil
-	if isStarted(QBInv) then
-		Player = Core.Functions.GetPlayer(src)
-		inventory = Player.PlayerData.items
-		totalWeight = GetTotalWeight(inventory)
-	elseif isStarted(OXInv) then
-		inventory = exports[OXInv]:Inventory(src)
-		totalWeight = exports[OXInv]:CanCarryAmount(src, data.item, data.amount)
-	end
-	-- Check for empty slots
-	local slots = 0
-	for _ in pairs(inventory) do
-		slots += 1
-	end
-	-- create table and check if the player can acutally hold the amount
 	if canCarry({ [data.item] = data.amount }, src) then
-		totalWeight += (Items[data.item].weight * data.amount)
+		goto continue
 	else
 		triggerNotify(getName(data.shop), "Not enough space in inventory", "error", src)
 		return
 	end
-
-	slots = Config.Overrides.MaxSlots - slots
-	local balance = data.shopTable.societyCharge and getSocietyAccount(data.shopTable.societyCharge) or getPlayer(src)[tostring(data.billType)]
-	local cost = (data.price * data.amount)
-	-- If too heavy:
-	if (totalWeight + (Items[data.item].weight * data.amount)) > InventoryWeight then
-		triggerNotify(getName(data.shop), "Not enough space in inventory", "error", src)
-		return
-		-- If unique and it would poof away:
-	elseif Items[data.item].unique and (tonumber(slots) < tonumber(data.amount)) then
-		triggerNotify(getName(data.shop), "Not enough slots in inventory", "error", src)
-		return
-	end
+	::continue::
 
 	--Money Check
 	if balance <= cost then -- Check for money first if not enough, stop here
 		triggerNotify(getName(data.shop), "Not enough money", "error", src)
 		return
 	end
+
 	-- If its a weapon or a unique item, do this:
 	if Items[data.item].type == "weapon" or Items[data.item].unique then
 		if Items[data.item].type == "weapon" then data.info = nil end
 		for i = 1, data.amount do -- Make a loop to put items into different slots rather than full amount in 1 slot
+		print("adding 1")
 			addItem(data.item, 1, data.info, src)
 			Wait(5)
 		end
-	else		-- if its a normal item, do normal things
-		addItem(data.item, data.amount, data.info, src)
+	else
+		addItem(data.item, data.amount, data.info, src) -- if its a normal item, add full amount in one go
 	end
 
 	if cost == 0 then
@@ -127,8 +104,8 @@ RegisterServerEvent('jim-shops:server:BuyItem', function(data)
 	end
 
 	if data.shopTable.societyOwned then
-		-- if store is "owned" by a society, send money to their bank
-		-- required the shop table to have `societyOwned = job` otherwise this will fail1
+		-- if store is "owned" by a society, send money to that bank account
+		-- required the shop table to have `societyOwned = job` otherwise this won't be used
 		fundSociety(data.shopTable.societyOwned, cost)
 	end
 	TriggerClientEvent("jim-shops:SellAnim", src, data)
