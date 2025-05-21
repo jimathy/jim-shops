@@ -1,5 +1,7 @@
-3.0.03
+3.0.04
 
-- Fix support for different inventories carry checks
+- Add new Sell-to peds, allowing easy setup of locations for users
+- Move casino "trade" chips to Sell-to ped code
+- Use global statebags instead of callbakcs at player load in
 
 https://github.com/jimathy/jim-shops
