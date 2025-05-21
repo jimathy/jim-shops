@@ -17,11 +17,6 @@ if Config.Overrides.generateStoreLimits then    -- if enabled then do this
                                     Config.Overrides.RandomAmount and math.random(1, v.products[i].amount) or
                                     v.products[i].amount,
                             }
-
-                            if item == Config.Overrides.SellCasinoChips.chipItem then
-                                tempTable[item].amount = v["products"][i].amount
-                            end
-
                         else
                             print("^1Error^7: ^3makeFreshStashes ^7- ^2Can't find item ^7'^6"..item.."^7'")
                         end

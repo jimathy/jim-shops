@@ -4,7 +4,7 @@ Products = {
         --{ name = "water_bottle", price = 2, amount = 50, },
         --{ name = "kurkakola", price = 2, amount = 50, },
         --{ name = "twerks_candy", price = 2, amount = 50, },
-       -- { name = "snikkel_candy", price = 2, amount = 50, },
+        -- { name = "snikkel_candy", price = 2, amount = 50, },
         { name = "sandwich", price = 2, amount = 50, },
         { name = "beer", price = 7, amount = 50, },
         { name = "whiskey", price = 10, amount = 50, },

@@ -1,16 +1,18 @@
 onResourceStart(function()
+
 	for k, v in pairs(Products) do -- Scan products table, to remove any items
 		debugPrint("^5Debug^7: ^2Scanning product table^7 - ^3Products^7['^6"..k.."^7']")
 		for i = 1, #v do
 			local item = Products[k][i].name
 			if not Items[item] then
-				print("^5Debug^7: ^3Config^7.^3Products^7['^6"..k.."^7'] ^2can't find item^7: ^6"..item.."^7")
+				print("^5Debug^7: ^3Products^7['^6"..k.."^7'] ^2can't find item^7: ^6"..item.."^7")
 			end
 		end
 	end
+
 	for k, v in pairs(Locations) do
 		if v.products == nil then
-			debugPrint("^5Debug^7: ^3Config^7.^3Locations^7['^6"..k.."^7']^2 can't find its product table^7")
+			debugPrint("^5Debug^7: ^3Locations^7['^6"..k.."^7']^2 can't find its product table^7")
 		end
 		if not v.isVendingMachine then
 			Locations[k]["model"] = { -- Pick a single ped model from the list so all players see same one
@@ -18,16 +20,22 @@ onResourceStart(function()
 			}
 		end
 	end
+
 	if Config.Overrides.BlackMarket then -- if true, pick a random coord from table for the market to appear
 		Locations["blackmarket"]["coords"] = {
 			Locations["blackmarket"]["coords"][math.random(1, #Locations["blackmarket"]["coords"])]
 		}
 	end
+	-- Use global statebag to sync location table between players
+	GlobalState.jimShopLocationsData = Locations
+	debugPrint("^5Statebag^7: ^2Updating^3 jimShopLocationsData ^2Global Statebag^7")
+
 end, true)
 
-createCallback("jim-shops:callback:syncShops", function(source)
-	return Locations
-end)
+onResourceStop(function()
+	-- Ensure statebag is clean
+	GlobalState.jimShopLocationsData = nil
+end, true)
 
 createCallback('jim-shops:server:getLicenseStatus', function(source, licenseArray)
 	local src = source
@@ -46,15 +54,6 @@ RegisterServerEvent('jim-shops:ShopOpen', function(shop, name, shopTable)
 	local data = { shopTable = { products = shopTable.items, label = shopTable.label, societyCharge = shopTable.society or shopTable.societyCharge or nil }, custom = true }
 	TriggerClientEvent('jim-shops:ShopMenu', src, data, true)
 end)
-
-local function GetTotalWeight(items)
-	local weight = 0
-	if not items then return 0 end
-	for _, item in pairs(items) do
-		weight += item.weight * (item.amount or item.count)
-	end
-	return tonumber(weight)
-end
 
 RegisterServerEvent('jim-shops:server:BuyItem', function(data)
 	--jsonPrint(data)
@@ -125,18 +124,5 @@ RegisterServerEvent('jim-shops:server:BuyItem', function(data)
 		else
 			debugPrint("^1Error^7: ^2Can't adjust cache info^7: '^6"..stashName.."^7'")
 		end
-	end
-end)
-
-RegisterNetEvent('jim-shops:server:sellChips', function()
-	local item = Config.Overrides.SellCasinoChips.chipItem
-    local src = source
-	local _, hasTable = hasItem(item, 1, src)
-	if hasTable[item].hasItem then
-		removeItem(item, hasTable[item].count, src)
-		local price = Config.Overrides.SellCasinoChips.pricePer * hasTable[item].count
-		triggerNotify(getName("casino"), "You sold your chips for $"..price, "success", src)
-	else
-		triggerNotify(getName("casino"), "You don't have any chips to trade", "error", src)
 	end
 end)

@@ -146,7 +146,6 @@ Locations = {
 		hideblip = true,
 		blipsprite = 617,
 		blipcolour = 0,
-		isCasino = true,
 	},
     ["casino2"] = {
 		label = "Casino Bar",

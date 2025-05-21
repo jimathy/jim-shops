@@ -5,7 +5,12 @@ Shops = {
 }
 
 onPlayerLoaded(function()
-	Locations = triggerCallback("jim-shops:callback:syncShops")
+
+    -- Wait for global statebag sync
+	while not GlobalState.jimShopLocationsData do Wait(100) end
+	debugPrint("^5Statebag^7: ^2Recieving ^4jimShopLocationsData: ^7'^6"..countTable(GlobalState.jimShopLocationsData).."^7'")
+	Locations = GlobalState.jimShopLocationsData
+
 	for k, v in pairs(Locations) do
 		if not v.isVendingMachine then
 			for l, b in pairs(v.coords) do
@@ -37,15 +42,7 @@ onPlayerLoaded(function()
 						})
 					end,
 				},}
-				if v.isCasino then
-					options[#options+1] = {
-						action = function()
-							TriggerServerEvent("jim-shops:server:sellChips")
-						end,
-						icon = "fab fa-galactic-republic",
-						label = "Trade Chips ($"..Config.Overrides.SellCasinoChips.pricePer.." per chip)",
-					}
-				end
+
 				if Config.Overrides.Peds then
 					if v["model"] then
 						local i = math.random(1, #v.model)

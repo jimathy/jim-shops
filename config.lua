@@ -5,7 +5,7 @@
 Config = {
 	Lan = "en",
 	System = {
-		Debug = false, -- Enable to add debug boxes and message.
+		Debug = true, -- Enable to add debug boxes and message.
 		EventDebug = false,
 
 
@@ -35,11 +35,5 @@ Config = {
 		GabzAmmu = false, -- Enable if using gabz Ammunation stores
 		VendOverride = true, -- Enable this if you want all the vending machines to use this script
 
-		SellCasinoChips = {
-			coords = vec4(950.37, 34.72, 71.87, 33.82),
-			ped = "S_M_Y_CASINO_01",
-			pricePer = 1,
-			chipItem = "casinochips",
-		}
 	},
 }

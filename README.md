@@ -44,8 +44,6 @@ Sample:
 
 - Refactored the shop building to use several if's instead of elseif so items can require multiple things, such as jobrole police & requireslicense weapon before you can buy it.
 
-- Config.SellCasinoChips now includes chipItem for easy changing your casino chip if needed
-
 ----- Original README Information
 # jim-shops
 - QBCore based shops system
