@@ -5,7 +5,7 @@
 Config = {
 	Lan = "en",
 	System = {
-		Debug = true, -- Enable to add debug boxes and message.
+		Debug = false, -- Enable to add debug boxes and message.
 		EventDebug = false,
 
 
