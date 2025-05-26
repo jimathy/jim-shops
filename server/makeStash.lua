@@ -9,6 +9,10 @@ if Config.Overrides.generateStoreLimits then    -- if enabled then do this
                     local tempTable = {}
                     local stashName = k.."_"..i
                     debugPrint("^5Debug^7: ^2Creating amount cache for^7", stashName)
+                    if not v.products or #v.products == 0 then
+                        print("^1Error^7: ^3makeFreshStashes ^7- ^2No products found for stash ^7'^6"..stashName.."^7'")
+                        goto skip
+                    end
                     for i = 1, #v.products do
                         local item = v.products[i].name:lower()
                         if Items[item] then
@@ -21,6 +25,7 @@ if Config.Overrides.generateStoreLimits then    -- if enabled then do this
                             print("^1Error^7: ^3makeFreshStashes ^7- ^2Can't find item ^7'^6"..item.."^7'")
                         end
                     end
+                    ::skip::
                     -- Add created stash table to cache
                     itemStashCache[stashName] = tempTable
                 end

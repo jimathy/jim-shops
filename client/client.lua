@@ -33,6 +33,10 @@ onPlayerLoaded(function()
 					job = v["job"] or nil,
 					gang = v["gang"] or nil,
 					action = function(data)
+						if not v.products or countTable(v.products) == 0 then
+							triggerNotify(nil, "Error - No products found for shop", "error")
+							return
+						end
 						Shops.Stores.Menu({
 							shopTable = v,
 							name = v.label,
