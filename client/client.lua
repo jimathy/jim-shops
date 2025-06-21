@@ -265,12 +265,13 @@ Shops.Stores.Charge = function(data)
         if dialog[1] then   -- if ox menu, auto adjust values
 			if not dialog[2] then
 				amount = dialog[1]
+				billType = "cash"
 			else
 				amount = dialog[2]
 				billType = dialog[1]
 			end
 		else
-			billType = dialog.billtype
+			billType = dialog.billtype or "cash"
 			amount = tonumber(dialog.amount)
 		end
 
