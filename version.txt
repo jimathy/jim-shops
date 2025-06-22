@@ -1,7 +1,7 @@
-3.0.04
+3.0.05
 
-- Add new Sell-to peds, allowing easy setup of locations for users
-- Move casino "trade" chips to Sell-to ped code
-- Use global statebags instead of callbakcs at player load in
+- Fix for is your shop has no models set
+- Warn users if a shop has empty/nil product table
+- Fix errors when buying "free" items when using ox_lib
 
 https://github.com/jimathy/jim-shops
