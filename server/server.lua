@@ -14,7 +14,7 @@ onResourceStart(function()
 		if v.products == nil then
 			debugPrint("^5Debug^7: ^3Locations^7['^6"..k.."^7']^2 can't find its product table^7")
 		end
-		if not v.isVendingMachine then
+		if not v.isVendingMachine and Locations[k]["model"] and next(Locations[k]["model"]) then
 			Locations[k]["model"] = { -- Pick a single ped model from the list so all players see same one
 				Locations[k]["model"][math.random(1, #Locations[k]["model"])]
 			}
