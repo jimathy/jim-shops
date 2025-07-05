@@ -1,7 +1,5 @@
-3.0.05
+3.0.06
 
-- Fix for is your shop has no models set
-- Warn users if a shop has empty/nil product table
-- Fix errors when buying "free" items when using ox_lib
+- Add better support for lation_ui
 
 https://github.com/jimathy/jim-shops
