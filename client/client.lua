@@ -168,6 +168,7 @@ Shops.Stores.Menu = function(data, custom)
 			if canSee then
 				ShopMenu[#ShopMenu+1] = {
 					icon = invImg(products[i].name),
+					image = invImg(products[i].name),
 					isMenuHeader = lock,
 					header = Items[products[i].name].label, txt = text,
 					onSelect = function()
@@ -192,7 +193,7 @@ Shops.Stores.Menu = function(data, custom)
 		header = data.shopTable["logo"] and "<center><img src="..data.shopTable["logo"].." width=200px>" or data.shopTable["label"]
 	elseif Config.System.Menu == "ox" then
 		header = data.shopTable["logo"] and '!['..''.. ']('..data.shopTable["logo"]..')' or data.shopTable["label"]
-	elseif Config.System.Menu == "gta" then
+	else
 		header =  data.shopTable["label"]
 	end
 	openMenu(ShopMenu, {
@@ -216,11 +217,11 @@ Shops.Stores.Charge = function(data)
         header = "<center><p><img src="..data.shopTable["logo"].." width=150px></img></p>"..header
     end
     local max = data.amount if max == 0 and not Config.Overrides.generateStoreLimits then max = nil end
-    if Config.System.Menu == "ox" then
-        settext = (Config.Overrides.generateStoreLimits == true and data.amount ~= 0) and "Amnt: "..data.amount.." | Cost: "..price or "Cost: "..price
-    else
+    if Config.System.Menu == "qb" then
         settext =
         "- Confirm Purchase -"..br..br.. ((Config.Overrides.generateStoreLimits and data.amount ~= 0) and "Amount: "..data.amount..br or "") ..weight..br.." Cost per item: "..price..br..br.."- Payment Type -"
+    else
+        settext = (Config.Overrides.generateStoreLimits == true and data.amount ~= 0) and "Amnt: "..data.amount.." | Cost: "..price or "Cost: "..price
     end
 	--print(price, type(price), price == "$0")
 	local dialogTable = {}

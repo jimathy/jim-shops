@@ -12,11 +12,14 @@ Config = {
 		--- FRAMEWORK OPTIONS ---
 		Menu = "qb",        -- Supports "qb"    (qb-menu)
 							-- "ox"             (ox_lib)
-							-- "gta"            (warmenu)
+							-- "lation"			(lation_ui)
 
 		Notify = "gta",     -- Supports "qb"    (qb-core)
 							-- "ox"             (ox_lib)
 							-- "gta"            (gta native)
+							-- "lation"			(lation_ui)
+							-- "esx"			(esx)
+							-- "okok"			(okok)
 	},
 
 

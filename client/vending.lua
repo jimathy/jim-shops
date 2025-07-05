@@ -110,7 +110,7 @@ Shops.Vending.Menu = function(data)
 		header = data.shopTable["logo"] and "<center><img src="..data.shopTable["logo"].." width=200px>" or data.shopTable["label"]
 	elseif Config.System.Menu == "ox" then
 		header = data.shopTable["logo"] and '!['..'lol'.. ']('..data.shopTable["logo"]..')' or data.shopTable["label"]
-	elseif Config.System.Menu == "gta" then
+	else
 		header = data.shopTable["label"]
 	end
 	openMenu(ShopMenu, {
@@ -129,11 +129,11 @@ Shops.Vending.Charge = function(data)
         header = "<center><p><img src="..data.shopTable["logo"].." width=150px></img></p>"..header
     end
     local max = data.amount if max == 0 and not Config.Overrides.generateStoreLimits then max = nil end
-    if Config.System.Menu == "ox" then
-        settext = (Config.Overrides.generateStoreLimits == true and data.amount ~= 0) and "Amnt: "..data.amount.." | Cost: "..price or "Cost: "..price
-    else
+    if Config.System.Menu == "qb" then
         settext =
         "- Confirm Purchase -"..br..br.. ((Config.Overrides.generateStoreLimits and data.amount ~= 0) and "Amount: "..data.amount..br or "") ..weight..br.." Cost per item: "..price..br..br.."- Payment Type -"
+    else
+        settext = (Config.Overrides.generateStoreLimits == true and data.amount ~= 0) and "Amnt: "..data.amount.." | Cost: "..price or "Cost: "..price
     end
     local dialog = createInput(Config.System.Menu == "qb" and header or Items[data.item].label, { {
             type = 'radio',
