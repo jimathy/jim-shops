@@ -34,9 +34,9 @@ Config = {
 		BlackMarket = true, 	-- enable to add blackmarket locations
 								-- when enabled the server side will decide a location and players recieve that on connecting
 		Measurement = "lb", -- Custom Weight measurement
-		Gabz247 = false,  -- Enable if using gabz 247 stores
-		GabzAmmu = false, -- Enable if using gabz Ammunation stores
-		VendOverride = true, -- Enable this if you want all the vending machines to use this script
+		Gabz247 = GetResourceState("cfx-gabz-247"):find("start"),  -- Enable if using gabz 247 stores
+		GabzAmmu = GetResourceState("cfx-gabz-ammunation"):find("start"), -- Enable if using gabz Ammunation stores
 
+		VendOverride = true, -- Enable this if you want all the vending machines to use this script
 	},
 }
