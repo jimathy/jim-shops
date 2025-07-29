@@ -53,10 +53,14 @@ onPlayerLoaded(function()
 						loadModel(v.model[i])
 						if IsModelAPed(v.model[i]) then
 							if not Peds[label] then
-								makeDistPed(v.model[i], b, true, false, v.scenario, nil, nil)
+								makeDistPed(v.model[i], b, true, false, v.scenario, nil, nil, function(ped)
+									if v["killable"] then
+										SetEntityInvincible(ped, false)
+										SetBlockingOfNonTemporaryEvents(ped, false)
+										FreezeEntityPosition(ped, false)
+									end
+								end)
 							end
-							-- if not v["killable"] then SetEntityInvincible(Peds[label], true) end
-							-- SetEntityNoCollisionEntity(entity, PlayerPedId(), false)
 						end
 						if not IsModelAPed(v.model[i]) then
 							if not Peds[label] then
