@@ -23,6 +23,12 @@ onResourceStart(function()
 				end
 			end
 		end
+		-- Register shop for exploit protection
+		if v.coords and #v.coords > 0 then
+			for i = 1, #v.coords do
+				registerSellShop(k, v.coords[i].xyz)
+			end
+		end
 	end
 
 	-- Use global statebag to sync location table between players

@@ -34,6 +34,7 @@ onPlayerLoaded(function()
                     local products = v.products
                     products.Header = v.label
                     sellMenu({
+                        name = k,
                         ped = entity,
                         sellTable = products
                     })
