@@ -1,5 +1,8 @@
-3.0.06
+3.0.07
 
-- Add better support for lation_ui
+- Update Readme.md to direct to gitbook
+- Add auto detection for gabz shop mlo's
+- Fix killable peds not being killable
+- Make use of jim_bridge's new shop exploit protection
 
 https://github.com/jimathy/jim-shops
