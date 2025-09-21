@@ -6,16 +6,16 @@ onPlayerLoaded(function()
 	Wait(1000)
 	for k, v in pairs(Locations) do
         if v.isVendingMachine == true and Config.Overrides.VendOverride then
-            for _, b in pairs(v.coords) do				-- Add custom vending machine locations
-                if v.model then
-                    local i = math.random(1, #v.model)
-                    loadModel(v.model[i])
-                    if not IsModelAPed(v.model[i]) then
-                        makeDistProp({ prop = v.model[i], coords = b }, true, false)
-                    end
-                end
-            end
-
+			if v.coords and #v.coords > 0 then
+				for i = 1, #v.coords do				-- Add custom vending machine locations
+					if v.model then
+						local modelPick = math.random(1, #v.model)
+						if not IsModelAPed(v.model[i]) then
+							makeDistProp({ prop = v.model[modelPick], coords = v.coords[i] }, true, false)
+						end
+					end
+				end
+			end
             createModelTarget(v.model, {
                 {
                     action = function(data)
