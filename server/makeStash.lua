@@ -15,7 +15,7 @@ if Config.Overrides.generateStoreLimits then    -- if enabled then do this
                     end
                     for i = 1, #v.products do
                         local item = v.products[i].name:lower()
-                        if Items[item] then
+                        if doesItemExist(item) then
                             tempTable[item] = {
                                 amount =
                                     Config.Overrides.RandomAmount and math.random(1, v.products[i].amount) or
@@ -41,7 +41,7 @@ RegisterNetEvent("jim-shops:server:GenerateVendStash", function(data)
 	local products = data.shopTable.products
 	for i = 1, #products do
         local item = products[i].name:lower()
-        if Items[item] then
+        if doesItemExist(item) then
             tempTable[item] = {
             amount =
                 Config.Overrides.RandomAmount and math.random(1, products[i].amount) or
@@ -88,7 +88,7 @@ RegisterNetEvent("qb-shops:server:RestockShopItems", function(storeinfo)
         local stashTable = {}
         for i = 1, #Config.Locations[name]["products"] do
             local item = Config.Locations[name]["products"][i].name:lower()
-            if not Items[item] then
+            if not doesItemExist(item) then
                 print("^5Debug^7: ^3RestockShopItems ^7- ^1Can't ^2find item ^7'^6"..item.."^7'")
             end
             itemStashCache[stashName][item].amount = Config.Locations[name]["products"][i].amount

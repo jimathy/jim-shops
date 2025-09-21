@@ -50,7 +50,7 @@ Shops.Vending.Menu = function(data)
 		local amount, lock = products[i].amount, false
 
         local item = products[i].name:lower()
-        if not Items[item] then
+        if not doesItemExist(item) then
 			print("^5Debug^7: ^3ShopItems ^7- ^1Can't ^2find item ^7'^6"..item.."^7'")
 		else
             local price = products[i].price == 0 and "Free" or "Cost: $"..products[i].price
@@ -86,7 +86,7 @@ Shops.Vending.Menu = function(data)
 				ShopMenu[#ShopMenu+1] = {
 					icon = invImg(item),
 					isMenuHeader = lock,
-					header = Items[item]?.label,
+					header = getItemLabel(item),
                     txt = text,
 					onSelect = function()
 						Shops.Vending.Charge({
@@ -124,7 +124,7 @@ Shops.Vending.Charge = function(data)
     local price = data.cost == "Free" and data.cost or "$"..data.cost
     local weight = Items[data.item].weight == 0 and "" or "Weight: "..(Items[data.item].weight / 1000)..Config.Overrides.Measurement
     local settext = ""
-    local header = "<center><p><img src=nui://"..invImg(data.item).." width=100px></p>"..Items[data.item]?.label
+    local header = "<center><p><img src=nui://"..invImg(data.item).." width=100px></p>"..getItemLabel(data.item)
     if data.shopTable["logo"] then
         header = "<center><p><img src="..data.shopTable["logo"].." width=150px></img></p>"..header
     end
@@ -135,7 +135,7 @@ Shops.Vending.Charge = function(data)
     else
         settext = (Config.Overrides.generateStoreLimits == true and data.amount ~= 0) and "Amnt: "..data.amount.." | Cost: "..price or "Cost: "..price
     end
-    local dialog = createInput(Config.System.Menu == "qb" and header or Items[data.item].label, { {
+    local dialog = createInput(Config.System.Menu == "qb" and header or getItemLabel(data.item), { {
             type = 'radio',
             label = "Payment Type",
             name = 'billtype',
