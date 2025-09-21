@@ -1,10 +1,38 @@
+
+
+local registeredShops = {}
+function registerJimShop(name, label, items, society, coords)
+	registeredShops[label] = registeredShops[label] or {}
+	registeredShops[label][#registeredShops[label]+1] = { label = label, items = items, society = society, coords = coords }
+	debugPrint("^5Debug^7: ^2Shop ^7'^4"..label.."^7' ^2Registered at^7: "..formatCoord(coords))
+end
+exports("registerShop", function(...)
+	registerJimShop(...)
+end)
+
 onResourceStart(function()
+
+	createCallback("jim-shops:checkShopExploit", function(source, shop)
+		local src = source
+		local ped = GetPlayerPed(src)
+		local srcCoords = GetEntityCoords(ped)
+		for k in pairs(registeredShops) do
+			if shop:find(k) then
+				for v = 1, #registeredShops[k] do
+					if #(registeredShops[k][v].coords.xy  - srcCoords.xy) <= 10 then
+						return true
+					end
+				end
+			end
+		end
+		return false
+	end)
 
 	for k, v in pairs(Products) do -- Scan products table, to remove any items
 		debugPrint("^5Debug^7: ^2Scanning product table^7 - ^3Products^7['^6"..k.."^7']")
 		for i = 1, #v do
 			local item = Products[k][i].name
-			if not Items[item] then
+            if not doesItemExist(item) then
 				print("^5Debug^7: ^3Products^7['^6"..k.."^7'] ^2can't find item^7: ^6"..item.."^7")
 			end
 		end
@@ -18,6 +46,11 @@ onResourceStart(function()
 			Locations[k]["model"] = { -- Pick a single ped model from the list so all players see same one
 				Locations[k]["model"][math.random(1, #Locations[k]["model"])]
 			}
+		end
+		if v.coords and #v.coords > 0 then
+			for i = 1, #v.coords do
+				registerJimShop(k, v.label, v.products, v.gang or v.job or nil, v.coords[i])
+			end
 		end
 	end
 
@@ -51,7 +84,30 @@ end)
 --Wrapper converting for opening shops externally
 RegisterServerEvent('jim-shops:ShopOpen', function(shop, name, shopTable)
 	local src = source
-	local data = { shopTable = { products = shopTable.items, label = shopTable.label, societyCharge = shopTable.society or shopTable.societyCharge or nil }, custom = true }
+	local ped = GetPlayerPed(src)
+	local srcCoords = GetEntityCoords(ped)
+	local allow = false
+	for k in pairs(registeredShops) do
+		if shopTable.label:find(k) then
+			for v = 1, #registeredShops[k] do
+				if #(registeredShops[k][v].coords.xy  - srcCoords.xy) <= 10 then
+					allow = true
+					break
+				else
+					allow = false
+				end
+			end
+		end
+	end
+
+	if not allow then return print("lol no") else print("it worked") end
+
+	local data = {
+		shopTable = {
+			products = shopTable.items,
+			label = shopTable.label,
+			societyCharge = shopTable.society or shopTable.societyCharge or nil
+		}, custom = true }
 	TriggerClientEvent('jim-shops:ShopMenu', src, data, true)
 end)
 
@@ -120,7 +176,7 @@ RegisterServerEvent('jim-shops:server:BuyItem', function(data)
 			else
 				itemStashCache[stashName][data.item:lower()].amount -= data.amount
 			end
-			debugPrint("^5Debug^7: ^2Removing ^7'^3"..Items[data.item].label.."^7' x"..data.amount.." ^2from Shop's Stash^7: ^6"..stashName.."^7")
+			debugPrint("^5Debug^7: ^2Removing ^7'^3"..getItemLabel(data.item).."^7' x"..data.amount.." ^2from Shop's Stash^7: ^6"..stashName.."^7")
 		else
 			debugPrint("^1Error^7: ^2Can't adjust cache info^7: '^6"..stashName.."^7'")
 		end

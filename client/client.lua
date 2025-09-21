@@ -8,8 +8,8 @@ onPlayerLoaded(function()
 
     -- Wait for global statebag sync
 	while not GlobalState.jimShopLocationsData do Wait(100) end
-	debugPrint("^5Statebag^7: ^2Recieving ^4jimShopLocationsData: ^7'^6"..countTable(GlobalState.jimShopLocationsData).."^7'")
 	Locations = GlobalState.jimShopLocationsData
+	debugPrint("^5Statebag^7: ^2Recieving ^4jimShopLocationsData: ^7'^6"..countTable(Locations).."^7'")
 
 	for k, v in pairs(Locations) do
 		if not v.isVendingMachine then
@@ -64,7 +64,7 @@ onPlayerLoaded(function()
 						end
 						if not IsModelAPed(v.model[i]) then
 							if not Peds[label] then
-								Peds[#Peds+1] = makeProp({
+								Peds[#Peds+1] = makeDistProp({
 									prop = v.model[i],
 									coords = b
 								}, true, false)
@@ -86,11 +86,15 @@ onPlayerLoaded(function()
 end, true)
 
 
-RegisterNetEvent('jim-shops:ShopMenu', function(data, custom)
-	Shops.Stores.Menu(data, custom)
+RegisterNetEvent('jim-shops:ShopMenu', function(...)
+	Shops.Stores.Menu(...)
 end)
 
 Shops.Stores.Menu = function(data, custom)
+	if triggerCallback("jim-shops:checkShopExploit", data.shopTable.label) then
+	else
+		return print("^1Error^7: ^1This shop wasn't registered^7")
+	end
 	local products, stashItems = data.shopTable.products, {}
 	local ShopMenu = {}
 	local setheader = " "
@@ -100,17 +104,15 @@ Shops.Stores.Menu = function(data, custom)
 		exports["jim-talktonpc"]:createCam(data.entity, true, "shop", true)
 	end
 
-	--if data.shopTable.products
-
 	if Config.Overrides.generateStoreLimits and not custom then
-		stashItems = triggerCallback('jim-shops:callback:GetStashItems', data.shop.."_"..data.shopNum)
+		stashItems = triggerCallback("jim-shops:callback:GetStashItems", data.shop.."_"..data.shopNum)
 	end
 
 	for i = 1, #products do
 		local amount, lock = products[i].amount, false
 
 		local item = products[i].name:lower()
-		if not Items[item] then
+		if not doesItemExist(item) then
 			print("^1Error^7: ^3ShopMenu ^7- ^2Can't find item ^7'^6"..item.."^7'")
 		else
 			local price = products[i].price <= 0 and "Free" or "Cost: $"..products[i].price
@@ -151,10 +153,10 @@ Shops.Stores.Menu = function(data, custom)
 			end]]
 			if products[i].requiresLicense then
 				canSee = false
-				local hasLicense = triggerCallback('jim-shops:server:getLicenseStatus', false, products[i].requiresLicense)
+				local hasLicense = triggerCallback("jim-shops:server:getLicenseStatus", false, products[i].requiresLicense)
 				if hasLicense == true then
 					if products[i].type == "gun" then
-						local hasPurchased = triggerCallback('jim-shops:server:checkifweaponpurchased', false, products[i].requiresLicense)
+						local hasPurchased = triggerCallback("jim-shops:server:checkifweaponpurchased", false, products[i].requiresLicense)
 						canSee = not hasPurchased
 					else
 						canSee = true
@@ -174,7 +176,8 @@ Shops.Stores.Menu = function(data, custom)
 					icon = invImg(products[i].name),
 					image = invImg(products[i].name),
 					isMenuHeader = lock,
-					header = Items[products[i].name].label, txt = text,
+					header = getItemLabel(products[i].name),
+					txt = text,
 					onSelect = function()
 						Shops.Stores.Charge({
 							item = products[i].name,
@@ -212,11 +215,10 @@ Shops.Stores.Menu = function(data, custom)
 end
 
 Shops.Stores.Charge = function(data)
-	jsonPrint(data)
     local price = data.cost == "Free" and data.cost or "$"..data.cost
     local weight = Items[data.item].weight == 0 and "" or "Weight: "..(Items[data.item].weight / 1000)..Config.Overrides.Measurement
     local settext = ""
-    local header = "<center><p><img src=nui://"..invImg(data.item:lower()).." width=100px></p>"..Items[data.item]?.label
+    local header = "<center><p><img src=nui://"..invImg(data.item:lower()).." width=100px></p>"..getItemLabel(data.item)
     if data.shopTable["logo"] then
         header = "<center><p><img src="..data.shopTable["logo"].." width=150px></img></p>"..header
     end
@@ -227,7 +229,6 @@ Shops.Stores.Charge = function(data)
     else
         settext = (Config.Overrides.generateStoreLimits == true and data.amount ~= 0) and "Amnt: "..data.amount.." | Cost: "..price or "Cost: "..price
     end
-	--print(price, type(price), price == "$0")
 	local dialogTable = {}
 	if price ~= "$0" then
 		dialogTable = {
@@ -262,10 +263,9 @@ Shops.Stores.Charge = function(data)
             min = 0, max = max, default = 1
         }}
 	end
-	local dialog = createInput(Config.System.Menu == "qb" and header or Items[data.item].label, dialogTable)
+	local dialog = createInput(Config.System.Menu == "qb" and header or getItemLabel(data.item), dialogTable)
 
     if dialog then
-		jsonPrint(dialog)
 		local amount, billType = 0, nil
         if dialog[1] then   -- if ox menu, auto adjust values
 			if not dialog[2] then
