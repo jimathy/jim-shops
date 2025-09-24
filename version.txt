@@ -1,8 +1,6 @@
-3.0.07
+3.0.08
 
-- Update Readme.md to direct to gitbook
-- Add auto detection for gabz shop mlo's
-- Fix killable peds not being killable
-- Make use of jim_bridge's new shop exploit protection
+- Fix vending machines requiring coord tables
+- Upgrade exploit security, external stores now need to be registered before opening
 
-https://github.com/jimathy/jim-shops
+https://github.com/jimathy/jim-shops/releases/latest
