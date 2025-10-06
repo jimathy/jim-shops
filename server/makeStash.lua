@@ -9,17 +9,27 @@ if Config.Overrides.generateStoreLimits then    -- if enabled then do this
                     local tempTable = {}
                     local stashName = k.."_"..i
                     debugPrint("^5Debug^7: ^2Creating amount cache for^7", stashName)
-                    if not v.products or #v.products == 0 then
+                    local tempProductTable = v.products
+                    if not v.products[1] then
+                        tempProductTable = {}
+                        for _, b in pairs(v.products) do
+                            local itemlist = b.Items or b.items
+                            for entry = 1, #itemlist do
+                                tempProductTable[#tempProductTable+1] = itemlist[entry]
+                            end
+                        end
+                    end
+                    if not tempProductTable or #tempProductTable == 0 then
                         print("^1Error^7: ^3makeFreshStashes ^7- ^2No products found for stash ^7'^6"..stashName.."^7'")
                         goto skip
                     end
-                    for i = 1, #v.products do
-                        local item = v.products[i].name:lower()
+                    for i = 1, #tempProductTable do
+                        local item = tempProductTable[i].name:lower()
                         if doesItemExist(item) then
                             tempTable[item] = {
                                 amount =
-                                    Config.Overrides.RandomAmount and math.random(1, v.products[i].amount) or
-                                    v.products[i].amount,
+                                    Config.Overrides.RandomAmount and math.random(1, tempProductTable[i].amount) or
+                                    tempProductTable[i].amount,
                             }
                         else
                             print("^1Error^7: ^3makeFreshStashes ^7- ^2Can't find item ^7'^6"..item.."^7'")

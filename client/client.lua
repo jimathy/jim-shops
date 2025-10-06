@@ -100,14 +100,51 @@ Shops.Stores.Menu = function(data, custom)
 	local setheader = " "
 	local custom = data.custom or custom
 
+	local header = ""
+	if Config.System.Menu == "qb" then
+		header = data.shopTable["logo"] and "<center><img src="..data.shopTable["logo"].." width=200px>" or data.shopTable["label"]
+	elseif Config.System.Menu == "ox" then
+		header = data.shopTable["logo"] and '!['..''.. ']('..data.shopTable["logo"]..')' or data.shopTable["label"]
+	else
+		header =  data.shopTable["label"]
+	end
+
 	if isStarted("jim-talktonpc") then
 		exports["jim-talktonpc"]:createCam(data.entity, true, "shop", true)
 	end
 
+	-- Must be a subbed menu
+	if products[1] == nil then
+		for k, v in pairsByKeys(products) do
+			local itemList = v.Items or v.items
+			ShopMenu[#ShopMenu+1] = {
+				header = v.header or ("Sub Menu "..k),
+				txt = countTable(itemList).." Products",
+				icon = invImg(itemList[1].name),
+				onSelect = function()
+					local newTable = cloneTable(data)
+					newTable.shopTable.products = v.Items or v.items
+					newTable.goBack = function() Shops.Stores.Menu(data, custom) end
+					Shops.Stores.Menu(newTable, custom)
+				end,
+				onBack = function()
+					Shops.Stores.Menu(data, custom)
+				end,
+			}
+		end
+		openMenu(ShopMenu, { header = header , canClose = true })
+		return
+	end
 	if Config.Overrides.generateStoreLimits and not custom then
 		stashItems = triggerCallback("jim-shops:callback:GetStashItems", data.shop.."_"..data.shopNum)
 	end
-
+	if data.goBack then
+		ShopMenu[#ShopMenu+1] = {
+			header = "Go Back",
+			icon = "fa-solid fa-arrow-rotate-left",
+			onSelect = function() return data.goBack() end,
+		}
+	end
 	for i = 1, #products do
 		local amount, lock = products[i].amount, false
 
@@ -143,14 +180,14 @@ Shops.Stores.Menu = function(data, custom)
 					end
 				end
 			end
-			--[[if products[i].requiredGang then
+			if products[i].requiredGang then
 				canSee = false
 				for i2 = 1, #products[i].requiredGang do
-					if getJob("gang").name == products[i].requiredGang[i2] then
+					if hasJob(k, nil, v) then
 						canSee = true
 					end
 				end
-			end]]
+			end
 			if products[i].requiresLicense then
 				canSee = false
 				local hasLicense = triggerCallback("jim-shops:server:getLicenseStatus", false, products[i].requiresLicense)
@@ -194,14 +231,6 @@ Shops.Stores.Menu = function(data, custom)
 				}
 			end
 		end
-	end
-	local header = ""
-	if Config.System.Menu == "qb" then
-		header = data.shopTable["logo"] and "<center><img src="..data.shopTable["logo"].." width=200px>" or data.shopTable["label"]
-	elseif Config.System.Menu == "ox" then
-		header = data.shopTable["logo"] and '!['..''.. ']('..data.shopTable["logo"]..')' or data.shopTable["label"]
-	else
-		header =  data.shopTable["label"]
 	end
 	openMenu(ShopMenu, {
 		header = header,
