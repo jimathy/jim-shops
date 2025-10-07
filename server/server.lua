@@ -4,7 +4,7 @@ local registeredShops = {}
 function registerJimShop(name, label, items, society, coords)
 	registeredShops[label] = registeredShops[label] or {}
 	registeredShops[label][#registeredShops[label]+1] = { label = label, items = items, society = society, coords = coords }
-	debugPrint("^5Debug^7: ^2Shop ^7'^4"..label.."^7' ^2Registered at^7: "..formatCoord(coords))
+	debugPrint("^5Debug^7: "..(GetInvokingResource() or "Internal").." ^2Shop ^7'^4"..label.."^7' ^2Registered at^7: "..formatCoord(coords))
 end
 exports("registerShop", function(...)
 	registerJimShop(...)
@@ -100,7 +100,7 @@ RegisterServerEvent('jim-shops:ShopOpen', function(shop, name, shopTable)
 		end
 	end
 
-	if not allow then return print("lol no") else print("it worked") end
+	if not allow then return end
 
 	local data = {
 		shopTable = {
