@@ -117,9 +117,18 @@ Shops.Stores.Menu = function(data, custom)
 	if products[1] == nil then
 		for k, v in pairsByKeys(products) do
 			local itemList = v.Items or v.items
+			local countItems = function(table)
+				local count = 0
+				for i = 1, #table do
+					if doesItemExist(table[i].name) then
+						count += 1
+					end
+				end
+				return count
+			end
 			ShopMenu[#ShopMenu+1] = {
 				header = v.header or ("Sub Menu "..k),
-				txt = countTable(itemList).." Products",
+				txt = countItems(itemList).." Products",
 				icon = invImg(itemList[1].name),
 				onSelect = function()
 					local newTable = cloneTable(data)
@@ -132,7 +141,7 @@ Shops.Stores.Menu = function(data, custom)
 				end,
 			}
 		end
-		openMenu(ShopMenu, { header = header , canClose = true })
+		openMenu(ShopMenu, { header = header, canClose = true })
 		return
 	end
 	if Config.Overrides.generateStoreLimits and not custom then
