@@ -4,7 +4,7 @@ Products = {
         --{ name = "water_bottle", price = 2, amount = 50, },
         --{ name = "kurkakola", price = 2, amount = 50, },
         --{ name = "twerks_candy", price = 2, amount = 50, },
-        -- { name = "snikkel_candy", price = 2, amount = 50, },
+        --{ name = "snikkel_candy", price = 2, amount = 50, },
         { name = "sandwich", price = 2, amount = 50, },
         { name = "beer", price = 7, amount = 50, },
         { name = "whiskey", price = 10, amount = 50, },
@@ -20,22 +20,37 @@ Products = {
         { name = "vodka", price = 70000, amount = 50, },
     },
     ["hardware"] = {
-        { name = "lockpick", price = 200, amount = 50, },
-        { name = "weapon_wrench", price = 250, amount = 250, },
-        { name = "weapon_hammer", price = 250, amount = 250, },
-        { name = "weapon_bat", price = 500, amount = 50,  requiredGang = { "lostmc" } },  -- Gang only options in stores
-        { name = "repairkit", price = 250, amount = 50,  requiredJob = { ["mechanic"] = 0, ["police"] = 0 } },
-        { name = "screwdriverset", price = 350, amount = 50, },
-        { name = "phone", price = 850, amount = 50, },
-        { name = "radio", price = 250, amount = 50, },
-        { name = "binoculars", price = 50, amount = 50, },
-        { name = "firework1", price = 50, amount = 50, },
-        { name = "firework2", price = 50, amount = 50, },
-        { name = "firework3", price = 50, amount = 50, },
-        { name = "firework4", price = 50, amount = 50, },
-        { name = "fitbit", price = 400, amount = 150, },
-        { name = "cleaningkit", price = 150, amount = 150, },
-        { name = "advancedrepairkit", price = 500, amount = 50,  requiredJob = { ["mechanic"] = 0 } },
+        ["tools"] = {
+            header = "Tools",
+            Items = {
+                { name = "weapon_wrench", price = 250, amount = 250, },
+                { name = "weapon_hammer", price = 250, amount = 250, },
+                { name = "weapon_bat", price = 500, amount = 50,  requiredGang = { "lostmc" } },  -- Gang only options in stores
+                { name = "repairkit", price = 250, amount = 50,  requiredJob = { ["mechanic"] = 0, ["police"] = 0 } },
+                { name = "cleaningkit", price = 150, amount = 150, },
+                { name = "advancedrepairkit", price = 500, amount = 50,  requiredJob = { ["mechanic"] = 0 } },
+            },
+        },
+        ["fireworks"] = {
+            header = "Fireworks",
+            Items = {
+                { name = "firework1", price = 50, amount = 50, },
+                { name = "firework2", price = 50, amount = 50, },
+                { name = "firework3", price = 50, amount = 50, },
+                { name = "firework4", price = 50, amount = 50, },
+            },
+        },
+        ["tech"] = {
+            header = "Tech Products",
+            Items = {
+                { name = "lockpick", price = 200, amount = 50, },
+                { name = "screwdriverset", price = 350, amount = 50, },
+                { name = "phone", price = 850, amount = 50, },
+                { name = "radio", price = 250, amount = 50, },
+                { name = "fitbit", price = 400, amount = 150, },
+                { name = "binoculars", price = 50, amount = 50, },
+            },
+        },
     },
     ["weedshop"] = {
         { name = "joint", price = 10, amount = 1000, },
