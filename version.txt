@@ -1,6 +1,7 @@
-3.0.08
+3.0.09
 
-- Fix vending machines requiring coord tables
-- Upgrade exploit security, external stores now need to be registered before opening
+- Add ability to create and open embedded shops
+- Made "hardware store" an example of how this can be done (its optional)
+- Added the invoking script name to the debug print for `registerShop` export
 
 https://github.com/jimathy/jim-shops/releases/latest
