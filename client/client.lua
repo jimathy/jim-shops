@@ -112,7 +112,29 @@ Shops.Stores.Menu = function(data, custom)
 	if isStarted("jim-talktonpc") then
 		exports["jim-talktonpc"]:createCam(data.entity, true, "shop", true)
 	end
+	local countBasket = function(table)
+		local count = 0
+		local cost = 0
+		for k, v in pairs(table) do
+			if doesItemExist(k) then
+				count += v.amount
+				cost += v.cost
+			end
+		end
+		return count, cost
+	end
+	if Config.Overrides.BasketSystem then
+		local currentBasket = triggerCallback(getScript()..":server:getBasket", data.shop.."_"..data.shopNum)
+		local countedItems, countedPrice = countBasket(currentBasket)
+		ShopMenu[#ShopMenu+1] = {
+			header = countedItems == 0 and "Basket Empty" or "Item Basket - $"..countedPrice.." - "..countedItems.." items",
+			icon = "fas fa-basket-shopping",
+			disabled = countedItems == 0,
+			onSelect = function()
 
+			end,
+		}
+	end
 	-- Must be a subbed menu
 	if products[1] == nil then
 		for k, v in pairsByKeys(products) do
@@ -338,21 +360,26 @@ Shops.Stores.Charge = function(data)
 		if isStarted("jim-talktonpc") then
 			exports["jim-talktonpc"]:stopCam()
 		end
-		TriggerServerEvent("jim-shops:server:BuyItem",
-			{
-				amount = amount,
-				billType = billType,
-				item = data.item,
-				shopTable = data.shopTable,
-				price = data.cost,
-				info = data.info or nil,
-				shop = data.shop,
-				shopNum = data.shopNum or nil,
-				entity = data.entity or nil,
-				stash = data.amount and true or false,
-				custom = data.custom,
-			}
-		)
+		local newData = {
+			amount = amount,
+			billType = billType,
+			item = data.item,
+			shopTable = data.shopTable,
+			price = data.cost,
+			info = data.info or nil,
+			shop = data.shop,
+			shopNum = data.shopNum or nil,
+			entity = data.entity or nil,
+			stash = data.amount and true or false,
+			custom = data.custom,
+		}
+		if Config.Overrides.BasketSystem then
+			TriggerServerEvent(getScript()..":server:addBasketItem", newData)
+			Wait(300)
+			Shops.Stores.Menu(data, data.custom)
+		else
+			TriggerServerEvent("jim-shops:server:BuyItem", newData)
+		end
 	end
 end
 

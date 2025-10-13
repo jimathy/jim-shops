@@ -37,6 +37,10 @@ Config = {
 		Gabz247 = GetResourceState("cfx-gabz-247"):find("start"),  -- Enable if using gabz 247 stores
 		GabzAmmu = GetResourceState("cfx-gabz-ammunation"):find("start"), -- Enable if using gabz Ammunation stores
 
-		VendOverride = true, -- Enable this if you want all the vending machines to use this script
+		VendOverride = true, 	-- Enable this if you want all the vending machines to use this script
+
+		-- WIP ⚠️
+		--BasketSystem = true, 	-- If enabled, this creates a "Basket" for all shops, which users add items to and then can purchase in one go
+		--
 	},
 }
