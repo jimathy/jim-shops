@@ -3,6 +3,7 @@ itemStashCache = {}
 
 if Config.Overrides.generateStoreLimits then    -- if enabled then do this
     onResourceStart(function()
+        local missingItemCache = {}
         for k, v in pairs(Locations) do
             if not v.isVendingMachine then
                 for i = 1, #v.coords do
@@ -32,7 +33,7 @@ if Config.Overrides.generateStoreLimits then    -- if enabled then do this
                                     tempProductTable[i].amount,
                             }
                         else
-                            print("^1Error^7: ^3makeFreshStashes ^7- ^2Can't find item ^7'^6"..item.."^7'")
+                            missingItemCache[item] = true
                         end
                     end
                     ::skip::
@@ -40,6 +41,9 @@ if Config.Overrides.generateStoreLimits then    -- if enabled then do this
                     itemStashCache[stashName] = tempTable
                 end
             end
+        end
+        for item in pairsByKeys(missingItemCache) do
+            print("^1Error^7: ^3makeFreshStashes ^7- ^2Can't find item ^7'^6"..item.."^7'")
         end
     end, true)
 end
