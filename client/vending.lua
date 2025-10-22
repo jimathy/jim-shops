@@ -43,7 +43,7 @@ Shops.Vending.Menu = function(data)
 		if not vendID then
 			vendID = "Vend:["..string.sub(data.shopTable.label, 1, 4)..math.floor(GetEntityCoords(data.entity).x or 1)..math.floor(GetEntityCoords(data.entity).y or 1).."]"
 		end
-		stashItems = triggerCallback('jim-shops:callback:GetStashItems', vendID, data.shopTable)
+		stashItems = triggerCallback(getScript()..":callback:GetStashItems", vendID, data.shopTable)
 	end
 
 	for i = 1, #products do
@@ -109,7 +109,7 @@ Shops.Vending.Menu = function(data)
 	if Config.System.Menu == "qb" then
 		header = data.shopTable["logo"] and "<center><img src="..data.shopTable["logo"].." width=200px>" or data.shopTable["label"]
 	elseif Config.System.Menu == "ox" then
-		header = data.shopTable["logo"] and '!['..'lol'.. ']('..data.shopTable["logo"]..')' or data.shopTable["label"]
+		header = data.shopTable["logo"] and "![".."lol".."]("..data.shopTable["logo"]..")" or data.shopTable["label"]
 	else
 		header = data.shopTable["label"]
 	end
@@ -174,7 +174,7 @@ Shops.Vending.Charge = function(data)
 		if data.cost == "Free" then
 			data.cost = 0
 		end
-		TriggerServerEvent("jim-shops:server:BuyItem", {
+		TriggerServerEvent(getScript()..":server:BuyItem", {
             amount = amount,
             billType = billType,
             item = data.item,

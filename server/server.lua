@@ -12,7 +12,7 @@ end)
 
 onResourceStart(function()
 
-	createCallback("jim-shops:checkShopExploit", function(source, shop)
+	createCallback(getScript()..":checkShopExploit", function(source, shop)
 		local src = source
 		local ped = GetPlayerPed(src)
 		local srcCoords = GetEntityCoords(ped)
@@ -70,7 +70,7 @@ onResourceStop(function()
 	GlobalState.jimShopLocationsData = nil
 end, true)
 
-createCallback('jim-shops:server:getLicenseStatus', function(source, licenseArray)
+createCallback(getScript()..":server:getLicenseStatus", function(source, licenseArray)
 	local src = source
 	local hasLicense = true
 	local Player = Core.Functions.GetPlayer(src)
@@ -82,7 +82,7 @@ createCallback('jim-shops:server:getLicenseStatus', function(source, licenseArra
 end)
 
 --Wrapper converting for opening shops externally
-RegisterServerEvent('jim-shops:ShopOpen', function(shop, name, shopTable)
+RegisterServerEvent("jim-shops:ShopOpen", function(shop, name, shopTable)
 	local src = source
 	local ped = GetPlayerPed(src)
 	local srcCoords = GetEntityCoords(ped)
@@ -108,11 +108,10 @@ RegisterServerEvent('jim-shops:ShopOpen', function(shop, name, shopTable)
 			label = shopTable.label,
 			societyCharge = shopTable.society or shopTable.societyCharge or nil
 		}, custom = true }
-	TriggerClientEvent('jim-shops:ShopMenu', src, data, true)
+	TriggerClientEvent("jim-shops:ShopMenu", src, data, true)
 end)
 
-RegisterServerEvent('jim-shops:server:BuyItem', function(data)
-	--jsonPrint(data)
+RegisterServerEvent(getScript()..":server:BuyItem", function(data)
 	local src = source
 	local cost = (data.price * data.amount)
 	local balance = data.shopTable.societyCharge
@@ -162,11 +161,10 @@ RegisterServerEvent('jim-shops:server:BuyItem', function(data)
 		-- required the shop table to have `societyOwned = job` otherwise this won't be used
 		fundSociety(data.shopTable.societyOwned, cost)
 	end
-	TriggerClientEvent("jim-shops:SellAnim", src, data)
+	TriggerClientEvent(getScript()..":SellAnim", src, data)
 
 	--Remove item from stash
 	if Config.Overrides.generateStoreLimits and data.stash and not data.custom then
-		--jsonPrint(data)
 		local stashName = data.vendID or data.shop..(data.shopNum and "_"..data.shopNum or "")
 
 		debugPrint("^5Debug^7: ^2Adjusting cache info^7: '^6"..stashName.."^7'")

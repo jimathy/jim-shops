@@ -86,12 +86,12 @@ onPlayerLoaded(function()
 end, true)
 
 
-RegisterNetEvent('jim-shops:ShopMenu', function(...)
+RegisterNetEvent("jim-shops:ShopMenu", function(...)
 	Shops.Stores.Menu(...)
 end)
 
 Shops.Stores.Menu = function(data, custom)
-	if triggerCallback("jim-shops:checkShopExploit", data.shopTable.label) then
+	if triggerCallback(getScript()..":checkShopExploit", data.shopTable.label) then
 	else
 		return print("^1Error^7: ^1This shop wasn't registered^7")
 	end
@@ -104,7 +104,7 @@ Shops.Stores.Menu = function(data, custom)
 	if Config.System.Menu == "qb" then
 		header = data.shopTable["logo"] and "<center><img src="..data.shopTable["logo"].." width=200px>" or data.shopTable["label"]
 	elseif Config.System.Menu == "ox" then
-		header = data.shopTable["logo"] and '!['..''.. ']('..data.shopTable["logo"]..')' or data.shopTable["label"]
+		header = data.shopTable["logo"] and "![".."".."]("..data.shopTable["logo"]..")" or data.shopTable["label"]
 	else
 		header =  data.shopTable["label"]
 	end
@@ -123,17 +123,27 @@ Shops.Stores.Menu = function(data, custom)
 		end
 		return count, cost
 	end
+	local currentBasket = {}
 	if Config.Overrides.BasketSystem then
-		local currentBasket = triggerCallback(getScript()..":server:getBasket", data.shop.."_"..data.shopNum)
+		jsonPrint(data)
+		currentBasket = triggerCallback(getScript()..":server:getBasket", data.shop and data.shop.."_"..data.shopNum or data.shopTable.label)
+		jsonPrint(currentBasket)
 		local countedItems, countedPrice = countBasket(currentBasket)
-		ShopMenu[#ShopMenu+1] = {
-			header = countedItems == 0 and "Basket Empty" or "Item Basket - $"..countedPrice.." - "..countedItems.." items",
-			icon = "fas fa-basket-shopping",
-			disabled = countedItems == 0,
-			onSelect = function()
-
-			end,
-		}
+		if not data.goBack then
+			ShopMenu[#ShopMenu+1] = {
+				header = countedItems == 0 and "Basket Empty" or "Item Basket",
+				txt = countedItems > 0 and (countedItems.." items".."\n".."$"..cv(countedPrice)) or nil,
+				icon = "fas fa-basket-shopping",
+				disabled = countedItems == 0,
+				onSelect = function()
+					basketFunc.viewMenu({
+						currentBasket = currentBasket,
+						prevData = data,
+						custom = custom,
+					})
+				end,
+			}
+		end
 	end
 	-- Must be a subbed menu
 	if products[1] == nil then
@@ -154,8 +164,17 @@ Shops.Stores.Menu = function(data, custom)
 				icon = invImg(itemList[1].name),
 				onSelect = function()
 					local newTable = cloneTable(data)
+
+					-- store original table to be used in return button
+					newTable.origProducts = newTable.shopTable.products
+
+					-- Swap out menu items with embedded items
 					newTable.shopTable.products = v.Items or v.items
-					newTable.goBack = function() Shops.Stores.Menu(data, custom) end
+
+					newTable.goBack = function()
+						newTable.shopTable.products = newTable.origProducts
+						Shops.Stores.Menu(newTable, custom)
+					end
 					Shops.Stores.Menu(newTable, custom)
 				end,
 				onBack = function()
@@ -167,13 +186,17 @@ Shops.Stores.Menu = function(data, custom)
 		return
 	end
 	if Config.Overrides.generateStoreLimits and not custom then
-		stashItems = triggerCallback("jim-shops:callback:GetStashItems", data.shop.."_"..data.shopNum)
+		stashItems = triggerCallback(getScript()..":callback:GetStashItems", data.shop.."_"..data.shopNum)
 	end
 	if data.goBack then
 		ShopMenu[#ShopMenu+1] = {
 			header = "Go Back",
 			icon = "fa-solid fa-arrow-rotate-left",
-			onSelect = function() return data.goBack() end,
+			onSelect = function()
+				local backFunc = data.goBack
+				data.goBack = nil
+				return backFunc()
+			end,
 		}
 	end
 	for i = 1, #products do
@@ -196,6 +219,7 @@ Shops.Stores.Menu = function(data, custom)
 					else
 						amount = tonumber(stashItems[item].amount)
 					end
+					amount -= (currentBasket[item] and currentBasket[item].amount) or 0
 					text = price..br..(amount <= 0 and "Out Of Stock" or"Amount: x"..amount)..br.."Weight: "..(Items[item].weight / 1000)..Config.Overrides.Measurement
 				else
 					text = price..br.."Out Of Stock"..br.."Weight: "..(Items[item].weight / 1000)..Config.Overrides.Measurement
@@ -213,7 +237,7 @@ Shops.Stores.Menu = function(data, custom)
 			end
 			if products[i].requiredGang then
 				canSee = false
-				for i2 = 1, #products[i].requiredGang do
+				for k, v in pairs(products[i].requiredGang) do
 					if hasJob(k, nil, v) then
 						canSee = true
 					end
@@ -221,10 +245,10 @@ Shops.Stores.Menu = function(data, custom)
 			end
 			if products[i].requiresLicense then
 				canSee = false
-				local hasLicense = triggerCallback("jim-shops:server:getLicenseStatus", false, products[i].requiresLicense)
+				local hasLicense = triggerCallback(getScript()..":server:getLicenseStatus", false, products[i].requiresLicense)
 				if hasLicense == true then
 					if products[i].type == "gun" then
-						local hasPurchased = triggerCallback("jim-shops:server:checkifweaponpurchased", false, products[i].requiresLicense)
+						local hasPurchased = triggerCallback(getScript()..":server:checkifweaponpurchased", false, products[i].requiresLicense)
 						canSee = not hasPurchased
 					else
 						canSee = true
@@ -246,11 +270,13 @@ Shops.Stores.Menu = function(data, custom)
 					isMenuHeader = lock,
 					header = getItemLabel(products[i].name),
 					txt = text,
+
 					onSelect = function()
 						Shops.Stores.Charge({
 							item = products[i].name,
 							cost = products[i].price,
 							info = products[i].info,
+							origProducts = data.origProducts,
 							shopTable = data.shopTable,
 							shop = data.shop,
 							shopNum = data.shopNum or nil,
@@ -290,7 +316,8 @@ Shops.Stores.Charge = function(data)
         settext = (Config.Overrides.generateStoreLimits == true and data.amount ~= 0) and "Amnt: "..data.amount.." | Cost: "..price or "Cost: "..price
     end
 	local dialogTable = {}
-	if price ~= "$0" then
+	if price ~= "$0" and not Config.Overrides.BasketSystem then
+
 		dialogTable = {
 			{
 				type = 'radio',
@@ -312,16 +339,19 @@ Shops.Stores.Charge = function(data)
 				min = 0, max = max, default = 1
 			}
 		}
+
 	else
 
-        dialogTable = {{
-            type = 'number',
-            isRequired = true,
-            name = 'amount',
-            text = 'Amount to buy',
-            txt = settext,
-            min = 0, max = max, default = 1
-        }}
+        dialogTable = {
+			{
+				type = 'number',
+				isRequired = true,
+				name = 'amount',
+				text = 'Amount to buy',
+				txt = settext,
+				min = 0, max = max, default = 1
+			}
+	}
 	end
 	local dialog = createInput(Config.System.Menu == "qb" and header or getItemLabel(data.item), dialogTable)
 
@@ -343,21 +373,41 @@ Shops.Stores.Charge = function(data)
 		if Config.Overrides.generateStoreLimits and not data.custom then
 			if amount > max then
 				triggerNotify(getName(data.shop), "Incorrect amount", "error")
-				Shops.Vending.Charge(data)
+				if Config.Overrides.BasketSystem then
+					-- Force return to correct table
+					local newTable = cloneTable(data)
+					newTable.goBack = newTable.origProducts and (function()
+						newTable.shopTable.products = newTable.origProducts
+						Shops.Stores.Menu(newTable, data.custom)
+					end) or nil
+					Shops.Stores.Menu(newTable, data.custom)
+				else
+					Shops.Vending.Charge(data)
+				end
 				return
 			end
 		end
 
 		if amount <= 0 then
 			triggerNotify(getName(data.shop), "Incorrect amount", "error")
-			Shops.Vending.Charge(data)
+			if Config.Overrides.BasketSystem then
+			-- Force return to correct table
+			local newTable = cloneTable(data)
+				newTable.goBack = newTable.origProducts and (function()
+					newTable.shopTable.products = newTable.origProducts
+					Shops.Stores.Menu(newTable, data.custom)
+				end) or nil
+				Shops.Stores.Menu(newTable, data.custom)
+			else
+				Shops.Vending.Charge(data)
+			end
 			return
 		end
 		if data.cost == "Free" then
 			data.cost = 0
 		end
 
-		if isStarted("jim-talktonpc") then
+		if isStarted("jim-talktonpc") and not Config.Overrides.BasketSystem then
 			exports["jim-talktonpc"]:stopCam()
 		end
 		local newData = {
@@ -376,17 +426,25 @@ Shops.Stores.Charge = function(data)
 		if Config.Overrides.BasketSystem then
 			TriggerServerEvent(getScript()..":server:addBasketItem", newData)
 			Wait(300)
-			Shops.Stores.Menu(data, data.custom)
+
+			-- Force return to correct table
+			local newTable = cloneTable(data)
+			newTable.goBack = newTable.origProducts and (function()
+				newTable.shopTable.products = newTable.origProducts
+				Shops.Stores.Menu(newTable, data.custom)
+			end) or nil
+			Shops.Stores.Menu(newTable, data.custom)
+
 		else
-			TriggerServerEvent("jim-shops:server:BuyItem", newData)
+			TriggerServerEvent(getScript()..":server:BuyItem", newData)
 		end
 	end
 end
 
 --Selling animations are simply a pass item to seller animation
-RegisterNetEvent('jim-shops:SellAnim', function(data)
+RegisterNetEvent(getScript()..":SellAnim", function(data)
 	local Ped = PlayerPedId()
-	if isStarted("jim-talktonpc") then
+	if checkExportExists("jim-talktonpc", "injectEmotion") then
 		exports["jim-talktonpc"]:injectEmotion("thanks")
 	end
 	if data.entity then

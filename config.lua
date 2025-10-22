@@ -40,7 +40,7 @@ Config = {
 		VendOverride = true, 	-- Enable this if you want all the vending machines to use this script
 
 		-- WIP ⚠️
-		--BasketSystem = true, 	-- If enabled, this creates a "Basket" for all shops, which users add items to and then can purchase in one go
+		BasketSystem = false, 	-- If enabled, this creates a "Basket" for all shops, which users add items to and then can purchase in one go
 		--
 	},
 }

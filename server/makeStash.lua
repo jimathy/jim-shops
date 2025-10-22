@@ -48,8 +48,7 @@ if Config.Overrides.generateStoreLimits then    -- if enabled then do this
     end, true)
 end
 
-RegisterNetEvent("jim-shops:server:GenerateVendStash", function(data)
-    jsonPrint(data)
+RegisterNetEvent(getScript()..":server:GenerateVendStash", function(data)
     debugPrint("^5Debug^7: ^3GenerateVend ^7- ^2Creating new stash for vending machine^7")
 	local tempTable = {}
 	local products = data.shopTable.products
@@ -69,10 +68,10 @@ RegisterNetEvent("jim-shops:server:GenerateVendStash", function(data)
     itemStashCache[data.stashName] = tempTable
 end)
 
-createCallback('jim-shops:callback:GetStashItems',function(source, stashName, shopTable)
+createCallback(getScript()..":callback:GetStashItems", function(source, stashName, shopTable)
     if Config.Overrides.generateStoreLimits then
         if stashName:find("Vend") and not itemStashCache[stashName] then
-            TriggerEvent("jim-shops:server:GenerateVendStash", { stashName = stashName, shopTable = shopTable })
+            TriggerEvent(getScript()..":server:GenerateVendStash", { stashName = stashName, shopTable = shopTable })
         end
 
         return itemStashCache[stashName]
