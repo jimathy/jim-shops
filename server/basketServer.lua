@@ -51,7 +51,7 @@ RegisterNetEvent(getScript()..":server:addBasketItem", function(data)
         amount = amount,
         cost = data.price * amount,
     }
-    triggerNotify(data.shopTable.label, "Added "..data.amount.." Item(s) to basket", "success", src)
+    triggerNotify(data.shopTable.label, locale("general", "addedToBasket"):format(data.amount), "success", src)
 end)
 
 RegisterServerEvent(getScript()..":server:BuyBasketItems", function(data)
@@ -59,7 +59,7 @@ RegisterServerEvent(getScript()..":server:BuyBasketItems", function(data)
 	local shopName = data.shop and data.shop.."_"..data.shopNum or data.shopTable.label
     local currentBasket = basketSystem[shopName][src]
     if currentBasket == nil then
-        print("ERROR NO BASKET FOUND")
+        print("^1ERROR NO BASKET FOUND FOR SRC^7: src")
     end
 	local src = source
 	local cost = data.totalCost
@@ -75,13 +75,13 @@ RegisterServerEvent(getScript()..":server:BuyBasketItems", function(data)
         tempBasket[k] = v.amount
     end
 	if not canCarry(tempBasket, src) then
-		triggerNotify(getName(data.shop), "Not enough space in inventory", "error", src)
+		triggerNotify(getName(data.shop), locale("error", "noSpace"), "error", src)
 		return -- Stop here
     end
 	print(balance, cost, balance <= cost)
 	--Money Check
 	if balance < cost then -- Check for money first if not enough, stop here
-		triggerNotify(getName(data.shop), "Not enough money", "error", src)
+		triggerNotify(getName(data.shop), locale("general", "noMoney"), "error", src)
 		return
 	end
 
@@ -99,11 +99,11 @@ RegisterServerEvent(getScript()..":server:BuyBasketItems", function(data)
     end
 
 	if cost == 0 then
-		triggerNotify(nil, "Free item", "success", src)
+		triggerNotify(nil, locale("general", "freeItem"), "success", src)
 	else
 		if tostring(data.billType) == "society" then
 			local societyCharge = data.shopTable.societyCharge or data.society
-			triggerNotify(getName(data.shop), "Charing society for purchase", "success", src)
+			triggerNotify(getName(data.shop), locale("general", "chargeSociety"), "success", src)
 			chargeSociety(societyCharge, cost)
 		else
 			chargePlayer(cost, tostring(data.billType), src)

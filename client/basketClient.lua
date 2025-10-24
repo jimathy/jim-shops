@@ -17,7 +17,7 @@ basketFunc.viewMenu = function(data)
     -- if player can't carry the items, show warning
     if not canCarryCheck then
         basketMenu[#basketMenu+1] = {
-            header = "Not Enough Space in inventory",
+            header = locale("error", "noSpace"),
             icon = "fas fa-xmark",
             disabled = true,
         }
@@ -35,9 +35,9 @@ basketFunc.viewMenu = function(data)
         hasMoney = getMoney >= data.totalCost
     end
     basketMenu[#basketMenu+1] = {
-        header = "Payment Type: "..currentPayment,
+        header = locale("general", "paymentType").." "..currentPayment,
         icon = currentPayment == "cash" and "fas fa-money-bill" or currentPayment == "bank" and "fas fa-credit-card" or "fas fa-vault",
-        txt = "Balance - $"..cv(getMoney),
+        txt = locale("basket", "balance").." - "..curVal..cv(getMoney),
         arrow = true,
         onSelect = function()
             if prevData.shopTable.societyCharge then
@@ -53,8 +53,8 @@ basketFunc.viewMenu = function(data)
     }
 
     basketMenu[#basketMenu+1] = {
-        header = hasMoney and "Confirm Purchase" or "Not enough money for purchase",
-        txt = "Total Cost: $"..cv(data.totalCost),
+        header = hasMoney and locale("general", "confirm") or locale("error", "noMoney"),
+        txt = locale("basket", "totalCost").." "..curVal..cv(data.totalCost),
         icon = hasMoney and "fas fa-check",
         disabled = not hasMoney,
         onSelect = function()
@@ -76,12 +76,12 @@ basketFunc.viewMenu = function(data)
     }
 
     basketMenu[#basketMenu+1] = {
-        header = "Items:",
+        header = locale("basket", "itemsBasket"),
         disabled = true,
     }
     for k, v in pairs(data.currentBasket) do
         basketMenu[#basketMenu + 1] = {
-            header = getItemLabel(k).." - x"..v.amount.." - $"..cv(v.cost),
+            header = getItemLabel(k).." - x"..v.amount.." - "..curVal..cv(v.cost),
             icon = invImg(k),
             image = invImg(k),
             onSelect = function()
@@ -91,7 +91,7 @@ basketFunc.viewMenu = function(data)
     end
 
     basketMenu[#basketMenu+1] = {
-        header = "Clear Basket",
+        header = locale("basket", "clearBasket"),
         icon = "fas fa-trash",
         onSelect = function()
             if triggerCallback(getScript()..":server:clearBasket", prevData.shop.."_"..prevData.shopNum) then
@@ -102,8 +102,8 @@ basketFunc.viewMenu = function(data)
     }
 
     openMenu(basketMenu, {
-        header = "Basket",
-        headertxt = countTable(data.currentBasket).." item(s)",
+        header = locale("basket", "basketHeader"),
+        headertxt = countTable(data.currentBasket).." "..locale("basket", "items"),
         onBack = function()
             Shops.Stores.Menu(prevData, data.custom)
         end,
@@ -114,7 +114,7 @@ basketFunc.editMenu = function(data)
     local prevData = data.prevData
     local editMenu = {}
     editMenu[#editMenu+1] = {
-        header = "Remove Item",
+        header = locale("basket", "removeBasket"),
         icon = "fas fa-trash",
         onSelect = function()
             if triggerCallback(getScript()..":server:editBasketItem", {
@@ -134,9 +134,9 @@ basketFunc.editMenu = function(data)
         end,
     }
     editMenu[#editMenu+1] = {
-        header = "Edit Amount",
+        header = locale("basket", "editAmount"),
         icon = "fas fa-pen",
-        txt = "Edit the amount of this item in your basket",
+        txt = locale("basket", "editTxt"),
         onSelect = function()
             local newTable = cloneTable(data)
             newTable.item = prevData.item
@@ -174,8 +174,8 @@ basketFunc.editAmount = function(data)
         end
     end
 
-    local price = productData.price == (0 or nil) and "Free" or "$"..productData.price
-    local weight = Items[data.item].weight == 0 and "" or "Weight: "..(Items[data.item].weight / 1000)..Config.Overrides.Measurement
+    local price = productData.price == (0 or nil) and locale("general", "free") or curVal..productData.price
+    local weight = Items[data.item].weight == 0 and "" or locale("general", "weight").." "..(Items[data.item].weight / 1000)..Config.Overrides.Measurement
     local settext = ""
     local header = "<center><p><img src=nui://"..invImg(data.item:lower()).." width=100px></p>"..getItemLabel(data.item)
     if prevData.shopTable["logo"] then
@@ -200,16 +200,25 @@ basketFunc.editAmount = function(data)
     local max = amount if max == 0 and not Config.Overrides.generateStoreLimits then max = nil end
     if Config.System.Menu == "qb" then
         settext =
-        "- Confirm Purchase -"..br..br.. ((Config.Overrides.generateStoreLimits and amount ~= 0) and "Amount: "..amount..br or "") ..weight..br.." Cost per item: "..price..br..br.."- Payment Type -"
+            "- "..locale("general", "confirm").." -"..
+            br..
+            br..
+            ((Config.Overrides.generateStoreLimits and amount ~= 0) and locale("general", "amount")..": "..amount..br or "")..
+            weight..
+            br.." "..locale("general", "costPerItem").." "..price..
+            br..
+            br.."- "..locale("general", "paymentType").." -"
     else
-        settext = (Config.Overrides.generateStoreLimits == true and data.amount ~= 0) and "Amnt: "..amount.." | Cost: "..price or "Cost: "..price
+        settext =
+            (Config.Overrides.generateStoreLimits == true and data.amount ~= 0) and
+            locale("general", "amount")..": "..amount.." | "..locale("general", "cost").." "..price or locale("general", "cost").." "..price
     end
 	local dialog = createInput(Config.System.Menu == "qb" and header or getItemLabel(data.item), {
         {
             type = 'number',
             isRequired = true,
             name = 'amount',
-            text = 'Amount to buy',
+            text = locale("general", "amountToBuy"),
             txt = settext,
             min = 0, max = max, default = 1
         }}
@@ -232,18 +241,18 @@ basketFunc.editAmount = function(data)
 
 		if Config.Overrides.generateStoreLimits and not data.custom then
 			if amount > max then
-				triggerNotify(getName(prevData.shop), "Incorrect amount", "error")
+				triggerNotify(getName(prevData.shop), locale("error", "incorrectAmount"), "error")
 				basketFunc.editAmount(data)
 				return
 			end
 		end
 
 		if amount <= 0 then
-			triggerNotify(getName(data.shop), "Incorrect amount", "error")
+			triggerNotify(getName(data.shop), locale("error", "incorrectAmount"), "error")
 			basketFunc.editAmount(data)
 			return
 		end
-		if data.cost == "Free" then
+		if data.cost == locale("general", "free") then
 			data.cost = 0
 		end
         if triggerCallback(getScript()..":server:editBasketItem", {

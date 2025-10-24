@@ -43,10 +43,12 @@ onResourceStart(function()
 			debugPrint("^5Debug^7: ^3Locations^7['^6"..k.."^7']^2 can't find its product table^7")
 		end
 		if not v.isVendingMachine and Locations[k]["model"] and next(Locations[k]["model"]) then
-			Locations[k]["model"] = { -- Pick a single ped model from the list so all players see same one
+			-- Pick a single ped model from the list so all players see same one
+			Locations[k]["model"] = {
 				Locations[k]["model"][math.random(1, #Locations[k]["model"])]
 			}
 		end
+
 		if v.coords and #v.coords > 0 then
 			for i = 1, #v.coords do
 				registerJimShop(k, v.label, v.products, v.gang or v.job or nil, v.coords[i])
@@ -128,7 +130,7 @@ RegisterServerEvent(getScript()..":server:BuyItem", function(data)
 	::continue::
 
 	--Money Check
-	if balance <= cost then -- Check for money first if not enough, stop here
+	if balance < cost then -- Check for money first if not enough, stop here
 		triggerNotify(getName(data.shop), "Not enough money", "error", src)
 		return
 	end
@@ -145,7 +147,7 @@ RegisterServerEvent(getScript()..":server:BuyItem", function(data)
 	end
 
 	if cost == 0 then
-		triggerNotify(nil, "Free item", "success", src)
+		triggerNotify(nil, locale("general", "freeItem"), "success", src)
 	else
 		if tostring(data.billType) == "society" then
 			local societyCharge = data.shopTable.societyCharge or data.society

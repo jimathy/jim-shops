@@ -11,7 +11,7 @@ onPlayerLoaded(function()
 
 	for k, v in pairs(SellingLocations) do
         for l, b in pairs(v.coords) do
-            local label = "Seller - ['"..k.."("..l..")']"
+            local label = locale("target", "sellerBlip").." - ['"..k.."("..l..")']"
             if not v["hideblip"] then
                 Blips[#Blips+1] = makeBlip({
                     coords = b,
@@ -25,7 +25,7 @@ onPlayerLoaded(function()
             end
             local options = { {
                 icon = v.targetIcon or "fas fa-cash-register",
-                label = v.label or "Browse Shop",
+                label = v.label or locale("target", "browseShop"),
                 action = function(data)
                     local entity = type(data) == "table" and data.entity or data
                     if isStarted("jim-talktonpc") then

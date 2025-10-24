@@ -53,10 +53,10 @@ Shops.Vending.Menu = function(data)
         if not doesItemExist(item) then
 			print("^5Debug^7: ^3ShopItems ^7- ^1Can't ^2find item ^7'^6"..item.."^7'")
 		else
-            local price = products[i].price == 0 and "Free" or "Cost: $"..products[i].price
+            local price = products[i].price == 0 and locale("general", "free") or locale("general", "cost").." "..curVal..products[i].price
 
 			local text = (products[i].info and products[i].info.item) and ("Item: "..products[i].info.item..br) or ""
-			text = text..price..br.."Weight: "..(Items[item].weight / 1000)..Config.Overrides.Measurement
+			text = text..price..br..locale("general", "weight").." "..(Items[item].weight / 1000)..Config.Overrides.Measurement
 
 			if Config.Overrides.generateStoreLimits then
 				if stashItems[item] then
@@ -66,9 +66,9 @@ Shops.Vending.Menu = function(data)
 					else
 						amount = tonumber(stashItems[item].amount)
 					end
-					text = price..br..(amount <= 0 and "Out Of Stock" or"Amount: x"..amount)..br.."Weight: "..(Items[item].weight / 1000)..Config.Overrides.Measurement
+					text = price..br..(amount <= 0 and locale("general", "outOfStock") or locale("general", "amount") ..": x"..amount)..br.."Weight: "..(Items[item].weight / 1000)..Config.Overrides.Measurement
 				else
-					text = price..br.."Out Of Stock"..br.."Weight: "..(Items[item].weight / 1000)..Config.Overrides.Measurement
+					text = price..br..locale("general", "outOfStock")..br..locale("general", "weight").." "..(Items[item].weight / 1000)..Config.Overrides.Measurement
 					lock = true
 				end
 			end
@@ -121,8 +121,8 @@ Shops.Vending.Menu = function(data)
 end
 
 Shops.Vending.Charge = function(data)
-    local price = data.cost == "Free" and data.cost or "$"..data.cost
-    local weight = Items[data.item].weight == 0 and "" or "Weight: "..(Items[data.item].weight / 1000)..Config.Overrides.Measurement
+    local price = data.cost == locale("general", "free") and data.cost or curVal..data.cost
+    local weight = Items[data.item].weight == 0 and "" or locale("general", "weight").." "..(Items[data.item].weight / 1000)..Config.Overrides.Measurement
     local settext = ""
     local header = "<center><p><img src=nui://"..invImg(data.item).." width=100px></p>"..getItemLabel(data.item)
     if data.shopTable["logo"] then
@@ -131,9 +131,18 @@ Shops.Vending.Charge = function(data)
     local max = data.amount if max == 0 and not Config.Overrides.generateStoreLimits then max = nil end
     if Config.System.Menu == "qb" then
         settext =
-        "- Confirm Purchase -"..br..br.. ((Config.Overrides.generateStoreLimits and data.amount ~= 0) and "Amount: "..data.amount..br or "") ..weight..br.." Cost per item: "..price..br..br.."- Payment Type -"
+			"- "..locale("general", "confirm").." -"..
+			br..
+			br..
+			((Config.Overrides.generateStoreLimits and data.amount ~= 0) and locale("general", "amount")..": "..data.amount..br or "")..
+			weight..
+			br.." "..locale("general", "costPerItem").." "..price..
+			br..
+			br.."- "..locale("general", "paymentType").." -"
     else
-        settext = (Config.Overrides.generateStoreLimits == true and data.amount ~= 0) and "Amnt: "..data.amount.." | Cost: "..price or "Cost: "..price
+        settext =
+            (Config.Overrides.generateStoreLimits == true and data.amount ~= 0) and
+            locale("general", "amount")..": "..data.amount.." | "..locale("general", "cost").." "..price or locale("general", "cost").." "..price
     end
     local dialog = createInput(Config.System.Menu == "qb" and header or getItemLabel(data.item), { {
             type = 'radio',
@@ -141,15 +150,15 @@ Shops.Vending.Charge = function(data)
             name = 'billtype',
             text = settext,
             options = {
-                { value = "cash", text = "Cash" },
-                { value = "bank", text = "Card" }
+				{ value = "cash", text = locale("general", "cash") },
+				{ value = "bank", text = locale("general", "card") },
             }
         },
         {
             type = 'number',
             isRequired = true,
             name = 'amount',
-            text = 'Amount to buy',
+			text = locale("general", "amountToBuy"),
             txt = settext,
             min = 0, max = max, default = 1
         },
@@ -161,17 +170,17 @@ Shops.Vending.Charge = function(data)
 		if not dialog.amount then return end
 		if Config.Overrides.generateStoreLimits and data.custom == nil then
 			if amount > tonumber(data.amount) then
-				triggerNotify(getName(data.shop), "Incorrect amount", "error")
+				triggerNotify(getName(data.shop), locale("error", "incorrectAmount"), "error")
 				Shops.Vending.Charge(data)
 				return
 			end
 		end
 		if amount <= 0 then
-			triggerNotify(getName(data.shop), "Incorrect amount", "error")
+			triggerNotify(getName(data.shop), locale("error", "incorrectAmount"), "error")
 			Shops.Vending.Charge(data)
 			return
 		end
-		if data.cost == "Free" then
+		if data.cost == locale("general", "free") then
 			data.cost = 0
 		end
 		TriggerServerEvent(getScript()..":server:BuyItem", {
