@@ -160,7 +160,7 @@ Shops.Stores.Menu = function(data, custom)
 			end
 			ShopMenu[#ShopMenu+1] = {
 				header = v.header or ("Sub Menu "..k),
-				txt = countItems(itemList).." "..locale("general", "products"),
+				txt = countItems(itemList).." "..locale("general", "numProducts"),
 				icon = invImg(itemList[1].name),
 				onSelect = function()
 					local newTable = cloneTable(data)

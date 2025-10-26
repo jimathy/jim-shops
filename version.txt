@@ -1,7 +1,9 @@
-3.0.09
+3.1.0
 
-- Add ability to create and open embedded shops
-- Made "hardware store" an example of how this can be done (its optional)
-- Added the invoking script name to the debug print for `registerShop` export
+- Add New "Basket System"
+- Adds option to change all stores to use a checkout basket instead of per item purchase
+- Add Currency symbol override to Config.lua
+- Add locale system
+- Fix having exact cash claiming "not enough money"
 
 https://github.com/jimathy/jim-shops/releases/latest
