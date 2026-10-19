@@ -1,11 +1,46 @@
 
 
 local registeredShops = {}
+
+-- Server-defined sell price registry
+-- Supports per-shop pricing: { [shopName] = { [itemName] = price } }
+-- Or global pricing: { [itemName] = price }
+-- Use registerSellPrice() to register prices from your shop configs
+local priceRegistry = {}
+
+-- Register sell price for an item at a specific shop
+-- Usage: registerSellPrice("shopName", "item_name", 50)
+-- Usage: registerSellPrice(nil, "item_name", 50) -- nil = global price
+function registerShopPrice(shopName, itemName, price)
+    priceRegistry[tostring(shopName)] = priceRegistry[tostring(shopName)] or {}
+    priceRegistry[tostring(shopName)][tostring(itemName)] = tonumber(price)
+    debugPrint("^5Debug^7: ^2Registered price^7: ^3"..tostring(itemName).."^7[^3"..tostring(price).."^7] - "..tostring(shopName or "global").."^7")
+end
+
+-- Get sell price from registry (checks per-shop first, then global)
+function GetShopPrice(shopName, itemName)
+    -- Check for per-shop price (only if shopName is not nil/empty)
+    if shopName and shopName ~= "" then
+        local shopPrices = priceRegistry[tostring(shopName)]
+        if shopPrices then
+            return shopPrices[tostring(itemName)]
+        end
+    end
+    -- Fallback to global registry (no shop specified, or shop not found in registry)
+    return priceRegistry[tostring(itemName)]
+end
+
 function registerJimShop(name, label, items, society, coords)
 	registeredShops[label] = registeredShops[label] or {}
 	registeredShops[label][#registeredShops[label]+1] = { label = label, items = items, society = society, coords = coords }
+	if items then
+		for _, v in pairs(items) do
+			registerShopPrice(name, v.name, v.price)
+		end
+	end
 	debugPrint("^5Debug^7: "..(GetInvokingResource() or "Internal").." ^2Shop ^7'^4"..label.."^7' ^2Registered at^7: "..formatCoord(coords))
 end
+
 exports("registerShop", function(...)
 	registerJimShop(...)
 end)
@@ -115,7 +150,7 @@ end)
 
 RegisterServerEvent(getScript()..":server:BuyItem", function(data)
 	local src = source
-	local cost = (data.price * data.amount)
+	local cost = (GetShopPrice(data.shop, data.item) * data.amount)
 	local balance = data.shopTable.societyCharge
 		and getSocietyAccount(data.shopTable.societyCharge)
 		or getPlayer(src)[tostring(data.billType)]

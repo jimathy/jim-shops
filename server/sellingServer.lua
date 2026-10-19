@@ -26,7 +26,7 @@ onResourceStart(function()
 		-- Register shop for exploit protection
 		if v.coords and #v.coords > 0 then
 			for i = 1, #v.coords do
-				registerSellShop(k, v.coords[i].xyz)
+				registerSellShop(k, v.coords[i].xyz, v.products.Items)
 			end
 		end
 	end
